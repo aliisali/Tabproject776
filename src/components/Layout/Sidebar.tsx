@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Building2, Calendar, ClipboardList, FileText, Settings, BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield } from 'lucide-react';
+import { Users, Building2, Calendar, ClipboardList, FileText, Settings, BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield, Cube } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
 
@@ -35,6 +35,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'businesses', label: 'Businesses', icon: Building2 },
           { id: 'products', label: 'Products', icon: Package },
           { id: 'ar-camera', label: 'AR Camera', icon: Headphones },
+          { id: 'model-converter', label: '3D Model Converter', icon: Cube },
+          { id: 'model-permissions', label: '3D Model Permissions', icon: Settings },
           { id: 'module-permissions', label: 'Module Permissions', icon: Shield },
           { id: 'permissions', label: 'Permissions', icon: Settings },
           { id: 'reports', label: 'Reports', icon: FileText },
@@ -49,6 +51,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'customers', label: 'Customers', icon: Building2 },
           ...(hasModuleAccess('ar-camera') ? [{ id: 'ar-camera', label: 'AR Camera', icon: Headphones }] : []),
+          { id: '3d-viewer', label: '3D Model Viewer', icon: Cube },
         ];
       case 'employee':
         return [
@@ -61,6 +64,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'emails', label: 'Emails', icon: Mail },
           { id: 'notifications', label: 'Notifications', icon: Bell },
           { id: 'products', label: 'Product Viewer', icon: Package },
+          { id: '3d-viewer', label: '3D Model Viewer', icon: Cube },
         ];
       default:
         return [];

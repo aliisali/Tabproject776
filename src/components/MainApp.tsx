@@ -20,6 +20,9 @@ import { CustomerManagement } from './Customers/CustomerManagement';
 import { ARCameraModule } from './ARModule/ARCameraModule';
 import { ModulePermissions } from './Admin/ModulePermissions';
 import { AdminHTMLManager } from './Admin/AdminHTMLManager';
+import { ModelConverter } from './Admin/ModelConverter';
+import { ModelPermissions } from './Admin/ModelPermissions';
+import { Model3DViewer } from './Features/Model3DViewer';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -38,6 +41,8 @@ export function MainApp() {
         case 'products': return <ProductManagement />;
         case 'html-manager': return <AdminHTMLManager />;
         case 'module-permissions': return <ModulePermissions />;
+        case 'model-converter': return <ModelConverter />;
+        case 'model-permissions': return <ModelPermissions />;
         default: return <AdminDashboard />;
       }
     }
@@ -52,6 +57,7 @@ export function MainApp() {
         case 'reports': return <ReportsManagement />;
         case 'customers': return <CustomerManagement />;
         case 'ar-camera': return <ARCameraModule />;
+        case '3d-viewer': return <Model3DViewer />;
         default: return <BusinessDashboard />;
       }
     }
@@ -68,6 +74,7 @@ export function MainApp() {
         case 'emails': return <EmailCenter />;
         case 'notifications': return <NotificationCenter />;
         case 'products': return <ProductVisualizer />;
+        case '3d-viewer': return <Model3DViewer />;
         default: return <EmployeeDashboard />;
       }
     }
