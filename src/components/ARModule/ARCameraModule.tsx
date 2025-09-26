@@ -6,13 +6,14 @@ export default function ARCameraModule() {
 
   useEffect(() => {
     // The HTML content will be injected into the iframe
-    const htmlContent = `<!doctype html>
+    const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fullscreen AR Camera — 2D to 3D with Background Removal</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.loaders.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Arial;}
@@ -28,19 +29,20 @@ export default function ARCameraModule() {
   <div id="ui">
     <button id="startCam">Start Camera (back)</button>
     <button id="switchCam" disabled>Switch Camera</button>
-    <input id="imageInput" type="file" accept="image/*">
+    <input id="imageInput" type="file" accept="image/*,.max,.fbx,.gltf,.glb">
     <div>
       <button id="placeToggle" disabled>Place AR item</button>
       <button id="removeItem" disabled>Remove</button>
       <button id="screenshotBtn" disabled>📸 Screenshot</button>
     </div>
     <div>
-      <label for="shapeSelect">Convert to 3D:</label>
+      <label for="shapeSelect">3D Shape/Model:</label>
       <select id="shapeSelect">
         <option value="plane">Plane</option>
         <option value="box">Box</option>
         <option value="cylinder">Curved</option>
         <option value="sphere">Sphere</option>
+        <option value="custom">Custom 3D Model</option>
       </select>
     </div>
     <div>
@@ -50,7 +52,7 @@ export default function ARCameraModule() {
       <button id="rotateDown">⬇️ Down</button>
       <button id="resetBtn">Reset</button>
     </div>
-    <div id="status">Open with https:// or http://localhost for camera access.</div>
+    <div id="status">Upload images (.jpg, .png) or 3D models (.max, .fbx, .gltf). Camera requires HTTPS.</div>
   </div>
 
   <button id="toggleBtn">⚙️</button>
@@ -58,7 +60,10 @@ export default function ARCameraModule() {
   <video id="webcamVideo" playsinline autoplay muted></video>
 
   <a-scene embedded renderer="alpha: true" vr-mode-ui="enabled: false">
-    <a-assets><img id="vrTex" crossorigin="anonymous" /></a-assets>
+    <a-assets>
+      <img id="vrTex" crossorigin="anonymous" />
+      <a-asset-item id="customModel" crossorigin="anonymous"></a-asset-item>
+    </a-assets>
     <a-entity id="cameraRig">
       <a-entity id="aframeCamera" camera look-controls-enabled="false" position="0 0 0">
         <a-entity id="vrItem" visible="false" position="0 -0.2 -1" rotation="0 0 0" scale="1 1 1"></a-entity>
@@ -93,6 +98,8 @@ let itemPos={x:0,y:-0.2,z:-1};
 let itemRot={x:0,y:0,z:0};
 let itemScale=1;
 let currentShape=null;
+let currentFileType=null;
+let customModelUrl=null;
 
 // Camera
 async function startCamera(facingMode='environment'){
@@ -133,9 +140,28 @@ function removeBackground(img,callback){
 // Load image
 imageInput.onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
+  const fileName=f.name.toLowerCase();
+  currentFileType=fileName.split('.').pop();
   const url=URL.createObjectURL(f);
-  const img=new Image(); img.crossOrigin='anonymous'; img.src=url;
-  removeBackground(img,(png)=>{ vrTex.src=png; placeToggle.disabled=false; screenshotBtn.disabled=false; status.textContent='Image loaded with background removed.'; });
+  
+  if(currentFileType==='max'||currentFileType==='fbx'||currentFileType==='gltf'||currentFileType==='glb'){
+    // Handle 3D model files
+    customModelUrl=url;
+    document.getElementById('customModel').setAttribute('src',url);
+    placeToggle.disabled=false; 
+    screenshotBtn.disabled=false; 
+    shapeSelect.value='custom';
+    status.textContent='3D model loaded: '+f.name+'. Ready to place in AR.';
+  } else {
+    // Handle image files
+    const img=new Image(); img.crossOrigin='anonymous'; img.src=url;
+    removeBackground(img,(png)=>{ 
+      vrTex.src=png; 
+      placeToggle.disabled=false; 
+      screenshotBtn.disabled=false; 
+      status.textContent='Image loaded with background removed.'; 
+    });
+  }
 }
 
 // Place/remove
@@ -148,11 +174,29 @@ shapeSelect.onchange=()=>{ if(vrPlaced) applyShape(shapeSelect.value); }
 function applyShape(shape){
   vrItem.innerHTML='';
   let el;
-  if(shape==='plane'){ el=document.createElement('a-plane'); el.setAttribute('width','1'); el.setAttribute('height','0.6'); }
-  else if(shape==='box'){ el=document.createElement('a-box'); el.setAttribute('depth','0.2'); el.setAttribute('height','0.6'); el.setAttribute('width','1'); }
-  else if(shape==='cylinder'){ el=document.createElement('a-cylinder'); el.setAttribute('radius','0.7'); el.setAttribute('theta-length','60'); el.setAttribute('height','0.6'); }
-  else if(shape==='sphere'){ el=document.createElement('a-sphere'); el.setAttribute('radius','0.7'); }
-  el.setAttribute('material',\`src:#vrTex; side:double; transparent:true;\`);
+  
+  if(shape==='custom'&&customModelUrl){
+    // Use custom 3D model
+    el=document.createElement('a-entity');
+    if(currentFileType==='gltf'||currentFileType==='glb'){
+      el.setAttribute('gltf-model','#customModel');
+    } else if(currentFileType==='fbx'){
+      el.setAttribute('fbx-model','#customModel');
+    } else if(currentFileType==='max'){
+      // .max files need conversion to gltf first
+      status.textContent='Note: .max files need conversion to .gltf format for web display.';
+      el.setAttribute('gltf-model','#customModel');
+    }
+    el.setAttribute('scale','0.5 0.5 0.5'); // Scale down 3D models
+  } else {
+    // Use geometric shapes with texture
+    if(shape==='plane'){ el=document.createElement('a-plane'); el.setAttribute('width','1'); el.setAttribute('height','0.6'); }
+    else if(shape==='box'){ el=document.createElement('a-box'); el.setAttribute('depth','0.2'); el.setAttribute('height','0.6'); el.setAttribute('width','1'); }
+    else if(shape==='cylinder'){ el=document.createElement('a-cylinder'); el.setAttribute('radius','0.7'); el.setAttribute('theta-length','60'); el.setAttribute('height','0.6'); }
+    else if(shape==='sphere'){ el=document.createElement('a-sphere'); el.setAttribute('radius','0.7'); }
+    el.setAttribute('material',\`src:#vrTex; side:double; transparent:true;\`);
+  }
+  
   vrItem.appendChild(el);
   currentShape=shape;
 }
@@ -171,6 +215,19 @@ screenshotBtn.onclick=()=>takeScreenshot();
 // Toggle UI
 toggleBtn.onclick=()=>{ ui.style.display = (ui.style.display==='none' || ui.style.display==='') ? 'block' : 'none'; }
 
+// File type detection and handling
+function handleFileUpload(file){
+  const fileName=file.name.toLowerCase();
+  const fileType=fileName.split('.').pop();
+  
+  if(['max','fbx','gltf','glb'].includes(fileType)){
+    return 'model';
+  } else if(['jpg','jpeg','png','gif','webp'].includes(fileType)){
+    return 'image';
+  }
+  return 'unknown';
+}
+
 // Touch gestures: move / pinch / rotate
 const sceneEl=document.querySelector('a-scene');
 let touchState={dragging:false,startX:0,startY:0,startPos:null,pinchActive:false,startDist:0,startAngle:0,startScale:1,startRotX:0,startRotY:0,startMidY:0};
@@ -187,7 +244,7 @@ sceneEl.addEventListener('touchmove',function(e){
 },{passive:false});
 sceneEl.addEventListener('touchend',function(e){ if(e.touches.length===0){ touchState.dragging=false; touchState.pinchActive=false; } },{passive:false});
 
-status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, background auto-removed, choose 3D shape, then place. Touch: 1 finger move, 2 fingers pinch/twist/tilt.';
+status.textContent='Controls hidden. Tap ⚙️ to open. Upload images or 3D models (.max, .fbx, .gltf). Touch: 1 finger move, 2 fingers pinch/twist/tilt.';
 </script>
 </body>
 </html>`;
