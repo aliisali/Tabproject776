@@ -1,0 +1,310 @@
+import { User, Business, Job, Customer, Product, Notification } from '../types';
+
+// Storage keys with version to prevent conflicts
+const STORAGE_KEYS = {
+  USERS: 'jobmanager_users_v4',
+  BUSINESSES: 'jobmanager_businesses_v4',
+  JOBS: 'jobmanager_jobs_v4',
+  CUSTOMERS: 'jobmanager_customers_v4',
+  NOTIFICATIONS: 'jobmanager_notifications_v4',
+  PRODUCTS: 'jobmanager_products_v4'
+};
+
+// Default data with proper UUIDs
+const DEFAULT_USERS: User[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440003',
+    email: 'admin@platform.com',
+    name: 'Platform Admin',
+    role: 'admin',
+    permissions: ['all'],
+    createdAt: '2024-01-01T00:00:00Z',
+    isActive: true,
+    emailVerified: true,
+    password: 'password'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440004',
+    email: 'business@company.com',
+    name: 'Business Manager',
+    role: 'business',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    permissions: ['manage_employees', 'view_dashboard', 'create_jobs'],
+    createdAt: '2024-01-01T00:00:00Z',
+    isActive: true,
+    emailVerified: true,
+    password: 'password'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440005',
+    email: 'employee@company.com',
+    name: 'Field Employee',
+    role: 'employee',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    permissions: ['create_jobs', 'manage_tasks', 'capture_signatures', 'ar_camera_access'],
+    createdAt: '2024-01-01T00:00:00Z',
+    isActive: true,
+    emailVerified: true,
+    password: 'password'
+  },
+];
+
+const DEFAULT_BUSINESSES: Business[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440001',
+    name: 'ABC Construction Co.',
+    address: '123 Main Street, City, State 12345',
+    phone: '+1 (555) 123-4567',
+    email: 'contact@abcconstruction.com',
+    adminId: '550e8400-e29b-41d4-a716-446655440004',
+    features: ['job_management', 'calendar', 'reports', 'camera', 'ar_camera'],
+    subscription: 'premium',
+    createdAt: '2024-01-01T00:00:00Z',
+    vrViewEnabled: true
+  }
+];
+
+const DEFAULT_CUSTOMERS: Customer[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440006',
+    name: 'ABC Corp',
+    email: 'contact@abccorp.com',
+    phone: '+1 (555) 111-2222',
+    mobile: '+1 (555) 111-3333',
+    address: '123 Business Ave, City, State',
+    postcode: '12345',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    createdAt: '2024-01-01T00:00:00Z'
+  }
+];
+
+const DEFAULT_PRODUCTS: Product[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-446655440008',
+    name: 'Industrial HVAC Unit',
+    category: 'HVAC Systems',
+    description: 'High-efficiency commercial HVAC system',
+    image: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
+    specifications: ['Cooling Capacity: 5 Tons', 'Heating Capacity: 120,000 BTU', 'Energy Rating: SEER 16'],
+    price: 2500,
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z'
+  }
+];
+
+const DEFAULT_JOBS: Job[] = [
+  {
+    id: 'JOB-001',
+    title: 'HVAC Installation',
+    description: 'Install new HVAC system in office building',
+    status: 'completed',
+    customerId: '550e8400-e29b-41d4-a716-446655440006',
+    employeeId: '550e8400-e29b-41d4-a716-446655440005',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    scheduledDate: '2024-01-15T09:00:00Z',
+    completedDate: '2024-01-15T16:30:00Z',
+    quotation: 2500,
+    invoice: 2500,
+    images: [],
+    documents: [],
+    checklist: [
+      { id: '1', text: 'Site inspection', completed: true },
+      { id: '2', text: 'Equipment delivery', completed: true },
+      { id: '3', text: 'Installation', completed: true },
+      { id: '4', text: 'Testing', completed: true }
+    ],
+    createdAt: '2024-01-15T09:00:00Z'
+  }
+];
+
+const DEFAULT_NOTIFICATIONS: Notification[] = [
+  {
+    id: '550e8400-e29b-41d4-a716-44665544000a',
+    userId: '550e8400-e29b-41d4-a716-446655440005',
+    title: 'Welcome to JobManager Pro',
+    message: 'Your account has been set up successfully!',
+    type: 'system',
+    read: false,
+    createdAt: '2024-01-01T10:00:00Z'
+  }
+];
+
+// Storage utilities with bulletproof error handling
+export const saveToStorage = (key: string, data: any): boolean => {
+  try {
+    const jsonData = JSON.stringify(data);
+    localStorage.setItem(key, jsonData);
+    console.log(`✅ SAVED ${key}:`, data.length || Object.keys(data).length, 'items');
+    
+    // Verify save worked
+    const verification = localStorage.getItem(key);
+    if (!verification) {
+      throw new Error('Save verification failed');
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`❌ FAILED TO SAVE ${key}:`, error);
+    return false;
+  }
+};
+
+export const loadFromStorage = (key: string, defaultValue: any) => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored && stored !== 'undefined' && stored !== 'null') {
+      const parsed = JSON.parse(stored);
+      console.log(`✅ LOADED ${key}:`, parsed.length || Object.keys(parsed).length, 'items');
+      return parsed;
+    }
+  } catch (error) {
+    console.error(`❌ FAILED TO LOAD ${key}:`, error);
+  }
+  
+  console.log(`📝 USING DEFAULT ${key}:`, defaultValue.length || Object.keys(defaultValue).length, 'items');
+  // Save defaults immediately
+  saveToStorage(key, defaultValue);
+  return defaultValue;
+};
+
+// Data management functions
+export class LocalStorageService {
+  
+  // Users
+  static getUsers(): User[] {
+    return loadFromStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
+  }
+
+  static saveUsers(users: User[]): boolean {
+    return saveToStorage(STORAGE_KEYS.USERS, users);
+  }
+
+  static createUser(userData: Omit<User, 'id' | 'createdAt'>): User {
+    const users = this.getUsers();
+    const newUser: User = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...userData,
+      createdAt: new Date().toISOString(),
+      isActive: true,
+      emailVerified: false
+    };
+    
+    const updatedUsers = [...users, newUser];
+    this.saveUsers(updatedUsers);
+    
+    return newUser;
+  }
+
+  static updateUser(id: string, updates: Partial<User>): boolean {
+    const users = this.getUsers();
+    const updatedUsers = users.map(user => 
+      user.id === id ? { ...user, ...updates } : user
+    );
+    return this.saveUsers(updatedUsers);
+  }
+
+  static deleteUser(id: string): boolean {
+    const users = this.getUsers();
+    const updatedUsers = users.filter(user => user.id !== id);
+    return this.saveUsers(updatedUsers);
+  }
+
+  // Businesses
+  static getBusinesses(): Business[] {
+    return loadFromStorage(STORAGE_KEYS.BUSINESSES, DEFAULT_BUSINESSES);
+  }
+
+  static saveBusinesses(businesses: Business[]): boolean {
+    return saveToStorage(STORAGE_KEYS.BUSINESSES, businesses);
+  }
+
+  static createBusiness(businessData: Omit<Business, 'id' | 'createdAt'>): Business {
+    const businesses = this.getBusinesses();
+    const newBusiness: Business = {
+      id: `business-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...businessData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedBusinesses = [...businesses, newBusiness];
+    this.saveBusinesses(updatedBusinesses);
+    
+    return newBusiness;
+  }
+
+  // Jobs
+  static getJobs(): Job[] {
+    return loadFromStorage(STORAGE_KEYS.JOBS, DEFAULT_JOBS);
+  }
+
+  static saveJobs(jobs: Job[]): boolean {
+    return saveToStorage(STORAGE_KEYS.JOBS, jobs);
+  }
+
+  static createJob(jobData: Omit<Job, 'id' | 'createdAt'>): Job {
+    const jobs = this.getJobs();
+    const newJob: Job = {
+      id: `JOB-${Date.now().toString().slice(-6)}`,
+      ...jobData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedJobs = [...jobs, newJob];
+    this.saveJobs(updatedJobs);
+    
+    return newJob;
+  }
+
+  // Customers
+  static getCustomers(): Customer[] {
+    return loadFromStorage(STORAGE_KEYS.CUSTOMERS, DEFAULT_CUSTOMERS);
+  }
+
+  static saveCustomers(customers: Customer[]): boolean {
+    return saveToStorage(STORAGE_KEYS.CUSTOMERS, customers);
+  }
+
+  static createCustomer(customerData: Omit<Customer, 'id' | 'createdAt'>): Customer {
+    const customers = this.getCustomers();
+    const newCustomer: Customer = {
+      id: `customer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...customerData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedCustomers = [...customers, newCustomer];
+    this.saveCustomers(updatedCustomers);
+    
+    return newCustomer;
+  }
+
+  // Products
+  static getProducts(): Product[] {
+    return loadFromStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
+  }
+
+  static saveProducts(products: Product[]): boolean {
+    return saveToStorage(STORAGE_KEYS.PRODUCTS, products);
+  }
+
+  // Notifications
+  static getNotifications(): Notification[] {
+    return loadFromStorage(STORAGE_KEYS.NOTIFICATIONS, DEFAULT_NOTIFICATIONS);
+  }
+
+  static saveNotifications(notifications: Notification[]): boolean {
+    return saveToStorage(STORAGE_KEYS.NOTIFICATIONS, notifications);
+  }
+
+  // Initialize all data
+  static initializeData(): void {
+    console.log('🚀 Initializing localStorage data...');
+    this.getUsers();
+    this.getBusinesses();
+    this.getJobs();
+    this.getCustomers();
+    this.getProducts();
+    this.getNotifications();
+    console.log('✅ All data initialized successfully');
+  }
+}
