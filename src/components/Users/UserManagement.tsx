@@ -5,13 +5,24 @@ import { useData } from '../../contexts/DataContext';
 
 export function UserManagement() {
   const { user: currentUser } = useAuth();
-  const { users, addUser, deleteUser, businesses } = useData();
+  const { users, addUser, deleteUser, updateUser, businesses } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'employee' as 'admin' | 'business' | 'employee',
+    businessId: '',
+    permissions: [] as string[]
+  });
+  const [editUser, setEditUser] = useState({
     name: '',
     email: '',
     password: '',
@@ -323,6 +334,157 @@ export function UserManagement() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Edit User</h3>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingUser(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateUser} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editUser.name}
+                  onChange={(e) => setEditUser({...editUser, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editUser.email}
+                  onChange={(e) => setEditUser({...editUser, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Password (Leave blank to keep current)
+                  </label>
+                  <input
+                    type="password"
+                    value={editUser.password}
+                    onChange={(e) => setEditUser({...editUser, password: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter new password"
+                    minLength={6}
+                  />
+                  {editUser.password && (
+                    <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={editUser.confirmPassword}
+                    onChange={(e) => setEditUser({...editUser, confirmPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Confirm new password"
+                    minLength={6}
+                    disabled={!editUser.password}
+                  />
+                  {editUser.password && editUser.confirmPassword && editUser.password !== editUser.confirmPassword && (
+                    <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                  )}
+                </div>
+              </div>
+
+              {currentUser?.role === 'admin' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    User Role *
+                  </label>
+                  <select
+                    required
+                    value={editUser.role}
+                    onChange={(e) => setEditUser({...editUser, role: e.target.value as 'admin' | 'business' | 'employee'})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="admin">Admin User</option>
+                    <option value="business">Business User</option>
+                    <option value="employee">Employee User</option>
+                  </select>
+                </div>
+              )}
+
+              {(editUser.role === 'business' || editUser.role === 'employee') && currentUser?.role === 'admin' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business ID
+                  </label>
+                  <input
+                    type="text"
+                    value={editUser.businessId}
+                    onChange={(e) => setEditUser({...editUser, businessId: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter business ID"
+                  />
+                </div>
+              )}
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Current Permissions</h4>
+                <div className="flex flex-wrap gap-2">
+                  {editingUser.permissions.map((permission: string) => (
+                    <span key={permission} className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                      {permission === 'vr_view' && <Headphones className="w-3 h-3 mr-1" />}
+                      {permission.replace('_', ' ')}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingUser(null);
+                  }}
+                  className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Update User
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

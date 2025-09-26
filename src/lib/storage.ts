@@ -200,7 +200,16 @@ export class LocalStorageService {
     const updatedUsers = users.map(user => 
       user.id === id ? { ...user, ...updates } : user
     );
-    return this.saveUsers(updatedUsers);
+    const success = this.saveUsers(updatedUsers);
+    
+    // Update current user session if editing current user
+    const currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
+    if (currentUser && currentUser.id === id) {
+      const updatedCurrentUser = { ...currentUser, ...updates };
+      localStorage.setItem('current_user', JSON.stringify(updatedCurrentUser));
+    }
+    
+    return success;
   }
 
   static deleteUser(id: string): boolean {
