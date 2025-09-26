@@ -11,7 +11,7 @@ export default function ARCameraModule() {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fullscreen AR Camera — 2D to 3D with Background Removal</title>
+  <title>BlindsCloud AR Camera — Professional Blinds Demonstration</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.loaders.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -19,30 +19,35 @@ export default function ARCameraModule() {
     html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Arial;}
     #webcamVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000;}
     a-scene{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;}
-    #ui{position:fixed;right:10px;top:10px;z-index:3;background:rgba(255,255,255,0.96);padding:10px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:440px;display:none;}
+    #ui{position:fixed;right:10px;top:10px;z-index:3;background:rgba(255,255,255,0.96);padding:15px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:480px;display:none;}
     #ui button,#ui input,#ui select{margin:5px 0;padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:#fff;cursor:pointer}
-    #toggleBtn{position:fixed;bottom:12px;right:12px;z-index:4;background:#fff;padding:10px 14px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;}
+    #toggleBtn{position:fixed;bottom:12px;right:12px;z-index:4;background:linear-gradient(135deg, #6366f1, #8b5cf6);color:white;padding:12px 16px;border-radius:50%;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;}
+    #newTabBtn{position:fixed;bottom:12px;left:12px;z-index:4;background:linear-gradient(135deg, #3b82f6, #1d4ed8);color:white;padding:8px 12px;border-radius:8px;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;font-size:14px;}
     #status{font-size:12px;color:#333;margin-top:6px}
+    .ar-overlay{position:fixed;top:10px;left:10px;z-index:3;background:rgba(0,0,0,0.7);color:white;padding:8px 12px;border-radius:8px;font-size:12px;}
   </style>
 </head>
 <body>
+  <div class="ar-overlay">BlindsCloud AR Demo - Professional Blinds Visualization</div>
+  
   <div id="ui">
-    <button id="startCam">Start Camera (back)</button>
+    <h3 style="margin:0 0 10px;color:#333;font-size:14px;">📱 BlindsCloud AR Camera</h3>
+    <button id="startCam">🎥 Start Camera (back)</button>
     <button id="switchCam" disabled>Switch Camera</button>
-    <input id="imageInput" type="file" accept="image/*,.max,.fbx,.gltf,.glb">
+    <input id="imageInput" type="file" accept="image/*,.max,.fbx,.gltf,.glb" style="width:100%;margin:8px 0;">
     <div>
-      <button id="placeToggle" disabled>Place AR item</button>
-      <button id="removeItem" disabled>Remove</button>
-      <button id="screenshotBtn" disabled>📸 Screenshot</button>
+      <button id="placeToggle" disabled>🎯 Place Blinds</button>
+      <button id="removeItem" disabled>❌ Remove</button>
+      <button id="screenshotBtn" disabled>📸 Capture Demo</button>
     </div>
     <div>
-      <label for="shapeSelect">3D Shape/Model:</label>
+      <label for="shapeSelect">Blinds Style:</label>
       <select id="shapeSelect">
-        <option value="plane">Plane</option>
-        <option value="box">Box</option>
-        <option value="cylinder">Curved</option>
-        <option value="sphere">Sphere</option>
-        <option value="custom">Custom 3D Model</option>
+        <option value="plane">Flat Panel Blinds</option>
+        <option value="box">Venetian Blinds</option>
+        <option value="cylinder">Curved Blinds</option>
+        <option value="sphere">Rounded Blinds</option>
+        <option value="custom">Custom Blinds Model</option>
       </select>
     </div>
     <div>
@@ -52,10 +57,11 @@ export default function ARCameraModule() {
       <button id="rotateDown">⬇️ Down</button>
       <button id="resetBtn">Reset</button>
     </div>
-    <div id="status">Upload images (.jpg, .png) or 3D models (.max, .fbx, .gltf). Camera requires HTTPS.</div>
+    <div id="status">Upload blinds images or 3D models (.max, .fbx, .gltf). Show customers how blinds will look!</div>
   </div>
 
   <button id="toggleBtn">⚙️</button>
+  <button id="newTabBtn" onclick="window.open(window.location.href, '_blank')">🔗 New Tab</button>
 
   <video id="webcamVideo" playsinline autoplay muted></video>
 
@@ -265,6 +271,15 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload images or 3D mod
           <div>
             <h1 className="text-3xl font-bold text-gray-900">AR Camera Module</h1>
             <p className="text-gray-600 mt-2">Demonstrate blinds in customer spaces with AR visualization</p>
+          </div>
+          <div className="ml-auto">
+            <button
+              onClick={() => window.open('/ar-camera-fullscreen', '_blank')}
+              className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Camera className="w-5 h-5 mr-2" />
+              Open in New Tab
+            </button>
           </div>
         </div>
 
