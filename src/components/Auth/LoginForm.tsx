@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { LogIn, User, Lock } from 'lucide-react';
+import { LogIn, User, Lock, Layers } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Logo } from '../Layout/Logo';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -28,16 +29,15 @@ export function LoginForm() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <LogIn className="w-8 h-8 text-white" />
+            <div className="mx-auto mb-6">
+              <Logo size="lg" variant="color" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">JobManager Pro v1.2</h1>
             <p className="text-gray-600 mt-2">Professional Business Management Platform</p>
-            <p className="text-sm text-blue-600 mt-1">✨ Storage Fixed + Admin VR Access</p>
+            <p className="text-sm text-purple-600 mt-1">✨ Advanced AR & 3D Model Integration</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -84,14 +84,14 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
           {/* Demo Accounts */}
-          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Demo Accounts</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">

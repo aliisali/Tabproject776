@@ -20,10 +20,10 @@ export function EmployeeDashboard() {
   const pendingToday = todayJobs.filter(job => job.status === 'pending').length;
   
   const todayStats = [
-    { label: 'Today\'s Jobs', value: todayJobs.length.toString(), icon: ClipboardList, color: 'bg-blue-500' },
-    { label: 'Completed', value: completedToday.toString(), icon: CheckCircle, color: 'bg-green-500' },
-    { label: 'Pending', value: pendingToday.toString(), icon: Clock, color: 'bg-yellow-500' },
-    { label: 'Photos Taken', value: '12', icon: Camera, color: 'bg-purple-500' },
+    { label: 'Today\'s Jobs', value: todayJobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600' },
+    { label: 'Completed', value: completedToday.toString(), icon: CheckCircle, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600' },
+    { label: 'Pending', value: pendingToday.toString(), icon: Clock, color: 'bg-gradient-to-r from-amber-500 to-amber-600' },
+    { label: 'Photos Taken', value: '12', icon: Camera, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
   ];
 
   // Transform jobs data for display
@@ -64,9 +64,9 @@ export function EmployeeDashboard() {
         {todayStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 p-6 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center space-x-4">
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <div>

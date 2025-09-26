@@ -3,10 +3,10 @@ import { Users, Building2, TrendingUp, Activity, UserCheck, AlertCircle } from '
 
 export function AdminDashboard() {
   const stats = [
-    { label: 'Total Users', value: '1,247', icon: Users, color: 'bg-blue-500', change: '+12%' },
-    { label: 'Active Businesses', value: '89', icon: Building2, color: 'bg-green-500', change: '+8%' },
-    { label: 'Platform Revenue', value: '$45,230', icon: TrendingUp, color: 'bg-purple-500', change: '+23%' },
-    { label: 'System Health', value: '99.9%', icon: Activity, color: 'bg-emerald-500', change: '+0.1%' },
+    { label: 'Total Users', value: '1,247', icon: Users, color: 'bg-gradient-to-r from-blue-500 to-blue-600', change: '+12%' },
+    { label: 'Active Businesses', value: '89', icon: Building2, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', change: '+8%' },
+    { label: 'Platform Revenue', value: '$45,230', icon: TrendingUp, color: 'bg-gradient-to-r from-purple-500 to-purple-600', change: '+23%' },
+    { label: 'System Health', value: '99.9%', icon: Activity, color: 'bg-gradient-to-r from-indigo-500 to-indigo-600', change: '+0.1%' },
   ];
 
   const recentActivity = [
@@ -28,14 +28,14 @@ export function AdminDashboard() {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 p-6 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                   <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                  <p className="text-sm text-green-600 mt-1">{stat.change} from last month</p>
+                  <p className="text-sm text-emerald-600 mt-1 font-medium">{stat.change} from last month</p>
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -46,7 +46,7 @@ export function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
           <div className="space-y-4">
             {recentActivity.map((activity, index) => (
@@ -66,7 +66,7 @@ export function AdminDashboard() {
         </div>
 
         {/* System Status */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">System Status</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">

@@ -23,17 +23,17 @@ export function BusinessDashboard() {
   const activeEmployees = users.filter(user => user.role === 'employee' && user.isActive).length;
   
   const stats = [
-    { label: 'Total Jobs', value: jobs.length.toString(), icon: ClipboardList, color: 'bg-blue-500', change: '+18%' },
-    { label: 'Jobs Completed', value: completedJobs.toString(), icon: CheckCircle, color: 'bg-green-500', change: '+12%' },
-    { label: 'Jobs Cancelled', value: cancelledJobs.toString(), icon: XCircle, color: 'bg-red-500', change: '-5%' },
-    { label: 'Pending Jobs', value: pendingJobs.toString(), icon: Clock, color: 'bg-yellow-500', change: '+2%' },
+    { label: 'Total Jobs', value: jobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600', change: '+18%' },
+    { label: 'Jobs Completed', value: completedJobs.toString(), icon: CheckCircle, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', change: '+12%' },
+    { label: 'Jobs Cancelled', value: cancelledJobs.toString(), icon: XCircle, color: 'bg-gradient-to-r from-red-500 to-red-600', change: '-5%' },
+    { label: 'Pending Jobs', value: pendingJobs.toString(), icon: Clock, color: 'bg-gradient-to-r from-amber-500 to-amber-600', change: '+2%' },
   ];
 
   const revenueStats = [
-    { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'bg-emerald-500' },
-    { label: 'Active Employees', value: activeEmployees.toString(), icon: Users, color: 'bg-purple-500' },
-    { label: 'Growth Rate', value: '+23%', icon: TrendingUp, color: 'bg-indigo-500' },
-    { label: 'This Month', value: `${jobs.length} Jobs`, icon: Calendar, color: 'bg-pink-500' },
+    { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600' },
+    { label: 'Active Employees', value: activeEmployees.toString(), icon: Users, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
+    { label: 'Growth Rate', value: '+23%', icon: TrendingUp, color: 'bg-gradient-to-r from-indigo-500 to-indigo-600' },
+    { label: 'This Month', value: `${jobs.length} Jobs`, icon: Calendar, color: 'bg-gradient-to-r from-pink-500 to-pink-600' },
   ];
 
   // Get recent jobs from actual data
@@ -67,18 +67,18 @@ export function BusinessDashboard() {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 p-6 hover:shadow-xl transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                   <p className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</p>
                   <p className={`text-sm mt-1 ${
-                    stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    stat.change.startsWith('+') ? 'text-emerald-600 font-medium' : 'text-red-600 font-medium'
                   }`}>
                     {stat.change} from last month
                   </p>
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
