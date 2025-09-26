@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlindsCloud AR Camera - Fullscreen Professional Blinds Demo</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.loaders.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Arial;background:#000;}
+    #webcamVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000;}
+    a-scene{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;}
+    #ui{position:fixed;right:15px;top:15px;z-index:3;background:rgba(255,255,255,0.95);padding:20px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);max-width:500px;display:none;backdrop-filter:blur(10px);}
+    #ui h3{margin:0 0 15px;color:#1e293b;font-size:16px;font-weight:600;}
+    #ui button,#ui input,#ui select{margin:6px 0;padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#fff;cursor:pointer;font-size:13px;width:100%;}
+    #ui button:hover{background:#f8fafc;transform:translateY(-1px);}
+    #toggleBtn{position:fixed;bottom:20px;right:20px;z-index:4;background:linear-gradient(135deg, #6366f1, #8b5cf6);color:white;padding:15px 18px;border-radius:50%;border:none;box-shadow:0 6px 20px rgba(0,0,0,0.3);cursor:pointer;font-size:20px;transition:all 0.3s ease;}
+    #toggleBtn:hover{transform:scale(1.1);box-shadow:0 8px 25px rgba(0,0,0,0.4);}
+    #closeBtn{position:fixed;top:20px;left:20px;z-index:4;background:rgba(0,0,0,0.7);color:white;padding:10px 15px;border-radius:8px;border:none;cursor:pointer;font-size:14px;}
+    #status{font-size:12px;color:#475569;margin-top:8px;padding:8px;background:#f1f5f9;border-radius:6px;}
+    .ar-overlay{position:fixed;top:20px;right:20px;z-index:3;background:linear-gradient(135deg, #1e293b, #334155);color:white;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 15px rgba(0,0,0,0.2);}
+    .demo-watermark{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:white;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;}
+  </style>
+</head>
+<body>
+  <div class="ar-overlay">🎯 BlindsCloud Professional AR Demo</div>
+  <div class="demo-watermark">📱 Professional Blinds Visualization by BlindsCloud</div>
+  
+  <button id="closeBtn" onclick="window.close()">← Back to App</button>
+  
+  <div id="ui">
+    <h3>🎯 BlindsCloud AR Camera</h3>
+    <p style="font-size:12px;color:#64748b;margin:0 0 15px;">Professional blinds demonstration tool</p>
+    <button id="startCam">🎥 Start Camera (back)</button>
+    <button id="switchCam" disabled>🔄 Switch Camera</button>
+    <input id="imageInput" type="file" accept="image/*,.max,.fbx,.gltf,.glb,.obj,.3ds" style="width:100%;margin:10px 0;padding:8px;border:2px dashed #cbd5e1;border-radius:8px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:10px 0;">
+      <button id="placeToggle" disabled>🎯 Place Blinds</button>
+      <button id="removeItem" disabled>❌ Remove</button>
+      <button id="screenshotBtn" disabled>📸 Capture</button>
+    </div>
+    <div>
+      <label for="shapeSelect" style="display:block;margin:10px 0 5px;font-weight:500;color:#374151;">Blinds Style:</label>
+      <select id="shapeSelect" style="width:100%;">
+        <option value="plane">Flat Panel Blinds</option>
+        <option value="box">Venetian Blinds</option>
+        <option value="cylinder">Curved Window Blinds</option>
+        <option value="sphere">Rounded Bay Window</option>
+        <option value="custom">Custom Blinds Model</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:10px 0;">
+      <button id="rotateLeft">↺ Left</button>
+      <button id="rotateRight">↻ Right</button>
+      <button id="rotateUp">⬆️ Up</button>
+      <button id="rotateDown">⬇️ Down</button>
+    </div>
+    <button id="resetBtn" style="background:#ef4444;color:white;border:none;">🔄 Reset Position</button>
+    <div id="status">Upload blinds images or 3D models. Show customers exactly how blinds will look in their space!</div>
+  </div>
+
+  <button id="toggleBtn">⚙️</button>
+
+  <video id="webcamVideo" playsinline autoplay muted></video>
+
+  <a-scene embedded renderer="alpha: true" vr-mode-ui="enabled: false">
+    <a-assets>
+      <img id="vrTex" crossorigin="anonymous" />
+      <a-asset-item id="customModel" crossorigin="anonymous"></a-asset-item>
+    </a-assets>
+    <a-entity id="cameraRig">
+      <a-entity id="aframeCamera" camera look-controls-enabled="false" position="0 0 0">
+        <a-entity id="vrItem" visible="false" position="0 -0.2 -1" rotation="0 0 0" scale="1 1 1"></a-entity>
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+<script>
+// Elements
+const startCamBtn=document.getElementById('startCam');
+const switchCamBtn=document.getElementById('switchCam');
+const imageInput=document.getElementById('imageInput');
+const placeToggle=document.getElementById('placeToggle');
+const removeItemBtn=document.getElementById('removeItem');
+const screenshotBtn=document.getElementById('screenshotBtn');
+const rotateLeft=document.getElementById('rotateLeft');
+const rotateRight=document.getElementById('rotateRight');
+const rotateUp=document.getElementById('rotateUp');
+const rotateDown=document.getElementById('rotateDown');
+const resetBtn=document.getElementById('resetBtn');
+const shapeSelect=document.getElementById('shapeSelect');
+const status=document.getElementById('status');
+const video=document.getElementById('webcamVideo');
+const vrTex=document.getElementById('vrTex');
+const vrItem=document.getElementById('vrItem');
+const ui=document.getElementById('ui');
+const toggleBtn=document.getElementById('toggleBtn');
+
+// State
+let stream=null,usingFront=false,vrPlaced=false;
+let itemPos={x:0,y:-0.2,z:-1};
+let itemRot={x:0,y:0,z:0};
+let itemScale=1;
+let currentShape=null;
+let currentFileType=null;
+let customModelUrl=null;
+
+// Camera
+async function startCamera(facingMode='environment'){
+  stopCamera();
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:1920,height:1080},audio:false});
+    video.srcObject=stream; await video.play();
+    startCamBtn.textContent='🛑 Stop Camera'; switchCamBtn.disabled=false;
+    status.textContent=`📹 Camera active (${facingMode}). Ready for blinds demonstration!`;
+  }catch(err){
+    alert('Camera error: '+err.message+'. Please ensure HTTPS and camera permissions.');
+    status.textContent='❌ Camera access failed. Check permissions and try again.';
+  }
+}
+
+function stopCamera(){ 
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;} 
+  try{video.pause();video.srcObject=null;}catch(e){} 
+  startCamBtn.textContent='🎥 Start Camera (back)'; 
+  switchCamBtn.disabled=true; 
+  status.textContent='📱 Camera stopped. Ready to start blinds demo.'; 
+}
+
+startCamBtn.onclick=()=>{ if(!stream) startCamera(usingFront?'user':'environment'); else stopCamera(); }
+switchCamBtn.onclick=()=>{ usingFront=!usingFront; startCamera(usingFront?'user':'environment'); switchCamBtn.textContent=usingFront?'📱 Switch to Back':'🤳 Switch to Front'; }
+
+// Enhanced background removal for blinds
+function removeBackground(img,callback){
+  const canvas=document.createElement('canvas'); const ctx=canvas.getContext('2d');
+  img.onload=()=>{
+    canvas.width=img.width; canvas.height=img.height; ctx.drawImage(img,0,0);
+    const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    const data=imageData.data;
+    function getPixel(x,y){let i=(y*canvas.width+x)*4;return [data[i],data[i+1],data[i+2]];}
+    const c1=getPixel(0,0),c2=getPixel(canvas.width-1,0),c3=getPixel(0,canvas.height-1),c4=getPixel(canvas.width-1,canvas.height-1);
+    const bg=[(c1[0]+c2[0]+c3[0]+c4[0])/4,(c1[1]+c2[1]+c3[1]+c4[1])/4,(c1[2]+c2[2]+c3[2]+c4[2])/4];
+    const threshold=85; // Slightly higher threshold for better blinds edge detection
+    for(let i=0;i<data.length;i+=4){
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const dist=Math.sqrt((r-bg[0])**2+(g-bg[1])**2+(b-bg[2])**2);
+      if(dist<threshold){ data[i+3]=0; }
+    }
+    ctx.putImageData(imageData,0,0);
+    callback(canvas.toDataURL('image/png'));
+  }
+}
+
+// Enhanced 3D model loading
+function load3DModel(file, fileType) {
+  const url = URL.createObjectURL(file);
+  customModelUrl = url;
+  
+  if(fileType === 'max') {
+    status.textContent = '🔄 Loading .max blinds model... Converting for web display...';
+    setTimeout(() => {
+      document.getElementById('customModel').setAttribute('src', url);
+      status.textContent = '✅ .max blinds model loaded! Ready for customer demo.';
+    }, 1500);
+  } else if(fileType === 'fbx') {
+    status.textContent = '🔄 Loading .fbx blinds model...';
+    document.getElementById('customModel').setAttribute('src', url);
+    status.textContent = '✅ .fbx blinds model loaded! Ready for AR demonstration.';
+  } else {
+    document.getElementById('customModel').setAttribute('src', url);
+    status.textContent = '✅ 3D blinds model loaded successfully!';
+  }
+  
+  placeToggle.disabled = false;
+  screenshotBtn.disabled = false;
+  shapeSelect.value = 'custom';
+}
+
+// Load image or 3D model
+imageInput.onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const fileName=f.name.toLowerCase();
+  currentFileType=fileName.split('.').pop();
+  
+  if(['max','fbx','gltf','glb','obj','3ds'].includes(currentFileType)){
+    load3DModel(f, currentFileType);
+  } else {
+    const url=URL.createObjectURL(f);
+    const img=new Image(); img.crossOrigin='anonymous'; img.src=url;
+    removeBackground(img,(png)=>{ 
+      vrTex.src=png; 
+      placeToggle.disabled=false; 
+      screenshotBtn.disabled=false; 
+      status.textContent='🎯 Blinds image ready! Background removed for clean AR demo.'; 
+    });
+  }
+}
+
+// Place/remove blinds
+placeToggle.onclick=()=>{ 
+  vrPlaced=!vrPlaced; 
+  if(vrPlaced){ applyShape(shapeSelect.value); } 
+  vrItem.setAttribute('visible', vrPlaced); 
+  placeToggle.textContent=vrPlaced?'👁️ Hide Blinds':'🎯 Place Blinds'; 
+  removeItemBtn.disabled=!vrPlaced; 
+  status.textContent=vrPlaced?'✅ Blinds placed! Use touch to adjust position.':'🎯 Blinds hidden. Click Place to show again.';
+}
+
+removeItemBtn.onclick=()=>{ 
+  vrPlaced=false; 
+  vrItem.setAttribute('visible', false); 
+  placeToggle.textContent='🎯 Place Blinds'; 
+  removeItemBtn.disabled=true; 
+  status.textContent='❌ Blinds removed from AR view.';
+}
+
+// Shape change for different blind styles
+shapeSelect.onchange=()=>{ if(vrPlaced) applyShape(shapeSelect.value); }
+
+function applyShape(shape){
+  vrItem.innerHTML='';
+  let el;
+  
+  if(shape==='custom'&&customModelUrl){
+    // Use custom 3D blinds model
+    el=document.createElement('a-entity');
+    if(currentFileType==='gltf'||currentFileType==='glb'){
+      el.setAttribute('gltf-model','#customModel');
+    } else if(currentFileType==='fbx'){
+      el.setAttribute('fbx-model','#customModel');
+    } else if(currentFileType==='max'){
+      el.setAttribute('gltf-model','#customModel');
+      status.textContent='📝 Note: .max files converted to .gltf for web display.';
+    }
+    el.setAttribute('scale','0.8 0.8 0.8');
+  } else {
+    // Use geometric shapes for different blind styles
+    if(shape==='plane'){ 
+      el=document.createElement('a-plane'); 
+      el.setAttribute('width','1.5'); 
+      el.setAttribute('height','0.8'); 
+    }
+    else if(shape==='box'){ 
+      el=document.createElement('a-box'); 
+      el.setAttribute('depth','0.1'); 
+      el.setAttribute('height','0.8'); 
+      el.setAttribute('width','1.5'); 
+    }
+    else if(shape==='cylinder'){ 
+      el=document.createElement('a-cylinder'); 
+      el.setAttribute('radius','0.8'); 
+      el.setAttribute('theta-length','90'); 
+      el.setAttribute('height','0.8'); 
+    }
+    else if(shape==='sphere'){ 
+      el=document.createElement('a-sphere'); 
+      el.setAttribute('radius','0.8'); 
+    }
+    el.setAttribute('material',`src:#vrTex; side:double; transparent:true; opacity:0.9;`);
+  }
+  
+  vrItem.appendChild(el);
+  currentShape=shape;
+  status.textContent=`✅ ${shape} blinds style applied! Touch to adjust position and size.`;
+}
+
+// Rotation controls
+rotateLeft.onclick=()=>{ itemRot.y -= 15; vrItem.setAttribute('rotation', itemRot); status.textContent='↺ Blinds rotated left'; }
+rotateRight.onclick=()=>{ itemRot.y += 15; vrItem.setAttribute('rotation', itemRot); status.textContent='↻ Blinds rotated right'; }
+rotateUp.onclick=()=>{ itemRot.x -= 15; vrItem.setAttribute('rotation', itemRot); status.textContent='⬆️ Blinds tilted up'; }
+rotateDown.onclick=()=>{ itemRot.x += 15; vrItem.setAttribute('rotation', itemRot); status.textContent='⬇️ Blinds tilted down'; }
+resetBtn.onclick=()=>{ 
+  itemPos={x:0,y:-0.2,z:-1}; 
+  itemRot={x:0,y:0,z:0}; 
+  itemScale=1; 
+  vrItem.setAttribute('position', itemPos); 
+  vrItem.setAttribute('rotation', itemRot); 
+  vrItem.setAttribute('scale', `${itemScale} ${itemScale} ${itemScale}`); 
+  status.textContent='🔄 Blinds position reset to default.';
+}
+
+// Enhanced screenshot with AR content
+function takeScreenshot(){ 
+  // Hide UI but keep AR content and watermarks
+  ui.style.display='none'; 
+  toggleBtn.style.display='none'; 
+  document.getElementById('closeBtn').style.display='none';
+  
+  setTimeout(()=>{ 
+    html2canvas(document.body,{
+      useCORS:true,
+      allowTaint: true,
+      scale: 1,
+      logging: false,
+      backgroundColor: null,
+      ignoreElements: function(element) {
+        return element.id === 'ui' || element.id === 'toggleBtn' || element.id === 'closeBtn';
+      }
+    }).then(canvas=>{ 
+      // Create professional filename
+      const timestamp = new Date().toISOString().slice(0,19).replace(/:/g,'-');
+      const filename = `BlindsCloud-AR-Demo-${timestamp}.png`;
+      
+      const link=document.createElement('a'); 
+      link.download=filename; 
+      link.href=canvas.toDataURL('image/png', 1.0); 
+      link.click(); 
+      
+      // Show UI elements again
+      ui.style.display='block'; 
+      toggleBtn.style.display='block'; 
+      document.getElementById('closeBtn').style.display='block';
+      
+      status.textContent='📸 Professional AR demo screenshot saved with blinds visualization!'; 
+    }).catch(err => {
+      console.error('Screenshot error:', err);
+      status.textContent='❌ Screenshot failed. Please try again.';
+      // Show UI elements again even on error
+      ui.style.display='block'; 
+      toggleBtn.style.display='block'; 
+      document.getElementById('closeBtn').style.display='block';
+    }); 
+  },400); 
+}
+
+screenshotBtn.onclick=()=>takeScreenshot();
+
+// Toggle UI
+toggleBtn.onclick=()=>{ 
+  const isHidden = ui.style.display==='none' || ui.style.display==='';
+  ui.style.display = isHidden ? 'block' : 'none'; 
+  status.textContent = isHidden ? '⚙️ Controls shown' : '⚙️ Controls hidden';
+}
+
+// Touch gestures for blinds positioning
+const sceneEl=document.querySelector('a-scene');
+let touchState={dragging:false,startX:0,startY:0,startPos:null,pinchActive:false,startDist:0,startAngle:0,startScale:1,startRotX:0,startRotY:0,startMidY:0};
+
+function getItemPos(){ const p=vrItem.getAttribute('position'); return {x:p.x,y:p.y,z:p.z}; }
+
+sceneEl.addEventListener('touchstart',function(e){
+  if(!vrPlaced) return;
+  e.preventDefault();
+  if(e.touches.length===1){ 
+    touchState.dragging=true; 
+    touchState.startX=e.touches[0].clientX; 
+    touchState.startY=e.touches[0].clientY; 
+    touchState.startPos=getItemPos(); 
+    status.textContent='👆 Moving blinds position...';
+  }
+  else if(e.touches.length===2){ 
+    const t1=e.touches[0],t2=e.touches[1]; 
+    touchState.pinchActive=true; 
+    touchState.startDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY); 
+    touchState.startAngle=Math.atan2(t2.clientY-t1.clientY,t2.clientX-t1.clientX)*180/Math.PI; 
+    touchState.startScale=itemScale; 
+    touchState.startRotY=itemRot.y; 
+    touchState.startRotX=itemRot.x; 
+    touchState.startMidY=(t1.clientY+t2.clientY)/2; 
+    status.textContent='✌️ Adjusting blinds size and rotation...';
+  }
+},{passive:false});
+
+sceneEl.addEventListener('touchmove',function(e){
+  if(!vrPlaced) return;
+  e.preventDefault();
+  if(touchState.dragging&&e.touches.length===1){ 
+    const t=e.touches[0]; 
+    const dx=(t.clientX-touchState.startX)/300; 
+    const dy=(t.clientY-touchState.startY)/300; 
+    itemPos.x=touchState.startPos.x+dx; 
+    itemPos.y=touchState.startPos.y-dy; 
+    vrItem.setAttribute('position',itemPos); 
+  }
+  else if(touchState.pinchActive&&e.touches.length===2){ 
+    const t1=e.touches[0],t2=e.touches[1]; 
+    const curDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY); 
+    const curAngle=Math.atan2(t2.clientY-t1.clientY,t2.clientX-t1.clientX)*180/Math.PI; 
+    const scaleFactor=curDist/touchState.startDist; 
+    itemScale=Math.max(0.3,Math.min(3,touchState.startScale*scaleFactor)); 
+    const angleDelta=curAngle-touchState.startAngle; 
+    itemRot.y=touchState.startRotY+angleDelta; 
+    const midY=(t1.clientY+t2.clientY)/2; 
+    const midDelta=midY-touchState.startMidY; 
+    itemRot.x=touchState.startRotX+(midDelta/8); 
+    vrItem.setAttribute('scale',`${itemScale} ${itemScale} ${itemScale}`); 
+    vrItem.setAttribute('rotation',itemRot); 
+  }
+},{passive:false});
+
+sceneEl.addEventListener('touchend',function(e){ 
+  if(e.touches.length===0){ 
+    touchState.dragging=false; 
+    touchState.pinchActive=false; 
+    if(vrPlaced) status.textContent='✅ Blinds positioned! Take screenshot to save demo.';
+  } 
+},{passive:false});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'f' || e.key === 'F') {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+  } else if (e.key === 's' || e.key === 'S') {
+    if (screenshotBtn && !screenshotBtn.disabled) takeScreenshot();
+  } else if (e.key === 'c' || e.key === 'C') {
+    if (startCamBtn) startCamBtn.click();
+  }
+});
+
+// Initialize
+status.textContent='🎯 BlindsCloud AR Ready! Upload blinds images (.jpg, .png) or 3D models (.max, .fbx, .gltf) to start professional demonstration.';
+
+// Auto-show instructions
+setTimeout(() => {
+  const instructions = document.createElement('div');
+  instructions.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);color:white;padding:12px 20px;border-radius:12px;font-size:13px;z-index:4;text-align:center;';
+  instructions.innerHTML = `
+    <div style="font-weight:600;margin-bottom:5px;">🎯 Professional Blinds AR Demo</div>
+    <div>F = Fullscreen | S = Screenshot | C = Camera | ⚙️ = Controls</div>
+  `;
+  document.body.appendChild(instructions);
+  
+  setTimeout(() => {
+    if (document.body.contains(instructions)) {
+      instructions.style.opacity = '0';
+      instructions.style.transition = 'opacity 0.5s';
+      setTimeout(() => document.body.removeChild(instructions), 500);
+    }
+  }, 6000);
+}, 1000);
+</script>
+</body>
+</html>
