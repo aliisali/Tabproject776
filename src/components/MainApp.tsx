@@ -23,6 +23,7 @@ import { AdminHTMLManager } from './Admin/AdminHTMLManager';
 import { ModelConverter } from './Admin/ModelConverter';
 import { ModelPermissions } from './Admin/ModelPermissions';
 import { Model3DViewer } from './Features/Model3DViewer';
+import { EmailManager } from './Admin/EmailManager';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -43,6 +44,7 @@ export function MainApp() {
         case 'module-permissions': return <ModulePermissions />;
         case 'model-converter': return <ModelConverter />;
         case 'model-permissions': return <ModelPermissions />;
+        case 'email-manager': return <EmailManager />;
         default: return <AdminDashboard />;
       }
     }

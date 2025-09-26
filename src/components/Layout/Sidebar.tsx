@@ -41,6 +41,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'permissions', label: 'Permissions', icon: Settings },
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'html-manager', label: 'HTML Manager', icon: Code },
+          { id: 'email-manager', label: 'Email Manager', icon: Mail },
         ];
       case 'business':
         return [

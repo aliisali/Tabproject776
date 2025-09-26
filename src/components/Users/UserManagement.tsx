@@ -223,7 +223,23 @@ export function UserManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                      <button
+                        onClick={() => {
+                          setEditingUser(user);
+                          setEditUser({
+                            name: user.name,
+                            email: user.email,
+                            password: '', // Don't pre-fill password for security
+                            confirmPassword: '',
+                            role: user.role,
+                            businessId: user.businessId || '',
+                            permissions: user.permissions
+                          });
+                          setShowEditModal(true);
+                        }}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit User"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors">
