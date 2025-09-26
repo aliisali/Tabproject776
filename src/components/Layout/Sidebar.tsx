@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Building2, Calendar, ClipboardList, FileText, Settings, ChartBar as BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield } from 'lucide-react';
+import { Users, Building2, Calendar, ClipboardList, FileText, Settings, BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
 
