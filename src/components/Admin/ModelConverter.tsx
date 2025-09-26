@@ -468,14 +468,86 @@ export function ModelConverter() {
               
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">3D Model Preview</h4>
-                <div className="aspect-square bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <Box className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                    <p className="text-gray-700 font-medium">3D Model Viewer</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Interactive 3D preview would be displayed here
-                    </p>
-                  </div>
+                <div className="aspect-square bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg overflow-hidden">
+                  <iframe
+                    src={`data:text/html;charset=utf-8,${encodeURIComponent(`
+                      <!DOCTYPE html>
+                      <html>
+                      <head>
+                        <meta charset="utf-8">
+                        <title>3D Model Preview</title>
+                        <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+                        <style>
+                          body { margin: 0; overflow: hidden; background: linear-gradient(135deg, #1f2937, #374151); }
+                          a-scene { width: 100vw; height: 100vh; }
+                          #controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 20px; display: flex; gap: 8px; }
+                          .control-btn { background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 12px; cursor: pointer; font-size: 11px; }
+                          .control-btn:hover { background: #2563eb; }
+                        </style>
+                      </head>
+                      <body>
+                        <div id="controls">
+                          <button class="control-btn" onclick="rotateModel()">↺</button>
+                          <button class="control-btn" onclick="zoomIn()">+</button>
+                          <button class="control-btn" onclick="zoomOut()">-</button>
+                          <button class="control-btn" onclick="resetView()">⌂</button>
+                        </div>
+
+                        <a-scene embedded background="color: #1f2937" vr-mode-ui="enabled: false">
+                          <a-assets>
+                            <img id="modelTexture" src="${selectedModel.originalImage}" crossorigin="anonymous">
+                          </a-assets>
+                          
+                          <a-light type="ambient" color="#404040" intensity="0.5"></a-light>
+                          <a-light type="directional" position="2 4 5" color="#ffffff" intensity="0.7"></a-light>
+                          
+                          <a-entity id="model3d" position="0 0 -2" rotation="0 0 0" scale="1 1 1">
+                            ${selectedModel.settings.style === 'realistic' ? `
+                              <a-box width="1.5" height="0.9" depth="0.2" material="src: #modelTexture; metalness: 0.1; roughness: 0.7"></a-box>
+                            ` : selectedModel.settings.style === 'geometric' ? `
+                              <a-dodecahedron radius="0.8" material="src: #modelTexture; wireframe: true; color: #00ff88"></a-dodecahedron>
+                            ` : `
+                              <a-sphere radius="0.8" material="src: #modelTexture; shader: toon"></a-sphere>
+                            `}
+                            <a-animation attribute="rotation" to="0 360 0" repeat="indefinite" dur="15000"></a-animation>
+                          </a-entity>
+                          
+                          <a-camera position="0 1.6 0" look-controls="pointerLockEnabled: false"></a-camera>
+                        </a-scene>
+
+                        <script>
+                          let rotation = 0;
+                          let scale = 1;
+                          const model = document.querySelector('#model3d');
+                          
+                          function rotateModel() {
+                            rotation += 90;
+                            model.setAttribute('rotation', \`0 \${rotation} 0\`);
+                          }
+                          
+                          function zoomIn() {
+                            scale = Math.min(scale * 1.3, 2.5);
+                            model.setAttribute('scale', \`\${scale} \${scale} \${scale}\`);
+                          }
+                          
+                          function zoomOut() {
+                            scale = Math.max(scale * 0.7, 0.5);
+                            model.setAttribute('scale', \`\${scale} \${scale} \${scale}\`);
+                          }
+                          
+                          function resetView() {
+                            rotation = 0;
+                            scale = 1;
+                            model.setAttribute('rotation', '0 0 0');
+                            model.setAttribute('scale', '1 1 1');
+                          }
+                        </script>
+                      </body>
+                      </html>
+                    `)}`}
+                    className="w-full h-full border-0"
+                    title="3D Model Preview"
+                  />
                 </div>
               </div>
             </div>

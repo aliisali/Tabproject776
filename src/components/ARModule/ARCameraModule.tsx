@@ -232,6 +232,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
         {/* Available 3D Models */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Available 3D Models</h2>
+          <p className="text-sm text-gray-600 mb-4">Click on any model to load it into the AR camera for realistic 3D visualization</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { name: 'HVAC Unit', image: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=200' },
@@ -244,13 +245,21 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
                   <img src={model.image} alt={model.name} className="w-full h-full object-cover" />
                 </div>
                 <p className="text-sm font-medium text-gray-700">{model.name}</p>
-                <button className="mt-1 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">
+                <button 
+                  onClick={() => loadModelIntoAR(model)}
+                  className="mt-1 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   Load in AR
                 </button>
               </div>
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Model Loading Notification */}
+      <div id="modelNotification" className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300">
+        <p className="text-sm">3D Model loaded successfully!</p>
       </div>
 
       {/* AR Module Container */}
@@ -278,4 +287,29 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
       </div>
     </div>
   );
+
+  // Function to load model into AR
+  function loadModelIntoAR(model: any) {
+    // Show notification
+    const notification = document.getElementById('modelNotification');
+    if (notification) {
+      notification.style.transform = 'translateX(0)';
+      setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+      }, 3000);
+    }
+
+    // Send message to AR iframe to load the model
+    const iframe = document.querySelector('iframe[title="AR Camera Module"]') as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'LOAD_3D_MODEL',
+        model: {
+          name: model.name,
+          image: model.image,
+          type: '3d_model'
+        }
+      }, '*');
+    }
+  }
 }

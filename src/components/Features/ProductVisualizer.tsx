@@ -117,14 +117,145 @@ export function ProductVisualizer() {
                 )}
                 
                 {viewMode === '3d' && (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-                    <div className="text-center">
-                      <Package className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                      <p className="text-gray-700 font-medium">3D Model Viewer</p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Interactive 3D model would be displayed here
-                      </p>
-                    </div>
+                  <div className="w-full h-full relative bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg overflow-hidden">
+                    <iframe
+                      src={`data:text/html;charset=utf-8,${encodeURIComponent(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="utf-8">
+                          <title>3D Model Viewer</title>
+                          <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+                          <style>
+                            body { margin: 0; overflow: hidden; background: linear-gradient(135deg, #1f2937, #374151); }
+                            a-scene { width: 100vw; height: 100vh; }
+                            #controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 25px; display: flex; gap: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+                            .control-btn { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+                            .control-btn:hover { background: #2563eb; transform: scale(1.05); }
+                            #info { position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; font-family: Arial, sans-serif; font-size: 14px; max-width: 250px; }
+                          </style>
+                        </head>
+                        <body>
+                          <div id="info">
+                            <h3 style="margin: 0 0 10px 0; color: #1f2937;">${selectedProductData.name}</h3>
+                            <p style="margin: 0 0 5px 0; color: #6b7280;">Price: $${selectedProductData.price.toLocaleString()}</p>
+                            <p style="margin: 0; color: #6b7280; font-size: 12px;">Use controls below to interact</p>
+                          </div>
+                          
+                          <div id="controls">
+                            <button class="control-btn" onclick="rotateLeft()">↺ Rotate</button>
+                            <button class="control-btn" onclick="zoomIn()">🔍 Zoom In</button>
+                            <button class="control-btn" onclick="zoomOut()">🔍 Zoom Out</button>
+                            <button class="control-btn" onclick="resetView()">🔄 Reset</button>
+                            <button class="control-btn" onclick="toggleWireframe()">📐 Wireframe</button>
+                          </div>
+
+                          <a-scene embedded background="color: linear-gradient(135deg, #1f2937, #374151)" vr-mode-ui="enabled: false">
+                            <a-assets>
+                              <img id="productTexture" src="${selectedProductData.image}" crossorigin="anonymous">
+                            </a-assets>
+                            
+                            <!-- Lighting -->
+                            <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
+                            <a-light type="directional" position="2 4 5" color="#ffffff" intensity="0.8"></a-light>
+                            <a-light type="point" position="-2 2 2" color="#4f46e5" intensity="0.3"></a-light>
+                            
+                            <!-- 3D Model -->
+                            <a-entity id="productModel" position="0 0 -3" rotation="0 0 0" scale="1 1 1">
+                              <a-box 
+                                id="mainModel"
+                                width="2" 
+                                height="1.2" 
+                                depth="0.3"
+                                material="src: #productTexture; metalness: 0.2; roughness: 0.8"
+                                animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear"
+                              ></a-box>
+                              
+                              <!-- Additional details for realism -->
+                              <a-cylinder 
+                                position="0 -0.8 0" 
+                                radius="1.2" 
+                                height="0.1" 
+                                color="#2d3748"
+                                material="metalness: 0.8; roughness: 0.2"
+                              ></a-cylinder>
+                            </a-entity>
+                            
+                            <!-- Camera with controls -->
+                            <a-entity id="cameraRig" position="0 1.6 0">
+                              <a-camera 
+                                id="camera"
+                                look-controls="enabled: true; pointerLockEnabled: false"
+                                wasd-controls="enabled: false"
+                                position="0 0 0"
+                              ></a-camera>
+                            </a-entity>
+                            
+                            <!-- Environment -->
+                            <a-plane 
+                              position="0 -1 0" 
+                              rotation="-90 0 0" 
+                              width="10" 
+                              height="10" 
+                              color="#1a202c"
+                              material="metalness: 0.1; roughness: 0.9"
+                            ></a-plane>
+                          </a-scene>
+
+                          <script>
+                            let currentRotation = 0;
+                            let currentScale = 1;
+                            let isWireframe = false;
+                            const model = document.querySelector('#productModel');
+                            const mainModel = document.querySelector('#mainModel');
+                            
+                            function rotateLeft() {
+                              currentRotation += 45;
+                              model.setAttribute('rotation', \`0 \${currentRotation} 0\`);
+                            }
+                            
+                            function zoomIn() {
+                              currentScale = Math.min(currentScale * 1.2, 3);
+                              model.setAttribute('scale', \`\${currentScale} \${currentScale} \${currentScale}\`);
+                            }
+                            
+                            function zoomOut() {
+                              currentScale = Math.max(currentScale * 0.8, 0.3);
+                              model.setAttribute('scale', \`\${currentScale} \${currentScale} \${currentScale}\`);
+                            }
+                            
+                            function resetView() {
+                              currentRotation = 0;
+                              currentScale = 1;
+                              model.setAttribute('rotation', '0 0 0');
+                              model.setAttribute('scale', '1 1 1');
+                              model.setAttribute('position', '0 0 -3');
+                            }
+                            
+                            function toggleWireframe() {
+                              isWireframe = !isWireframe;
+                              if (isWireframe) {
+                                mainModel.setAttribute('material', 'wireframe: true; color: #00ff00');
+                              } else {
+                                mainModel.setAttribute('material', 'src: #productTexture; metalness: 0.2; roughness: 0.8; wireframe: false');
+                              }
+                            }
+                            
+                            // Auto-rotate toggle
+                            let autoRotate = true;
+                            document.addEventListener('click', function() {
+                              if (autoRotate) {
+                                mainModel.removeAttribute('animation');
+                                autoRotate = false;
+                              }
+                            });
+                          </script>
+                        </body>
+                        </html>
+                      `)}`}
+                      className="w-full h-full border-0"
+                      title="3D Model Viewer"
+                    />
                   </div>
                 )}
                 
