@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Eye, Trash2, Download, Settings, Cube, Image, Zap, X, Play, Pause } from 'lucide-react';
+import { Upload, Eye, Trash2, Download, Settings, Cuboid as Cube, Image, Zap, X, Play, Pause } from 'lucide-react';
 
 interface Model3D {
   id: string;

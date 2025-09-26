@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cube, Users, Settings, Eye, Check, X, Search } from 'lucide-react';
+import { Cuboid as Cube, Users, Settings, Eye, Check, X, Search } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 
 interface ModelPermission {
