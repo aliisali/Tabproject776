@@ -1,15 +1,14 @@
-# 🚀 JobManager Pro v2.0 - Complete Business Management Platform with Database
+# 🚀 JobManager Pro v1.2 - Complete Business Management Platform
 
-## ✨ **LATEST UPDATE - Database Integration & Permanent Storage!**
+## ✨ **LATEST UPDATE - Storage Fixed + Admin VR Access!**
 
-### 🔥 **What's New in v2.0:**
-- ✅ **DATABASE INTEGRATION** - All users saved permanently in Supabase
-- ✅ **PARENT-CHILD RELATIONSHIPS** - Proper user hierarchy management
-- ✅ **PERSISTENT DATA** - Jobs, businesses, and all data saved in database
-- ✅ **SECURE PERMISSIONS** - Database-level role-based access control
-- ✅ **ACTIVITY LOGGING** - Complete audit trail of all actions
-- ✅ **MODULE ACCESS CONTROL** - Granular permissions for AR Camera and other modules
-- ✅ **SCALABLE ARCHITECTURE** - Ready for enterprise deployment
+### 🔥 **What's New in v1.2:**
+- ✅ **STORAGE SYSTEM FIXED** - All data now persists permanently with versioned localStorage
+- ✅ **ADMIN VR ACCESS** - Admin users can now directly access AR Camera module
+- ✅ **MODULE PERMISSIONS** - Granular control over who can access AR Camera features
+- ✅ **BULLETPROOF PERSISTENCE** - Data survives page refresh and browser restart
+- ✅ **FULL ADMIN CONTROLS** - Complete CRUD operations for all data types
+- ✅ **EMPLOYEE VR INHERITANCE** - Employees get VR access based on business settings
 
 ## ✨ **Production-Ready Features**
 

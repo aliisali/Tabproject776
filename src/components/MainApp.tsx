@@ -37,6 +37,7 @@ export function MainApp() {
         case 'reports': return <ReportsManagement />;
         case 'products': return <ProductManagement />;
         case 'html-manager': return <AdminHTMLManager />;
+        case 'module-permissions': return <ModulePermissions />;
         default: return <AdminDashboard />;
       }
     }
