@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Business, Job, Customer, Notification, Product } from '../types';
 import { LocalStorageService } from '../lib/storage';
 import { DatabaseService } from '../lib/database';
+import { EmailService } from '../services/EmailService';
 
 interface DataContextType {
   // Users
@@ -118,12 +119,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
+      let newUser: User;
       if (useDatabase) {
-        const newUser = await DatabaseService.createUser(userData);
+        newUser = await DatabaseService.createUser(userData);
         setUsers(prev => [...prev, newUser]);
       } else {
-        const newUser = LocalStorageService.createUser(userData);
+        newUser = LocalStorageService.createUser(userData);
         setUsers(prev => [...prev, newUser]);
+      }
+      
+      // Send welcome email with credentials
+      try {
+        const businessName = newUser.businessId 
+          ? businesses.find(b => b.id === newUser.businessId)?.name 
+          : undefined;
+          
+        await EmailService.sendWelcomeEmail({
+          name: newUser.name,
+          email: newUser.email,
+          password: userData.password, // Use original password from form
+          role: newUser.role,
+          businessName
+        });
+        
+        console.log('✅ Welcome email sent to:', newUser.email);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send welcome email:', emailError);
+        // Don't fail user creation if email fails
       }
       
       showSuccessMessage(`User "${userData.name}" created successfully!`);
@@ -136,6 +158,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (id: string, userData: Partial<User>) => {
     try {
+      const originalUser = users.find(u => u.id === id);
+      
       if (useDatabase) {
         await DatabaseService.updateUser(id, userData);
       } else {
@@ -145,6 +169,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setUsers(prev => prev.map(user => 
         user.id === id ? { ...user, ...userData } : user
       ));
+      
+      // Send password reset email if password was changed
+      if (userData.password && originalUser) {
+        try {
+          await EmailService.sendPasswordResetEmail({
+            name: originalUser.name,
+            email: originalUser.email,
+            newPassword: userData.password
+          });
+          console.log('✅ Password reset email sent to:', originalUser.email);
+        } catch (emailError) {
+          console.error('⚠️ Failed to send password reset email:', emailError);
+        }
+      }
       
       showSuccessMessage('User updated successfully!');
     } catch (error) {
