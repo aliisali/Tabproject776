@@ -15,7 +15,7 @@ const DEFAULT_USERS: User[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440003',
     email: 'admin@platform.com',
-    name: 'Platform Admin',
+    name: 'BlindsCloud Admin',
     role: 'admin',
     permissions: ['all'],
     createdAt: '2024-01-01T00:00:00Z',
@@ -26,7 +26,7 @@ const DEFAULT_USERS: User[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440004',
     email: 'business@company.com',
-    name: 'Business Manager',
+    name: 'Blinds Business Manager',
     role: 'business',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     permissions: ['manage_employees', 'view_dashboard', 'create_jobs'],
@@ -38,7 +38,7 @@ const DEFAULT_USERS: User[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440005',
     email: 'employee@company.com',
-    name: 'Field Employee',
+    name: 'Blinds Installation Specialist',
     role: 'employee',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     permissions: ['create_jobs', 'manage_tasks', 'capture_signatures', 'ar_camera_access'],
@@ -52,12 +52,12 @@ const DEFAULT_USERS: User[] = [
 const DEFAULT_BUSINESSES: Business[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440001',
-    name: 'ABC Construction Co.',
-    address: '123 Main Street, City, State 12345',
+    name: 'BlindsCloud Solutions Ltd.',
+    address: '456 Window Street, Blindfold City, BC 12345',
     phone: '+1 (555) 123-4567',
-    email: 'contact@abcconstruction.com',
+    email: 'contact@blindscloud.com',
     adminId: '550e8400-e29b-41d4-a716-446655440004',
-    features: ['job_management', 'calendar', 'reports', 'camera', 'ar_camera'],
+    features: ['job_management', 'calendar', 'reports', 'camera', 'ar_camera', 'vr_view', '3d_models'],
     subscription: 'premium',
     createdAt: '2024-01-01T00:00:00Z',
     vrViewEnabled: true
@@ -67,12 +67,23 @@ const DEFAULT_BUSINESSES: Business[] = [
 const DEFAULT_CUSTOMERS: Customer[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440006',
-    name: 'ABC Corp',
-    email: 'contact@abccorp.com',
+    name: 'Luxury Homes Ltd.',
+    email: 'contact@luxuryhomes.com',
     phone: '+1 (555) 111-2222',
     mobile: '+1 (555) 111-3333',
-    address: '123 Business Ave, City, State',
+    address: '789 Luxury Lane, Premium District',
     postcode: '12345',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440007',
+    name: 'Modern Office Complex',
+    email: 'facilities@modernoffice.com',
+    phone: '+1 (555) 222-3333',
+    mobile: '+1 (555) 222-4444',
+    address: '321 Corporate Plaza, Business District',
+    postcode: '54321',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     createdAt: '2024-01-01T00:00:00Z'
   }
@@ -81,12 +92,45 @@ const DEFAULT_CUSTOMERS: Customer[] = [
 const DEFAULT_PRODUCTS: Product[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440008',
-    name: 'Industrial HVAC Unit',
-    category: 'HVAC Systems',
-    description: 'High-efficiency commercial HVAC system',
-    image: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
-    specifications: ['Cooling Capacity: 5 Tons', 'Heating Capacity: 120,000 BTU', 'Energy Rating: SEER 16'],
-    price: 2500,
+    name: 'Premium Blackout Blinds',
+    category: 'Window Blinds',
+    description: 'High-quality blackout blinds for complete light control and privacy',
+    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+    specifications: ['100% Light Blocking', 'Thermal Insulation', 'Easy Installation', 'Custom Sizing Available'],
+    price: 299,
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-446655440009',
+    name: 'Smart Motorized Blinds',
+    category: 'Smart Blinds',
+    description: 'App-controlled motorized blinds with scheduling and automation features',
+    image: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
+    specifications: ['WiFi Connectivity', 'Voice Control Compatible', 'Solar Panel Option', 'Smartphone App'],
+    price: 599,
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-44665544000a',
+    name: 'Venetian Blinds Collection',
+    category: 'Venetian Blinds',
+    description: 'Classic venetian blinds in various materials and colors',
+    image: 'https://images.pexels.com/photos/1571453/pexels-photo-1571453.jpeg?auto=compress&cs=tinysrgb&w=400',
+    specifications: ['Aluminum Slats', 'Tilt Control', 'Multiple Colors', 'Durable Construction'],
+    price: 149,
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-44665544000b',
+    name: 'Roller Blinds Pro',
+    category: 'Roller Blinds',
+    description: 'Professional roller blinds for offices and commercial spaces',
+    image: 'https://images.pexels.com/photos/6969832/pexels-photo-6969832.jpeg?auto=compress&cs=tinysrgb&w=400',
+    specifications: ['Fire Retardant Fabric', 'Commercial Grade', 'Chain Control', 'UV Protection'],
+    price: 199,
     isActive: true,
     createdAt: '2024-01-01T00:00:00Z'
   }
@@ -95,23 +139,43 @@ const DEFAULT_PRODUCTS: Product[] = [
 const DEFAULT_JOBS: Job[] = [
   {
     id: 'JOB-001',
-    title: 'HVAC Installation',
-    description: 'Install new HVAC system in office building',
+    title: 'Premium Blackout Blinds Installation',
+    description: 'Install premium blackout blinds in luxury home master bedroom',
     status: 'completed',
     customerId: '550e8400-e29b-41d4-a716-446655440006',
     employeeId: '550e8400-e29b-41d4-a716-446655440005',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     scheduledDate: '2024-01-15T09:00:00Z',
     completedDate: '2024-01-15T16:30:00Z',
-    quotation: 2500,
-    invoice: 2500,
+    quotation: 899,
+    invoice: 899,
     images: [],
     documents: [],
     checklist: [
-      { id: '1', text: 'Site inspection', completed: true },
-      { id: '2', text: 'Equipment delivery', completed: true },
-      { id: '3', text: 'Installation', completed: true },
-      { id: '4', text: 'Testing', completed: true }
+      { id: '1', text: 'Window measurements', completed: true },
+      { id: '2', text: 'Blinds delivery', completed: true },
+      { id: '3', text: 'Professional installation', completed: true },
+      { id: '4', text: 'Quality check & demo', completed: true }
+    ],
+    createdAt: '2024-01-15T09:00:00Z'
+  },
+  {
+    id: 'JOB-002',
+    title: 'Smart Motorized Blinds Setup',
+    description: 'Install and configure smart motorized blinds with app integration',
+    status: 'in-progress',
+    customerId: '550e8400-e29b-41d4-a716-446655440007',
+    employeeId: '550e8400-e29b-41d4-a716-446655440005',
+    businessId: '550e8400-e29b-41d4-a716-446655440001',
+    scheduledDate: '2024-01-18T10:00:00Z',
+    quotation: 1299,
+    images: [],
+    documents: [],
+    checklist: [
+      { id: '1', text: 'Site survey and WiFi check', completed: true },
+      { id: '2', text: 'Smart blinds delivery', completed: true },
+      { id: '3', text: 'Motor installation', completed: false },
+      { id: '4', text: 'App setup and testing', completed: false }
     ],
     createdAt: '2024-01-15T09:00:00Z'
   }
@@ -121,11 +185,19 @@ const DEFAULT_NOTIFICATIONS: Notification[] = [
   {
     id: '550e8400-e29b-41d4-a716-44665544000a',
     userId: '550e8400-e29b-41d4-a716-446655440005',
-    title: 'Welcome to JobManager Pro',
-    message: 'Your account has been set up successfully!',
+    title: 'Welcome to BlindsCloud',
+    message: 'Your blinds specialist account has been set up successfully! Start managing installations and AR demonstrations.',
     type: 'system',
     read: false,
     createdAt: '2024-01-01T10:00:00Z'
+  },
+  {
+    id: '550e8400-e29b-41d4-a716-44665544000b',
+    name: 'New Blinds Installation Job',
+    message: 'Premium blackout blinds installation scheduled for Luxury Homes Ltd.',
+    type: 'job',
+    read: false,
+    createdAt: '2024-01-18T08:00:00Z'
   }
 ];
 

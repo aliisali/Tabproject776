@@ -10,17 +10,17 @@ export function AdminDashboard() {
   ];
 
   const recentActivity = [
-    { action: 'New business registered', user: 'ABC Construction', time: '2 hours ago', type: 'success' },
-    { action: 'User account suspended', user: 'john@example.com', time: '4 hours ago', type: 'warning' },
-    { action: 'System backup completed', user: 'System', time: '6 hours ago', type: 'info' },
-    { action: 'Payment processed', user: 'XYZ Services', time: '8 hours ago', type: 'success' },
+    { action: 'New blinds business registered', user: 'Premium Blinds Co.', time: '2 hours ago', type: 'success' },
+    { action: 'AR demonstration completed', user: 'blinds@specialist.com', time: '4 hours ago', type: 'success' },
+    { action: '3D model converted', user: 'Smart Blinds Ltd.', time: '6 hours ago', type: 'info' },
+    { action: 'Installation completed', user: 'Luxury Blinds Pro', time: '8 hours ago', type: 'success' },
   ];
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">Platform overview and system management</p>
+        <p className="text-gray-600 mt-2">BlindsCloud platform overview and system management</p>
       </div>
 
       {/* Stats Grid */}
@@ -79,21 +79,21 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Activity className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-medium">Database</span>
+                <span className="text-sm font-medium">3D Model Converter</span>
               </div>
               <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Operational</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Activity className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-medium">File Storage</span>
+                <span className="text-sm font-medium">AR Camera System</span>
               </div>
               <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Operational</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
-                <span className="text-sm font-medium">Analytics</span>
+                <span className="text-sm font-medium">Blinds Analytics</span>
               </div>
               <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Operational</span>
             </div>

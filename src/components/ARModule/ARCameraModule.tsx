@@ -207,7 +207,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">AR Camera Module</h1>
-            <p className="text-gray-600 mt-2">Advanced AR Camera with 2D to 3D conversion and background removal</p>
+            <p className="text-gray-600 mt-2">Demonstrate blinds in customer spaces with AR visualization</p>
           </div>
         </div>
 
@@ -216,13 +216,13 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
           <div className="flex items-start space-x-3">
             <Info className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-blue-800">
-              <h3 className="font-semibold mb-2">How to use the AR Camera:</h3>
+              <h3 className="font-semibold mb-2">How to demonstrate blinds with AR:</h3>
               <ul className="space-y-1 text-sm">
-                <li>• <strong>Start Camera:</strong> Click "Start Camera" to begin AR experience</li>
-                <li>• <strong>Upload Image:</strong> Select an image file - background will be auto-removed</li>
-                <li>• <strong>3D Conversion:</strong> Choose shape (Plane, Box, Curved, Sphere) to convert 2D to 3D</li>
-                <li>• <strong>Touch Controls:</strong> 1 finger to move, 2 fingers to pinch/twist/tilt</li>
-                <li>• <strong>Screenshot:</strong> Capture and save your AR creation</li>
+                <li>• <strong>Start Camera:</strong> Point camera at customer's window</li>
+                <li>• <strong>Upload Blinds:</strong> Select blinds image - background auto-removed</li>
+                <li>• <strong>3D Visualization:</strong> Convert blinds to 3D for realistic preview</li>
+                <li>• <strong>Position Blinds:</strong> Touch to move and resize blinds on window</li>
+                <li>• <strong>Customer Demo:</strong> Show how blinds will look in their space</li>
                 <li>• <strong>Settings:</strong> Tap ⚙️ button to show/hide controls</li>
               </ul>
             </div>
@@ -237,7 +237,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
             <h2 className="text-lg font-semibold text-gray-900">AR Camera Interface</h2>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Camera className="w-4 h-4" />
-              <span>Requires HTTPS for camera access</span>
+              <span>Live blinds demonstration tool</span>
             </div>
           </div>
         </div>

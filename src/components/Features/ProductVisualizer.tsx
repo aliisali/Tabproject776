@@ -25,13 +25,13 @@ export function ProductVisualizer() {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Product Visualizer</h1>
-        <p className="text-gray-600 mt-2">View and demonstrate products to customers</p>
+        <p className="text-gray-600 mt-2">Showcase blinds collections and demonstrate to customers</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Product List */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Catalog</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Blinds Catalog</h2>
           <div className="space-y-4">
             {activeProducts.map((product) => (
               <div

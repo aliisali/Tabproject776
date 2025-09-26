@@ -62,10 +62,10 @@ export function Model3DViewer() {
     const mockModels: Model3D[] = [
       {
         id: 'model-1',
-        name: 'HVAC Unit 3D',
-        originalImage: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
+        name: 'Premium Blackout Blinds 3D',
+        originalImage: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
         model3D: 'mock-3d-model-url',
-        thumbnail: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
+        thumbnail: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
         status: 'completed',
         createdAt: '2024-01-15T10:00:00Z',
         settings: {
@@ -76,10 +76,10 @@ export function Model3DViewer() {
       },
       {
         id: 'model-2',
-        name: 'Electrical Panel',
-        originalImage: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=400',
+        name: 'Smart Motorized Blinds 3D',
+        originalImage: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
         model3D: 'mock-3d-model-url-2',
-        thumbnail: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=400',
+        thumbnail: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
         status: 'completed',
         createdAt: '2024-01-16T14:30:00Z',
         settings: {

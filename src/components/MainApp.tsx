@@ -24,6 +24,7 @@ import { ModelConverter } from './Admin/ModelConverter';
 import { ModelPermissions } from './Admin/ModelPermissions';
 import { Model3DViewer } from './Features/Model3DViewer';
 import { EmailManager } from './Admin/EmailManager';
+import PermissionManagementWrapper from './Permissions/PermissionManagement';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -38,7 +39,7 @@ export function MainApp() {
         case 'users': return <UserManagement />;
         case 'businesses': return <BusinessManagement />;
         case 'ar-camera': return <ARCameraModule />;
-        case 'permissions': return <PermissionManagement />;
+        case 'permissions': return <PermissionManagementWrapper />;
         case 'reports': return <ReportsManagement />;
         case 'products': return <ProductManagement />;
         case 'html-manager': return <AdminHTMLManager />;
@@ -113,7 +114,7 @@ export function MainApp() {
         isMinimized={sidebarMinimized}
         onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
       />
-      <main className={`flex-1 overflow-auto bg-gradient-to-br from-slate-50/50 to-blue-50/50 transition-all duration-300 ${sidebarMinimized ? 'ml-0' : ''}`}>
+      <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50/50 to-blue-50/50 transition-all duration-300">
         {renderContent()}
       </main>
     </div>
