@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Camera, Headphones, Info, Cuboid as Cube } from 'lucide-react'ort function ARCameraModule() {
+import { Camera, Headphones, Info, Cuboid as Cube } from 'lucide-react';
+
+export default function ARCameraModule() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
