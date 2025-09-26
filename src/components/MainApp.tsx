@@ -28,6 +28,7 @@ import { EmailManager } from './Admin/EmailManager';
 export function MainApp() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarMinimized, setSidebarMinimized] = useState(false);
 
   const renderContent = () => {
     // Admin-specific features
