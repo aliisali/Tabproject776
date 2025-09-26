@@ -195,6 +195,9 @@ export function Model3DViewer() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">{selectedModel.name}</h2>
                 <div className="flex items-center space-x-2">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                    Supports: .max, .fbx, .gltf, .glb
+                  </span>
                   <button
                     onClick={() => setViewerSettings({
                       ...viewerSettings,
