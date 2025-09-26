@@ -23,17 +23,17 @@ export function BusinessDashboard() {
   const activeEmployees = users.filter(user => user.role === 'employee' && user.isActive).length;
   
   const stats = [
-    { label: 'Total Jobs', value: jobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600', change: '+18%' },
-    { label: 'Jobs Completed', value: completedJobs.toString(), icon: CheckCircle, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', change: '+12%' },
-    { label: 'Jobs Cancelled', value: cancelledJobs.toString(), icon: XCircle, color: 'bg-gradient-to-r from-red-500 to-red-600', change: '-5%' },
-    { label: 'Pending Jobs', value: pendingJobs.toString(), icon: Clock, color: 'bg-gradient-to-r from-amber-500 to-amber-600', change: '+2%' },
+    { label: 'Blinds Installations', value: jobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600', change: '+18%' },
+    { label: 'Completed Jobs', value: completedJobs.toString(), icon: CheckCircle, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600', change: '+12%' },
+    { label: 'Cancelled Jobs', value: cancelledJobs.toString(), icon: XCircle, color: 'bg-gradient-to-r from-red-500 to-red-600', change: '-5%' },
+    { label: 'Pending Installs', value: pendingJobs.toString(), icon: Clock, color: 'bg-gradient-to-r from-amber-500 to-amber-600', change: '+2%' },
   ];
 
   const revenueStats = [
     { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600' },
-    { label: 'Active Employees', value: activeEmployees.toString(), icon: Users, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
+    { label: 'Installation Team', value: activeEmployees.toString(), icon: Users, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
     { label: 'Growth Rate', value: '+23%', icon: TrendingUp, color: 'bg-gradient-to-r from-indigo-500 to-indigo-600' },
-    { label: 'This Month', value: `${jobs.length} Jobs`, icon: Calendar, color: 'bg-gradient-to-r from-pink-500 to-pink-600' },
+    { label: 'This Month', value: `${jobs.length} Installs`, icon: Calendar, color: 'bg-gradient-to-r from-pink-500 to-pink-600' },
   ];
 
   // Get recent jobs from actual data
@@ -56,10 +56,10 @@ export function BusinessDashboard() {
   };
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Business Dashboard</h1>
-        <p className="text-gray-600 mt-2">Overview of your business operations and performance</p>
+        <p className="text-gray-600 mt-2">Overview of your blinds business operations and performance</p>
       </div>
 
       {/* Job Stats */}
@@ -110,14 +110,14 @@ export function BusinessDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Jobs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Jobs</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Installations</h2>
           <div className="space-y-4">
             {recentJobs.map((job, index) => (
               <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">{job.id}</p>
                   <p className="text-sm text-gray-600">{job.customer}</p>
-                  <p className="text-sm text-gray-500">Assigned to: {job.employee}</p>
+                  <p className="text-sm text-gray-500">Installer: {job.employee}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-900">{job.value}</p>
@@ -136,8 +136,8 @@ export function BusinessDashboard() {
           <div className="h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center">
             <div className="text-center">
               <TrendingUp className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <p className="text-gray-600">Performance chart would be displayed here</p>
-              <p className="text-sm text-gray-500 mt-2">Integration with charting library needed</p>
+              <p className="text-gray-600">Blinds installation performance chart</p>
+              <p className="text-sm text-gray-500 mt-2">Revenue and installation trends</p>
             </div>
           </div>
         </div>

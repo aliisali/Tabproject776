@@ -20,7 +20,7 @@ export function EmployeeDashboard() {
   const pendingToday = todayJobs.filter(job => job.status === 'pending').length;
   
   const todayStats = [
-    { label: 'Today\'s Jobs', value: todayJobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600' },
+    { label: 'Today\'s Installs', value: todayJobs.length.toString(), icon: ClipboardList, color: 'bg-gradient-to-r from-blue-500 to-blue-600' },
     { label: 'Completed', value: completedToday.toString(), icon: CheckCircle, color: 'bg-gradient-to-r from-emerald-500 to-emerald-600' },
     { label: 'Pending', value: pendingToday.toString(), icon: Clock, color: 'bg-gradient-to-r from-amber-500 to-amber-600' },
     { label: 'Photos Taken', value: '12', icon: Camera, color: 'bg-gradient-to-r from-purple-500 to-purple-600' },
@@ -53,10 +53,10 @@ export function EmployeeDashboard() {
   };
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Employee Dashboard</h1>
-        <p className="text-gray-600 mt-2">Your daily tasks and job management</p>
+        <h1 className="text-3xl font-bold text-gray-900">Installation Dashboard</h1>
+        <p className="text-gray-600 mt-2">Your daily blinds installation tasks and schedule</p>
       </div>
 
       {/* Today's Stats */}
@@ -83,7 +83,7 @@ export function EmployeeDashboard() {
         {/* Today's Jobs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Today's Schedule</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Today's Installations</h2>
             <Calendar className="w-5 h-5 text-gray-500" />
           </div>
           <div className="space-y-4">
@@ -143,7 +143,7 @@ export function EmployeeDashboard() {
             <div className="grid grid-cols-2 gap-3">
               <button className="flex items-center justify-center p-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
                 <Camera className="w-4 h-4 mr-2" />
-                <span className="text-sm">Capture</span>
+                <span className="text-sm">AR Demo</span>
               </button>
               <button className="flex items-center justify-center p-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
                 <FileText className="w-4 h-4 mr-2" />
