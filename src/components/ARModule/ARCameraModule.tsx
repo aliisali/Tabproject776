@@ -250,7 +250,55 @@ sceneEl.addEventListener('touchmove',function(e){
 },{passive:false});
 sceneEl.addEventListener('touchend',function(e){ if(e.touches.length===0){ touchState.dragging=false; touchState.pinchActive=false; } },{passive:false});
 
-status.textContent='Controls hidden. Tap ⚙️ to open. Upload images or 3D models (.max, .fbx, .gltf). Touch: 1 finger move, 2 fingers pinch/twist/tilt.';
+// Initialize
+status.textContent='BlindsCloud AR Ready! Tap ⚙️ for controls. Upload blinds (.jpg, .png) or 3D models (.max, .fbx, .gltf). Touch: 1 finger move, 2 fingers pinch/twist/tilt.';
+
+// Add fullscreen support
+function openFullscreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'f' || e.key === 'F') {
+    openFullscreen();
+  } else if (e.key === 's' || e.key === 'S') {
+    if (screenshotBtn && !screenshotBtn.disabled) {
+      takeScreenshot();
+    }
+  } else if (e.key === 'c' || e.key === 'C') {
+    if (startCamBtn) {
+      startCamBtn.click();
+    }
+  }
+});
+
+// Add instructions overlay
+setTimeout(() => {
+  const instructions = document.createElement('div');
+  instructions.innerHTML = \`
+    <div style="position:fixed;bottom:60px;left:12px;background:rgba(0,0,0,0.8);color:white;padding:8px 12px;border-radius:8px;font-size:11px;z-index:4;">
+      <div>📱 <strong>BlindsCloud AR Demo</strong></div>
+      <div>F = Fullscreen | S = Screenshot | C = Camera</div>
+    </div>
+  \`;
+  document.body.appendChild(instructions);
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    if (document.body.contains(instructions)) {
+      instructions.style.opacity = '0';
+      setTimeout(() => document.body.removeChild(instructions), 500);
+    }
+  }, 5000);
+}, 1000);
 </script>
 </body>
 </html>`;
