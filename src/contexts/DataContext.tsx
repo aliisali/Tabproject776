@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
-import { DatabaseService } from '../lib/supabase';
 import { LocalStorageService } from '../lib/storage';
 
 interface DataContextType {

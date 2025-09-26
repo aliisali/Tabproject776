@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
-import { DatabaseService } from '../lib/supabase';
 import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
