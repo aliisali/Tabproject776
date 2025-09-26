@@ -24,7 +24,259 @@ export function VRView() {
         {/* Embedded VR Content */}
         <div className="relative" style={{ height: '80vh' }}>
           <iframe
-            src="data:text/html;charset=utf-8,%3C%21doctype%20html%3E%0A%3Chtml%20lang%3D%22en%22%3E%0A%3Chead%3E%0A%20%20%3Cmeta%20charset%3D%22utf-8%22%20/%3E%0A%20%20%3Cmeta%20name%3D%22viewport%22%20content%3D%22width%3Ddevice-width%2Cinitial-scale%3D1%22%20/%3E%0A%20%20%3Ctitle%3EFullscreen%20AR%20Camera%20%E2%80%94%202D%20to%203D%20with%20Background%20Removal%3C/title%3E%0A%20%20%3Cscript%20src%3D%22https%3A//aframe.io/releases/1.4.2/aframe.min.js%22%3E%3C/script%3E%0A%20%20%3Cscript%20src%3D%22https%3A//cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js%22%3E%3C/script%3E%0A%20%20%3Cstyle%3E%0A%20%20%20%20html%2Cbody%7Bheight%3A100%25%3Bmargin%3A0%3Boverflow%3Ahidden%3Bfont-family%3Asystem-ui%2CSegoe%20UI%2CRoboto%2CArial%3B%7D%0A%20%20%20%20%23webcamVideo%7Bposition%3Afixed%3Bleft%3A0%3Btop%3A0%3Bwidth%3A100%25%3Bheight%3A100%25%3Bobject-fit%3Acover%3Bz-index%3A0%3Bbackground%3A%23000%3B%7D%0A%20%20%20%20a-scene%7Bposition%3Afixed%3Bleft%3A0%3Btop%3A0%3Bwidth%3A100%25%3Bheight%3A100%25%3Bz-index%3A1%3B%7D%0A%20%20%20%20%23ui%7Bposition%3Afixed%3Bright%3A10px%3Btop%3A10px%3Bz-index%3A3%3Bbackground%3Argba%28255%2C255%2C255%2C0.96%29%3Bpadding%3A10px%3Bborder-radius%3A10px%3Bbox-shadow%3A0%208px%2024px%20rgba%280%2C0%2C0%2C0.2%29%3Bmax-width%3A440px%3Bdisplay%3Anone%3B%7D%0A%20%20%20%20%23ui%20button%2C%23ui%20input%2C%23ui%20select%7Bmargin%3A5px%200%3Bpadding%3A6px%2010px%3Bborder-radius%3A6px%3Bborder%3A1px%20solid%20rgba%280%2C0%2C0%2C0.1%29%3Bbackground%3A%23fff%3Bcursor%3Apointer%7D%0A%20%20%20%20%23toggleBtn%7Bposition%3Afixed%3Bbottom%3A12px%3Bright%3A12px%3Bz-index%3A4%3Bbackground%3A%23fff%3Bpadding%3A10px%2014px%3Bborder-radius%3A50%25%3Bborder%3A1px%20solid%20rgba%280%2C0%2C0%2C0.2%29%3Bbox-shadow%3A0%204px%2012px%20rgba%280%2C0%2C0%2C0.25%29%3Bcursor%3Apointer%3Bfont-size%3A18px%3B%7D%0A%20%20%20%20%23status%7Bfont-size%3A12px%3Bcolor%3A%23333%3Bmargin-top%3A6px%7D%0A%20%20%3C/style%3E%0A%3C/head%3E%0A%3Cbody%3E%0A%20%20%3Cdiv%20id%3D%22ui%22%3E%0A%20%20%20%20%3Cbutton%20id%3D%22startCam%22%3EStart%20Camera%20%28back%29%3C/button%3E%0A%20%20%20%20%3Cbutton%20id%3D%22switchCam%22%20disabled%3ESwitch%20Camera%3C/button%3E%0A%20%20%20%20%3Cinput%20id%3D%22imageInput%22%20type%3D%22file%22%20accept%3D%22image/*%22%3E%0A%20%20%20%20%3Cdiv%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22placeToggle%22%20disabled%3EPlace%20AR%20item%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22removeItem%22%20disabled%3ERemove%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22screenshotBtn%22%20disabled%3E%F0%9F%93%B8%20Screenshot%3C/button%3E%0A%20%20%20%20%3C/div%3E%0A%20%20%20%20%3Cdiv%3E%0A%20%20%20%20%20%20%3Clabel%20for%3D%22shapeSelect%22%3EConvert%20to%203D%3A%3C/label%3E%0A%20%20%20%20%20%20%3Cselect%20id%3D%22shapeSelect%22%3E%0A%20%20%20%20%20%20%20%20%3Coption%20value%3D%22plane%22%3EPlane%3C/option%3E%0A%20%20%20%20%20%20%20%20%3Coption%20value%3D%22box%22%3EBox%3C/option%3E%0A%20%20%20%20%20%20%20%20%3Coption%20value%3D%22cylinder%22%3ECurved%3C/option%3E%0A%20%20%20%20%20%20%20%20%3Coption%20value%3D%22sphere%22%3ESphere%3C/option%3E%0A%20%20%20%20%20%20%3C/select%3E%0A%20%20%20%20%3C/div%3E%0A%20%20%20%20%3Cdiv%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22rotateLeft%22%3E%E2%86%BA%20Left%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22rotateRight%22%3E%E2%86%BB%20Right%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22rotateUp%22%3E%E2%AC%86%EF%B8%8F%20Up%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22rotateDown%22%3E%E2%AC%87%EF%B8%8F%20Down%3C/button%3E%0A%20%20%20%20%20%20%3Cbutton%20id%3D%22resetBtn%22%3EReset%3C/button%3E%0A%20%20%20%20%3C/div%3E%0A%20%20%20%20%3Cdiv%20id%3D%22status%22%3EOpen%20with%20https%3A//%20or%20http%3A//localhost%20for%20camera%20access.%3C/div%3E%0A%20%20%3C/div%3E%0A%0A%20%20%3Cbutton%20id%3D%22toggleBtn%22%3E%E2%9A%99%EF%B8%8F%3C/button%3E%0A%0A%20%20%3Cvideo%20id%3D%22webcamVideo%22%20playsinline%20autoplay%20muted%3E%3C/video%3E%0A%0A%20%20%3Ca-scene%20embedded%20renderer%3D%22alpha%3A%20true%22%20vr-mode-ui%3D%22enabled%3A%20false%22%3E%0A%20%20%20%20%3Ca-assets%3E%3Cimg%20id%3D%22vrTex%22%20crossorigin%3D%22anonymous%22%20/%3E%3C/a-assets%3E%0A%20%20%20%20%3Ca-entity%20id%3D%22cameraRig%22%3E%0A%20%20%20%20%20%20%3Ca-entity%20id%3D%22aframeCamera%22%20camera%20look-controls-enabled%3D%22false%22%20position%3D%220%200%200%22%3E%0A%20%20%20%20%20%20%20%20%3Ca-entity%20id%3D%22vrItem%22%20visible%3D%22false%22%20position%3D%220%20-0.2%20-1%22%20rotation%3D%220%200%200%22%20scale%3D%221%201%201%22%3E%3C/a-entity%3E%0A%20%20%20%20%20%20%3C/a-entity%3E%0A%20%20%20%20%3C/a-entity%3E%0A%20%20%3C/a-scene%3E%0A%0A%3Cscript%3E%0A//%20Elements%0Aconst%20startCamBtn%3Ddocument.getElementById%28%27startCam%27%29%3B%0Aconst%20switchCamBtn%3Ddocument.getElementById%28%27switchCam%27%29%3B%0Aconst%20imageInput%3Ddocument.getElementById%28%27imageInput%27%29%3B%0Aconst%20placeToggle%3Ddocument.getElementById%28%27placeToggle%27%29%3B%0Aconst%20removeItemBtn%3Ddocument.getElementById%28%27removeItem%27%29%3B%0Aconst%20screenshotBtn%3Ddocument.getElementById%28%27screenshotBtn%27%29%3B%0Aconst%20rotateLeft%3Ddocument.getElementById%28%27rotateLeft%27%29%3B%0Aconst%20rotateRight%3Ddocument.getElementById%28%27rotateRight%27%29%3B%0Aconst%20rotateUp%3Ddocument.getElementById%28%27rotateUp%27%29%3B%0Aconst%20rotateDown%3Ddocument.getElementById%28%27rotateDown%27%29%3B%0Aconst%20resetBtn%3Ddocument.getElementById%28%27resetBtn%27%29%3B%0Aconst%20shapeSelect%3Ddocument.getElementById%28%27shapeSelect%27%29%3B%0Aconst%20status%3Ddocument.getElementById%28%27status%27%29%3B%0Aconst%20video%3Ddocument.getElementById%28%27webcamVideo%27%29%3B%0Aconst%20vrTex%3Ddocument.getElementById%28%27vrTex%27%29%3B%0Aconst%20vrItem%3Ddocument.getElementById%28%27vrItem%27%29%3B%0Aconst%20ui%3Ddocument.getElementById%28%27ui%27%29%3B%0Aconst%20toggleBtn%3Ddocument.getElementById%28%27toggleBtn%27%29%3B%0A%0A//%20State%0Alet%20stream%3Dnull%2CusingFront%3Dfalse%2CvrPlaced%3Dfalse%3B%0Alet%20itemPos%3D%7Bx%3A0%2Cy%3A-0.2%2Cz%3A-1%7D%3B%0Alet%20itemRot%3D%7Bx%3A0%2Cy%3A0%2Cz%3A0%7D%3B%0Alet%20itemScale%3D1%3B%0Alet%20currentShape%3Dnull%3B%0A%0A//%20Camera%0Aasync%20function%20startCamera%28facingMode%3D%27environment%27%29%7B%0A%20%20stopCamera%28%29%3B%0A%20%20try%7B%0A%20%20%20%20stream%3Dawait%20navigator.mediaDevices.getUserMedia%28%7Bvideo%3A%7BfacingMode%7D%2Caudio%3Afalse%7D%29%3B%0A%20%20%20%20video.srcObject%3Dstream%3B%20await%20video.play%28%29%3B%0A%20%20%20%20startCamBtn.textContent%3D%27Stop%20Camera%27%3B%20switchCamBtn.disabled%3Dfalse%3B%0A%20%20%20%20status.textContent%3D%60Camera%20started%20%28%24%7BfacingMode%7D%29.%20Screenshot%20will%20auto-save.%60%3B%0A%20%20%20%20setTimeout%28%28%29%3D%3EtakeScreenshot%28%29%2C1000%29%3B%0A%20%20%7Dcatch%28err%29%7Balert%28%27Camera%20error%3A%20%27%2Berr.message%29%3B%7D%0A%7D%0Afunction%20stopCamera%28%29%7B%20if%28stream%29%7Bstream.getTracks%28%29.forEach%28t%3D%3Et.stop%28%29%29%3Bstream%3Dnull%3B%7D%20try%7Bvideo.pause%28%29%3Bvideo.srcObject%3Dnull%3B%7Dcatch%28e%29%7B%7D%20startCamBtn.textContent%3D%27Start%20Camera%20%28back%29%27%3B%20switchCamBtn.disabled%3Dtrue%3B%20status.textContent%3D%27Camera%20stopped.%27%3B%20%7D%0AstartCamBtn.onclick%3D%28%29%3D%3E%7B%20if%28%21stream%29%20startCamera%28usingFront%3F%27user%27%3A%27environment%27%29%3B%20else%20stopCamera%28%29%3B%20%7D%0AswitchCamBtn.onclick%3D%28%29%3D%3E%7B%20usingFront%3D%21usingFront%3B%20startCamera%28usingFront%3F%27user%27%3A%27environment%27%29%3B%20switchCamBtn.textContent%3DusingFront%3F%27Switch%20to%20Back%27%3A%27Switch%20to%20Front%27%3B%20%7D%0A%0A//%20Simple%20background%20removal%20%28corner%20color%29%0Afunction%20removeBackground%28img%2Ccallback%29%7B%0A%20%20const%20canvas%3Ddocument.createElement%28%27canvas%27%29%3B%20const%20ctx%3Dcanvas.getContext%28%272d%27%29%3B%0A%20%20img.onload%3D%28%29%3D%3E%7B%0A%20%20%20%20canvas.width%3Dimg.width%3B%20canvas.height%3Dimg.height%3B%20ctx.drawImage%28img%2C0%2C0%29%3B%0A%20%20%20%20const%20imageData%3Dctx.getImageData%280%2C0%2Ccanvas.width%2Ccanvas.height%29%3B%0A%20%20%20%20const%20data%3DimageData.data%3B%0A%20%20%20%20function%20getPixel%28x%2Cy%29%7Blet%20i%3D%28y*canvas.width%2Bx%29*4%3Breturn%20%5Bdata%5Bi%5D%2Cdata%5Bi%2B1%5D%2Cdata%5Bi%2B2%5D%5D%3B%7D%0A%20%20%20%20const%20c1%3DgetPixel%280%2C0%29%2Cc2%3DgetPixel%28canvas.width-1%2C0%29%2Cc3%3DgetPixel%280%2Ccanvas.height-1%29%2Cc4%3DgetPixel%28canvas.width-1%2Ccanvas.height-1%29%3B%0A%20%20%20%20const%20bg%3D%5B%28c1%5B0%5D%2Bc2%5B0%5D%2Bc3%5B0%5D%2Bc4%5B0%5D%29/4%2C%28c1%5B1%5D%2Bc2%5B1%5D%2Bc3%5B1%5D%2Bc4%5B1%5D%29/4%2C%28c1%5B2%5D%2Bc2%5B2%5D%2Bc3%5B2%5D%2Bc4%5B2%5D%29/4%5D%3B%0A%20%20%20%20const%20threshold%3D80%3B%0A%20%20%20%20for%28let%20i%3D0%3Bi%3Cdata.length%3Bi%2B%3D4%29%7B%0A%20%20%20%20%20%20const%20r%3Ddata%5Bi%5D%2Cg%3Ddata%5Bi%2B1%5D%2Cb%3Ddata%5Bi%2B2%5D%3B%0A%20%20%20%20%20%20const%20dist%3DMath.sqrt%28%28r-bg%5B0%5D%29**2%2B%28g-bg%5B1%5D%29**2%2B%28b-bg%5B2%5D%29**2%29%3B%0A%20%20%20%20%20%20if%28dist%3Cthreshold%29%7B%20data%5Bi%2B3%5D%3D0%3B%20%7D%0A%20%20%20%20%7D%0A%20%20%20%20ctx.putImageData%28imageData%2C0%2C0%29%3B%0A%20%20%20%20callback%28canvas.toDataURL%28%27image/png%27%29%29%3B%0A%20%20%7D%0A%7D%0A%0A//%20Load%20image%0AimageInput.onchange%3De%3D%3E%7B%0A%20%20const%20f%3De.target.files%5B0%5D%3B%20if%28%21f%29%20return%3B%0A%20%20const%20url%3DURL.createObjectURL%28f%29%3B%0A%20%20const%20img%3Dnew%20Image%28%29%3B%20img.crossOrigin%3D%27anonymous%27%3B%20img.src%3Durl%3B%0A%20%20removeBackground%28img%2C%28png%29%3D%3E%7B%20vrTex.src%3Dpng%3B%20placeToggle.disabled%3Dfalse%3B%20screenshotBtn.disabled%3Dfalse%3B%20status.textContent%3D%27Image%20loaded%20with%20background%20removed.%27%3B%20%7D%29%3B%0A%7D%0A%0A//%20Place/remove%0AplaceToggle.onclick%3D%28%29%3D%3E%7B%20vrPlaced%3D%21vrPlaced%3B%20if%28vrPlaced%29%7B%20applyShape%28shapeSelect.value%29%3B%20%7D%20vrItem.setAttribute%28%27visible%27%2C%20vrPlaced%29%3B%20placeToggle.textContent%3DvrPlaced%3F%27Hide%20AR%20item%27%3A%27Place%20AR%20item%27%3B%20removeItemBtn.disabled%3D%21vrPlaced%3B%20%7D%0AremoveItemBtn.onclick%3D%28%29%3D%3E%7B%20vrPlaced%3Dfalse%3B%20vrItem.setAttribute%28%27visible%27%2C%20false%29%3B%20placeToggle.textContent%3D%27Place%20AR%20item%27%3B%20removeItemBtn.disabled%3Dtrue%3B%20%7D%0A%0A//%20Shape%20change%0AshapeSelect.onchange%3D%28%29%3D%3E%7B%20if%28vrPlaced%29%20applyShape%28shapeSelect.value%29%3B%20%7D%0A%0Afunction%20applyShape%28shape%29%7B%0A%20%20vrItem.innerHTML%3D%27%27%3B%0A%20%20let%20el%3B%0A%20%20if%28shape%3D%3D%3D%27plane%27%29%7B%20el%3Ddocument.createElement%28%27a-plane%27%29%3B%20el.setAttribute%28%27width%27%2C%271%27%29%3B%20el.setAttribute%28%27height%27%2C%270.6%27%29%3B%20%7D%0A%20%20else%20if%28shape%3D%3D%3D%27box%27%29%7B%20el%3Ddocument.createElement%28%27a-box%27%29%3B%20el.setAttribute%28%27depth%27%2C%270.2%27%29%3B%20el.setAttribute%28%27height%27%2C%270.6%27%29%3B%20el.setAttribute%28%27width%27%2C%271%27%29%3B%20%7D%0A%20%20else%20if%28shape%3D%3D%3D%27cylinder%27%29%7B%20el%3Ddocument.createElement%28%27a-cylinder%27%29%3B%20el.setAttribute%28%27radius%27%2C%270.7%27%29%3B%20el.setAttribute%28%27theta-length%27%2C%2760%27%29%3B%20el.setAttribute%28%27height%27%2C%270.6%27%29%3B%20%7D%0A%20%20else%20if%28shape%3D%3D%3D%27sphere%27%29%7B%20el%3Ddocument.createElement%28%27a-sphere%27%29%3B%20el.setAttribute%28%27radius%27%2C%270.7%27%29%3B%20%7D%0A%20%20el.setAttribute%28%27material%27%2C%60src%3A%23vrTex%3B%20side%3Adouble%3B%20transparent%3Atrue%3B%60%29%3B%0A%20%20vrItem.appendChild%28el%29%3B%0A%20%20currentShape%3Dshape%3B%0A%7D%0A%0A//%20Buttons%0ArotateLeft.onclick%3D%28%29%3D%3E%7B%20itemRot.y%20-%3D%2015%3B%20vrItem.setAttribute%28%27rotation%27%2C%20itemRot%29%3B%20%7D%0ArotateRight.onclick%3D%28%29%3D%3E%7B%20itemRot.y%20%2B%3D%2015%3B%20vrItem.setAttribute%28%27rotation%27%2C%20itemRot%29%3B%20%7D%0ArotateUp.onclick%3D%28%29%3D%3E%7B%20itemRot.x%20-%3D%2015%3B%20vrItem.setAttribute%28%27rotation%27%2C%20itemRot%29%3B%20%7D%0ArotateDown.onclick%3D%28%29%3D%3E%7B%20itemRot.x%20%2B%3D%2015%3B%20vrItem.setAttribute%28%27rotation%27%2C%20itemRot%29%3B%20%7D%0AresetBtn.onclick%3D%28%29%3D%3E%7B%20itemPos%3D%7Bx%3A0%2Cy%3A-0.2%2Cz%3A-1%7D%3B%20itemRot%3D%7Bx%3A0%2Cy%3A0%2Cz%3A0%7D%3B%20itemScale%3D1%3B%20vrItem.setAttribute%28%27position%27%2C%20itemPos%29%3B%20vrItem.setAttribute%28%27rotation%27%2C%20itemRot%29%3B%20vrItem.setAttribute%28%27scale%27%2C%20%60%24%7BitemScale%7D%20%24%7BitemScale%7D%20%24%7BitemScale%7D%60%29%3B%20%7D%0A%0A//%20Screenshot%20hides%20UI%20then%20captures%0Afunction%20takeScreenshot%28%29%7B%20ui.style.display%3D%27none%27%3B%20toggleBtn.style.display%3D%27none%27%3B%20setTimeout%28%28%29%3D%3E%7B%20html2canvas%28document.body%2C%7BuseCORS%3Atrue%7D%29.then%28canvas%3D%3E%7B%20const%20link%3Ddocument.createElement%28%27a%27%29%3B%20link.download%3D%27screenshot.png%27%3B%20link.href%3Dcanvas.toDataURL%28%29%3B%20link.click%28%29%3B%20ui.style.display%3D%27block%27%3B%20toggleBtn.style.display%3D%27block%27%3B%20status.textContent%3D%27Screenshot%20saved.%27%3B%20%7D%29%3B%20%7D%2C200%29%3B%20%7D%0AscreenshotBtn.onclick%3D%28%29%3D%3EtakeScreenshot%28%29%3B%0A%0A//%20Toggle%20UI%0AtoggleBtn.onclick%3D%28%29%3D%3E%7B%20ui.style.display%20%3D%20%28ui.style.display%3D%3D%3D%27none%27%20%7C%7C%20ui.style.display%3D%3D%3D%27%27%29%20%3F%20%27block%27%20%3A%20%27none%27%3B%20%7D%0A%0A//%20Touch%20gestures%3A%20move%20/%20pinch%20/%20rotate%0Aconst%20sceneEl%3Ddocument.querySelector%28%27a-scene%27%29%3B%0Alet%20touchState%3D%7Bdragging%3Afalse%2CstartX%3A0%2CstartY%3A0%2CstartPos%3Anull%2CpinchActive%3Afalse%2CstartDist%3A0%2CstartAngle%3A0%2CstartScale%3A1%2CstartRotX%3A0%2CstartRotY%3A0%2CstartMidY%3A0%7D%3B%0Afunction%20getItemPos%28%29%7B%20const%20p%3DvrItem.getAttribute%28%27position%27%29%3B%20return%20%7Bx%3Ap.x%2Cy%3Ap.y%2Cz%3Ap.z%7D%3B%20%7D%0AsceneEl.addEventListener%28%27touchstart%27%2Cfunction%28e%29%7B%0A%20%20if%28%21vrPlaced%29%20return%3B%0A%20%20if%28e.touches.length%3D%3D%3D1%29%7B%20touchState.dragging%3Dtrue%3B%20touchState.startX%3De.touches%5B0%5D.clientX%3B%20touchState.startY%3De.touches%5B0%5D.clientY%3B%20touchState.startPos%3DgetItemPos%28%29%3B%20%7D%0A%20%20else%20if%28e.touches.length%3D%3D%3D2%29%7B%20const%20t1%3De.touches%5B0%5D%2Ct2%3De.touches%5B1%5D%3B%20touchState.pinchActive%3Dtrue%3B%20touchState.startDist%3DMath.hypot%28t2.clientX-t1.clientX%2Ct2.clientY-t1.clientY%29%3B%20touchState.startAngle%3DMath.atan2%28t2.clientY-t1.clientY%2Ct2.clientX-t1.clientX%29*180/Math.PI%3B%20touchState.startScale%3DitemScale%3B%20touchState.startRotY%3DitemRot.y%3B%20touchState.startRotX%3DitemRot.x%3B%20touchState.startMidY%3D%28t1.clientY%2Bt2.clientY%29/2%3B%20%7D%0A%7D%2C%7Bpassive%3Afalse%7D%29%3B%0AsceneEl.addEventListener%28%27touchmove%27%2Cfunction%28e%29%7B%0A%20%20if%28%21vrPlaced%29%20return%3B%0A%20%20if%28touchState.dragging%26%26e.touches.length%3D%3D%3D1%29%7B%20const%20t%3De.touches%5B0%5D%3B%20const%20dx%3D%28t.clientX-touchState.startX%29/240%3B%20const%20dy%3D%28t.clientY-touchState.startY%29/240%3B%20itemPos.x%3DtouchState.startPos.x%2Bdx%3B%20itemPos.y%3DtouchState.startPos.y-dy%3B%20vrItem.setAttribute%28%27position%27%2CitemPos%29%3B%20%7D%0A%20%20else%20if%28touchState.pinchActive%26%26e.touches.length%3D%3D%3D2%29%7B%20const%20t1%3De.touches%5B0%5D%2Ct2%3De.touches%5B1%5D%3B%20const%20curDist%3DMath.hypot%28t2.clientX-t1.clientX%2Ct2.clientY-t1.clientY%29%3B%20const%20curAngle%3DMath.atan2%28t2.clientY-t1.clientY%2Ct2.clientX-t1.clientX%29*180/Math.PI%3B%20const%20scaleFactor%3DcurDist/touchState.startDist%3B%20itemScale%3DMath.max%280.2%2CMath.min%284%2CtouchState.startScale*scaleFactor%29%29%3B%20const%20angleDelta%3DcurAngle-touchState.startAngle%3B%20itemRot.y%3DtouchState.startRotY%2BangleDelta%3B%20const%20midY%3D%28t1.clientY%2Bt2.clientY%29/2%3B%20const%20midDelta%3DmidY-touchState.startMidY%3B%20itemRot.x%3DtouchState.startRotX%2B%28midDelta/5%29%3B%20vrItem.setAttribute%28%27scale%27%2C%60%24%7BitemScale%7D%20%24%7BitemScale%7D%20%24%7BitemScale%7D%60%29%3B%20vrItem.setAttribute%28%27rotation%27%2CitemRot%29%3B%20%7D%0A%7D%2C%7Bpassive%3Afalse%7D%29%3B%0AsceneEl.addEventListener%28%27touchend%27%2Cfunction%28e%29%7B%20if%28e.touches.length%3D%3D%3D0%29%7B%20touchState.dragging%3Dfalse%3B%20touchState.pinchActive%3Dfalse%3B%20%7D%20%7D%2C%7Bpassive%3Afalse%7D%29%3B%0A%0Astatus.textContent%3D%27Controls%20hidden.%20Tap%20%E2%9A%99%EF%B8%8F%20to%20open.%20Upload%20image%2C%20background%20auto-removed%2C%20choose%203D%20shape%2C%20then%20place.%20Touch%3A%201%20finger%20move%2C%202%20fingers%20pinch/twist/tilt.%27%3B%0A%3C/script%3E%0A%3C/body%3E%0A%3C/html%3E"
+            src={`data:text/html;charset=utf-8,${encodeURIComponent(`
+              <!doctype html>
+              <html lang="en">
+              <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>Enhanced AR Camera — 3D Models with Background Removal</title>
+                <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+                <style>
+                  html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Arial;}
+                  #webcamVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000;}
+                  a-scene{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;}
+                  #ui{position:fixed;right:10px;top:10px;z-index:3;background:rgba(255,255,255,0.96);padding:10px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:440px;display:none;}
+                  #ui button,#ui input,#ui select{margin:5px 0;padding:6px 10px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:#fff;cursor:pointer}
+                  #toggleBtn{position:fixed;bottom:12px;right:12px;z-index:4;background:#fff;padding:10px 14px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;}
+                  #status{font-size:12px;color:#333;margin-top:6px}
+                  #modelLibrary{position:fixed;left:10px;top:10px;z-index:3;background:rgba(255,255,255,0.96);padding:10px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:200px;display:none;}
+                  .model-item{display:flex;align-items:center;padding:5px;margin:2px 0;border-radius:5px;cursor:pointer;transition:background 0.2s;}
+                  .model-item:hover{background:rgba(59,130,246,0.1);}
+                  .model-item img{width:30px;height:30px;border-radius:4px;margin-right:8px;object-fit:cover;}
+                  .model-item span{font-size:12px;color:#333;}
+                </style>
+              </head>
+              <body>
+                <div id="ui">
+                  <button id="startCam">Start Camera (back)</button>
+                  <button id="switchCam" disabled>Switch Camera</button>
+                  <input id="imageInput" type="file" accept="image/*">
+                  <div>
+                    <button id="placeToggle" disabled>Place 3D Model</button>
+                    <button id="removeItem" disabled>Remove</button>
+                    <button id="screenshotBtn" disabled>📸 Screenshot</button>
+                  </div>
+                  <div>
+                    <label for="shapeSelect">Model Type:</label>
+                    <select id="shapeSelect">
+                      <option value="realistic">Realistic 3D</option>
+                      <option value="box">Box Shape</option>
+                      <option value="cylinder">Curved</option>
+                      <option value="sphere">Sphere</option>
+                    </select>
+                  </div>
+                  <div>
+                    <button id="rotateLeft">↺ Left</button>
+                    <button id="rotateRight">↻ Right</button>
+                    <button id="rotateUp">⬆️ Up</button>
+                    <button id="rotateDown">⬇️ Down</button>
+                    <button id="resetBtn">Reset</button>
+                  </div>
+                  <div id="status">Enhanced AR with 3D models. Tap ⚙️ to toggle controls.</div>
+                </div>
+
+                <div id="modelLibrary">
+                  <h4 style="margin:0 0 10px 0;font-size:14px;color:#333;">3D Models</h4>
+                  <div class="model-item" onclick="loadModel('hvac')">
+                    <img src="https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=60" alt="HVAC">
+                    <span>HVAC Unit</span>
+                  </div>
+                  <div class="model-item" onclick="loadModel('electrical')">
+                    <img src="https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=60" alt="Electrical">
+                    <span>Electrical Panel</span>
+                  </div>
+                  <div class="model-item" onclick="loadModel('plumbing')">
+                    <img src="https://images.pexels.com/photos/1427107/pexels-photo-1427107.jpeg?auto=compress&cs=tinysrgb&w=60" alt="Plumbing">
+                    <span>Plumbing System</span>
+                  </div>
+                </div>
+
+                <button id="toggleBtn" onclick="toggleUI()">⚙️</button>
+                <button id="modelsBtn" onclick="toggleModels()" style="position:fixed;bottom:12px;left:12px;z-index:4;background:#fff;padding:10px 14px;border-radius:50%;border:1px solid rgba(0,0,0,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;font-size:18px;">📦</button>
+
+                <video id="webcamVideo" playsinline autoplay muted></video>
+
+                <a-scene embedded renderer="alpha: true" vr-mode-ui="enabled: false">
+                  <a-assets>
+                    <img id="vrTex" crossorigin="anonymous" />
+                    <img id="hvacTex" src="https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400" crossorigin="anonymous" />
+                    <img id="electricalTex" src="https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=400" crossorigin="anonymous" />
+                    <img id="plumbingTex" src="https://images.pexels.com/photos/1427107/pexels-photo-1427107.jpeg?auto=compress&cs=tinysrgb&w=400" crossorigin="anonymous" />
+                  </a-assets>
+                  
+                  <!-- Enhanced lighting for realistic 3D models -->
+                  <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
+                  <a-light type="directional" position="2 4 5" color="#ffffff" intensity="0.8"></a-light>
+                  <a-light type="point" position="-2 2 2" color="#4f46e5" intensity="0.3"></a-light>
+                  
+                  <a-entity id="cameraRig">
+                    <a-entity id="aframeCamera" camera look-controls-enabled="false" position="0 0 0">
+                      <a-entity id="vrItem" visible="false" position="0 -0.2 -1" rotation="0 0 0" scale="1 1 1"></a-entity>
+                    </a-entity>
+                  </a-entity>
+                </a-scene>
+
+                <script>
+                  // Enhanced AR Camera with 3D Model Support
+                  const startCamBtn=document.getElementById('startCam');
+                  const switchCamBtn=document.getElementById('switchCam');
+                  const imageInput=document.getElementById('imageInput');
+                  const placeToggle=document.getElementById('placeToggle');
+                  const removeItemBtn=document.getElementById('removeItem');
+                  const screenshotBtn=document.getElementById('screenshotBtn');
+                  const rotateLeft=document.getElementById('rotateLeft');
+                  const rotateRight=document.getElementById('rotateRight');
+                  const rotateUp=document.getElementById('rotateUp');
+                  const rotateDown=document.getElementById('rotateDown');
+                  const resetBtn=document.getElementById('resetBtn');
+                  const shapeSelect=document.getElementById('shapeSelect');
+                  const status=document.getElementById('status');
+                  const video=document.getElementById('webcamVideo');
+                  const vrTex=document.getElementById('vrTex');
+                  const vrItem=document.getElementById('vrItem');
+                  const ui=document.getElementById('ui');
+                  const modelLibrary=document.getElementById('modelLibrary');
+
+                  let stream=null,usingFront=false,vrPlaced=false;
+                  let itemPos={x:0,y:-0.2,z:-1};
+                  let itemRot={x:0,y:0,z:0};
+                  let itemScale=1;
+                  let currentModel=null;
+
+                  // Camera functions
+                  async function startCamera(facingMode='environment'){
+                    if(stream) stopCamera();
+                    try{
+                      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode},audio:false});
+                      video.srcObject=stream; await video.play();
+                      startCamBtn.textContent='Stop Camera'; switchCamBtn.disabled=false;
+                      status.textContent=\`Enhanced AR Camera started (\${facingMode}). Load 3D models from library.\`;
+                    }catch(err){alert('Camera error: '+err.message);}
+                  }
+                  
+                  function stopCamera(){
+                    if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+                    try{video.pause();video.srcObject=null;}catch(e){}
+                    startCamBtn.textContent='Start Camera (back)'; switchCamBtn.disabled=true;
+                    status.textContent='Camera stopped.';
+                  }
+
+                  startCamBtn.onclick=()=>{ if(!stream) startCamera(usingFront?'user':'environment'); else stopCamera(); }
+                  switchCamBtn.onclick=()=>{ usingFront=!usingFront; startCamera(usingFront?'user':'environment'); switchCamBtn.textContent=usingFront?'Switch to Back':'Switch to Front'; }
+
+                  // Load 3D model
+                  function loadModel(modelType) {
+                    let texId, modelName;
+                    switch(modelType) {
+                      case 'hvac': texId='hvacTex'; modelName='HVAC Unit'; break;
+                      case 'electrical': texId='electricalTex'; modelName='Electrical Panel'; break;
+                      case 'plumbing': texId='plumbingTex'; modelName='Plumbing System'; break;
+                      default: return;
+                    }
+                    
+                    vrTex.src = document.getElementById(texId).src;
+                    currentModel = {type: modelType, name: modelName};
+                    placeToggle.disabled=false; screenshotBtn.disabled=false;
+                    status.textContent=\`\${modelName} loaded. Ready to place in AR.\`;
+                    modelLibrary.style.display='none';
+                  }
+
+                  // Enhanced 3D model creation
+                  function applyShape(shape){
+                    vrItem.innerHTML='';
+                    let el;
+                    
+                    if(shape==='realistic' && currentModel){
+                      // Create realistic 3D model based on type
+                      if(currentModel.type === 'hvac'){
+                        el=document.createElement('a-box');
+                        el.setAttribute('width','2'); el.setAttribute('height','1.2'); el.setAttribute('depth','0.8');
+                        el.setAttribute('material',\`src:#vrTex; metalness:0.3; roughness:0.7; side:double;\`);
+                        
+                        // Add details
+                        const detail1=document.createElement('a-cylinder');
+                        detail1.setAttribute('position','0 0.7 0'); detail1.setAttribute('radius','0.3'); detail1.setAttribute('height','0.2');
+                        detail1.setAttribute('material','color:#666; metalness:0.8; roughness:0.2');
+                        el.appendChild(detail1);
+                      } else if(currentModel.type === 'electrical'){
+                        el=document.createElement('a-box');
+                        el.setAttribute('width','1.5'); el.setAttribute('height','2'); el.setAttribute('depth','0.3');
+                        el.setAttribute('material',\`src:#vrTex; metalness:0.1; roughness:0.9; side:double;\`);
+                      } else {
+                        el=document.createElement('a-cylinder');
+                        el.setAttribute('radius','0.8'); el.setAttribute('height','1.5');
+                        el.setAttribute('material',\`src:#vrTex; metalness:0.2; roughness:0.8; side:double;\`);
+                      }
+                    } else {
+                      // Fallback to basic shapes
+                      if(shape==='box'){ el=document.createElement('a-box'); el.setAttribute('depth','0.2'); el.setAttribute('height','0.6'); el.setAttribute('width','1'); }
+                      else if(shape==='cylinder'){ el=document.createElement('a-cylinder'); el.setAttribute('radius','0.7'); el.setAttribute('theta-length','60'); el.setAttribute('height','0.6'); }
+                      else if(shape==='sphere'){ el=document.createElement('a-sphere'); el.setAttribute('radius','0.7'); }
+                      else { el=document.createElement('a-plane'); el.setAttribute('width','1'); el.setAttribute('height','0.6'); }
+                      
+                      el.setAttribute('material',\`src:#vrTex; side:double; transparent:true;\`);
+                    }
+                    
+                    vrItem.appendChild(el);
+                  }
+
+                  // UI Controls
+                  placeToggle.onclick=()=>{ vrPlaced=!vrPlaced; if(vrPlaced){ applyShape(shapeSelect.value); } vrItem.setAttribute('visible', vrPlaced); placeToggle.textContent=vrPlaced?'Hide 3D Model':'Place 3D Model'; removeItemBtn.disabled=!vrPlaced; }
+                  removeItemBtn.onclick=()=>{ vrPlaced=false; vrItem.setAttribute('visible', false); placeToggle.textContent='Place 3D Model'; removeItemBtn.disabled=true; }
+                  shapeSelect.onchange=()=>{ if(vrPlaced) applyShape(shapeSelect.value); }
+
+                  // Rotation controls
+                  rotateLeft.onclick=()=>{ itemRot.y -= 15; vrItem.setAttribute('rotation', itemRot); }
+                  rotateRight.onclick=()=>{ itemRot.y += 15; vrItem.setAttribute('rotation', itemRot); }
+                  rotateUp.onclick=()=>{ itemRot.x -= 15; vrItem.setAttribute('rotation', itemRot); }
+                  rotateDown.onclick=()=>{ itemRot.x += 15; vrItem.setAttribute('rotation', itemRot); }
+                  resetBtn.onclick=()=>{ itemPos={x:0,y:-0.2,z:-1}; itemRot={x:0,y:0,z:0}; itemScale=1; vrItem.setAttribute('position', itemPos); vrItem.setAttribute('rotation', itemRot); vrItem.setAttribute('scale', \`\${itemScale} \${itemScale} \${itemScale}\`); }
+
+                  // Screenshot
+                  function takeScreenshot(){ ui.style.display='none'; modelLibrary.style.display='none'; document.getElementById('modelsBtn').style.display='none'; document.getElementById('toggleBtn').style.display='none'; setTimeout(()=>{ html2canvas(document.body,{useCORS:true}).then(canvas=>{ const link=document.createElement('a'); link.download='ar-screenshot.png'; link.href=canvas.toDataURL(); link.click(); ui.style.display='block'; document.getElementById('modelsBtn').style.display='block'; document.getElementById('toggleBtn').style.display='block'; status.textContent='AR screenshot saved with 3D model.'; }); },200); }
+                  screenshotBtn.onclick=()=>takeScreenshot();
+
+                  // UI toggles
+                  function toggleUI(){ ui.style.display = (ui.style.display==='none' || ui.style.display==='') ? 'block' : 'none'; }
+                  function toggleModels(){ modelLibrary.style.display = (modelLibrary.style.display==='none' || modelLibrary.style.display==='') ? 'block' : 'none'; }
+
+                  // Touch gestures for 3D models
+                  const sceneEl=document.querySelector('a-scene');
+                  let touchState={dragging:false,startX:0,startY:0,startPos:null,pinchActive:false,startDist:0,startAngle:0,startScale:1,startRotX:0,startRotY:0,startMidY:0};
+                  function getItemPos(){ const p=vrItem.getAttribute('position'); return {x:p.x,y:p.y,z:p.z}; }
+                  
+                  sceneEl.addEventListener('touchstart',function(e){
+                    if(!vrPlaced) return;
+                    if(e.touches.length===1){ touchState.dragging=true; touchState.startX=e.touches[0].clientX; touchState.startY=e.touches[0].clientY; touchState.startPos=getItemPos(); }
+                    else if(e.touches.length===2){ const t1=e.touches[0],t2=e.touches[1]; touchState.pinchActive=true; touchState.startDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY); touchState.startAngle=Math.atan2(t2.clientY-t1.clientY,t2.clientX-t1.clientX)*180/Math.PI; touchState.startScale=itemScale; touchState.startRotY=itemRot.y; touchState.startRotX=itemRot.x; touchState.startMidY=(t1.clientY+t2.clientY)/2; }
+                  },{passive:false});
+                  
+                  sceneEl.addEventListener('touchmove',function(e){
+                    if(!vrPlaced) return;
+                    if(touchState.dragging&&e.touches.length===1){ const t=e.touches[0]; const dx=(t.clientX-touchState.startX)/240; const dy=(t.clientY-touchState.startY)/240; itemPos.x=touchState.startPos.x+dx; itemPos.y=touchState.startPos.y-dy; vrItem.setAttribute('position',itemPos); }
+                    else if(touchState.pinchActive&&e.touches.length===2){ const t1=e.touches[0],t2=e.touches[1]; const curDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY); const curAngle=Math.atan2(t2.clientY-t1.clientY,t2.clientX-t1.clientX)*180/Math.PI; const scaleFactor=curDist/touchState.startDist; itemScale=Math.max(0.2,Math.min(4,touchState.startScale*scaleFactor)); const angleDelta=curAngle-touchState.startAngle; itemRot.y=touchState.startRotY+angleDelta; const midY=(t1.clientY+t2.clientY)/2; const midDelta=midY-touchState.startMidY; itemRot.x=touchState.startRotX+(midDelta/5); vrItem.setAttribute('scale',\`\${itemScale} \${itemScale} \${itemScale}\`); vrItem.setAttribute('rotation',itemRot); }
+                  },{passive:false});
+                  
+                  sceneEl.addEventListener('touchend',function(e){ if(e.touches.length===0){ touchState.dragging=false; touchState.pinchActive=false; } },{passive:false});
+
+                  // Listen for external model loading
+                  window.addEventListener('message', function(event) {
+                    if (event.data.type === 'LOAD_3D_MODEL') {
+                      const model = event.data.model;
+                      vrTex.src = model.image;
+                      currentModel = {type: model.name.toLowerCase(), name: model.name};
+                      placeToggle.disabled=false; screenshotBtn.disabled=false;
+                      status.textContent=\`\${model.name} loaded from library. Ready to place in AR.\`;
+                    }
+                  });
+
+                  status.textContent='Enhanced AR Camera ready. Load 3D models and place them in your environment.';
+                </script>
+              </body>
+              </html>
+            `)}`}
             className="w-full h-full border-0"
             title="VR View - AR Camera"
             allow="camera; microphone"
