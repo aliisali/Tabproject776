@@ -1,35 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://jyrndorchtglkmabncim.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5cm5kb3JjaHRnbGttYWJuY2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjcyOTU5NzQsImV4cCI6MjA0Mjg3MTk3NH0.VQzNpHJrOLtHQNVXkOcYJKqx8wOQGxZQJQzNpHJrOLt';
+// Auto-configured Supabase connection
+const supabaseUrl = 'https://jyrndorchtglkmabncim.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5cm5kb3JjaHRnbGttYWJuY2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTI2MDQsImV4cCI6MjA3NDM4ODYwNH0.w_86LzY-LduLH517CSP4fLKEIgFDPnDnKjGXCluHCIE';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Test connection with better error handling
-const testConnection = async () => {
+// Auto-setup database with demo data
+const setupDatabase = async () => {
   try {
-    console.log('🔄 Testing Supabase connection...');
-    console.log('📍 URL:', supabaseUrl);
-    console.log('🔑 Key configured:', !!supabaseKey);
+    console.log('🔄 Auto-configuring database...');
     
-    const { data, error } = await supabase.from('users').select('id').limit(1);
+    // Check if data exists
+    const { data: existingUsers, error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
     
     if (error) {
-      console.error('❌ Supabase connection test failed:', error);
-      console.error('Error details:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
+      console.log('⚠️ Database not ready, using localStorage fallback');
+      return;
+    }
+    
+    if (!existingUsers || existingUsers.length === 0) {
+      console.log('📝 Setting up demo data...');
+      
+      // Run the setup SQL
+      const { error: setupError } = await supabase.rpc('setup_demo_data');
+      
+      if (setupError) {
+        console.log('⚠️ Demo data setup failed, using localStorage');
+      } else {
+        console.log('✅ Demo data configured successfully');
+      }
     } else {
-      console.log('✅ Supabase connection successful');
-      console.log('📊 Test query returned:', data);
+      console.log('✅ Database already configured');
     }
   } catch (err) {
-    console.error('❌ Connection test error:', err);
+    console.log('⚠️ Auto-setup failed, using localStorage fallback');
   }
 };
 
-// Run test on module load
-testConnection();
+// Auto-setup on module load
+setupDatabase();

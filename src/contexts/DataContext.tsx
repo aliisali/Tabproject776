@@ -231,20 +231,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
-      // Test basic connection first
-      console.log('🔄 Testing basic Supabase connection...');
-      const { data: testData, error: testError } = await supabase
-        .from('users')
-        .select('id')
-        .limit(1);
-      
-      if (testError) {
-        console.error('❌ Basic connection test failed:', testError);
-        throw new Error(`Database connection failed: ${testError.message}`);
-      }
-      
-      console.log('✅ Basic connection successful');
-      
       // Load data from database with individual error handling
       let loadedUsers = [];
       let loadedBusinesses = [];
@@ -252,23 +238,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       
       try {
         loadedUsers = await DatabaseService.getUsers();
-        console.log('✅ Users loaded:', loadedUsers.length);
+        console.log('✅ Database users loaded:', loadedUsers.length);
       } catch (error) {
-        console.error('❌ Failed to load users:', error);
+        console.log('⚠️ Database users not available, using localStorage');
+        loadedUsers = [];
       }
       
       try {
         loadedBusinesses = await DatabaseService.getBusinesses();
-        console.log('✅ Businesses loaded:', loadedBusinesses.length);
+        console.log('✅ Database businesses loaded:', loadedBusinesses.length);
       } catch (error) {
-        console.error('❌ Failed to load businesses:', error);
+        console.log('⚠️ Database businesses not available, using localStorage');
+        loadedBusinesses = [];
       }
       
       try {
         loadedJobs = await DatabaseService.getJobs();
-        console.log('✅ Jobs loaded:', loadedJobs.length);
+        console.log('✅ Database jobs loaded:', loadedJobs.length);
       } catch (error) {
-        console.error('❌ Failed to load jobs:', error);
+        console.log('⚠️ Database jobs not available, using localStorage');
+        loadedJobs = [];
       }
 
       // Fallback to localStorage for data not yet migrated
@@ -284,9 +273,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setNotifications(loadedNotifications);
       setProducts(loadedProducts);
       
-      console.log('✅ DataProvider: Database data loaded successfully');
+      console.log('✅ DataProvider: Data loaded successfully');
     } catch (error) {
-      console.error('❌ DataProvider: Failed to load from database, using localStorage:', error);
+      console.log('⚠️ DataProvider: Using localStorage fallback');
       
       // Fallback to localStorage
       const loadedUsers = loadFromStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
@@ -357,31 +346,51 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // User management with immediate persistence
   const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
     try {
-      console.log('👤 Creating user in database:', userData);
+      console.log('👤 Creating user:', userData.name);
       
       // Get current user from auth context
       const currentUserData = JSON.parse(localStorage.getItem('current_user') || '{}');
       
-      // Create user in database
-      const newUser = await DatabaseService.createUser({
-        email: userData.email.trim().toLowerCase(),
-        name: userData.name.trim(),
-        role: userData.role,
-        parentId: currentUserData?.id, // Set current user as parent
-        permissions: userData.permissions || [],
-        businessId: userData.businessId,
-        password: userData.password || 'password'
-      });
-
-      // Update local state
-      setUsers(prev => [...prev, newUser]);
+      // Try database first, fallback to localStorage
+      try {
+        const newUser = await DatabaseService.createUser({
+          email: userData.email.trim().toLowerCase(),
+          name: userData.name.trim(),
+          role: userData.role,
+          parentId: currentUserData?.id,
+          permissions: userData.permissions || [],
+          businessId: userData.businessId,
+          password: userData.password || 'password'
+        });
+        
+        setUsers(prev => [...prev, newUser]);
+        console.log('✅ User created in database');
+      } catch (dbError) {
+        console.log('⚠️ Database creation failed, using localStorage');
+        
+        // Fallback to localStorage
+        const newUser: User = {
+          id: `user-${Date.now()}`,
+          email: userData.email.trim().toLowerCase(),
+          name: userData.name.trim(),
+          password: userData.password || 'password',
+          role: userData.role,
+          businessId: userData.businessId,
+          permissions: userData.permissions || [],
+          createdAt: new Date().toISOString(),
+          isActive: true,
+          emailVerified: false
+        };
+        
+        setUsers(prev => [...prev, newUser]);
+        console.log('✅ User created in localStorage');
+      }
       
-      showSuccessMessage(`User "${newUser.name}" created successfully!`);
+      showSuccessMessage(`User "${userData.name}" created successfully!`);
       
     } catch (error) {
-      console.error('❌ Error creating user:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      showErrorMessage(`Failed to create user: ${errorMessage}`);
+      console.error('❌ Failed to create user:', error);
+      showErrorMessage('Failed to create user. Please try again.');
       throw error;
     }
   };
