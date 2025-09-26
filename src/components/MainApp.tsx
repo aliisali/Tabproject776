@@ -107,14 +107,14 @@ export function MainApp() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <Sidebar 
         activeTab={activeTab} 
         onTabChange={setActiveTab}
         isMinimized={sidebarMinimized}
         onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
       />
-      <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50/50 to-blue-50/50 transition-all duration-300">
+      <main className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 transition-all duration-300">
         {renderContent()}
       </main>
     </div>
