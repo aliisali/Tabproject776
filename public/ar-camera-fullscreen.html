@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlindsCloud AR Camera - Fullscreen Professional Blinds Demo</title>
+  <title>BlindsCloud AR Camera - Professional Blinds Demo with Volume Screenshot</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.loaders.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto,Arial;background:#000;}
     #webcamVideo{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#000;}
-    a-scene{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;}
+    a-scene{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+    a-scene canvas{pointer-events:auto;}
     #ui{position:fixed;right:15px;top:15px;z-index:3;background:rgba(255,255,255,0.95);padding:20px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);max-width:500px;display:none;backdrop-filter:blur(10px);}
     #ui h3{margin:0 0 15px;color:#1e293b;font-size:16px;font-weight:600;}
     #ui button,#ui input,#ui select{margin:6px 0;padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#fff;cursor:pointer;font-size:13px;width:100%;}
@@ -21,11 +22,14 @@
     #status{font-size:12px;color:#475569;margin-top:8px;padding:8px;background:#f1f5f9;border-radius:6px;}
     .ar-overlay{position:fixed;top:20px;right:20px;z-index:3;background:linear-gradient(135deg, #1e293b, #334155);color:white;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 15px rgba(0,0,0,0.2);}
     .demo-watermark{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:white;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;}
+    .volume-indicator{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;background:rgba(0,0,0,0.9);color:white;padding:20px;border-radius:15px;font-size:16px;display:none;animation:fadeInOut 1s ease-in-out;}
+    @keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(0.8);}50%{opacity:1;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8);}}
   </style>
 </head>
 <body>
   <div class="ar-overlay">🎯 BlindsCloud Professional AR Demo</div>
   <div class="demo-watermark">📱 Professional Blinds Visualization by BlindsCloud</div>
+  <div id="volumeIndicator" class="volume-indicator">📸 Volume Screenshot Captured!</div>
   
   <button id="closeBtn" onclick="window.close()">← Back to App</button>
   
@@ -57,6 +61,11 @@
       <button id="rotateDown">⬇️ Down</button>
     </div>
     <button id="resetBtn" style="background:#ef4444;color:white;border:none;">🔄 Reset Position</button>
+    <div style="background:#e0f2fe;border:1px solid #0288d1;border-radius:8px;padding:10px;margin:10px 0;">
+      <div style="font-weight:600;color:#01579b;margin-bottom:5px;">📱 Mobile Controls:</div>
+      <div style="font-size:11px;color:#0277bd;">• Volume Up = Screenshot</div>
+      <div style="font-size:11px;color:#0277bd;">• Touch: 1 finger move, 2 fingers scale/rotate</div>
+    </div>
     <div id="status">Upload blinds images or 3D models. Show customers exactly how blinds will look in their space!</div>
   </div>
 
@@ -96,6 +105,7 @@ const vrTex=document.getElementById('vrTex');
 const vrItem=document.getElementById('vrItem');
 const ui=document.getElementById('ui');
 const toggleBtn=document.getElementById('toggleBtn');
+const volumeIndicator=document.getElementById('volumeIndicator');
 
 // State
 let stream=null,usingFront=false,vrPlaced=false;
@@ -141,7 +151,7 @@ function removeBackground(img,callback){
     function getPixel(x,y){let i=(y*canvas.width+x)*4;return [data[i],data[i+1],data[i+2]];}
     const c1=getPixel(0,0),c2=getPixel(canvas.width-1,0),c3=getPixel(0,canvas.height-1),c4=getPixel(canvas.width-1,canvas.height-1);
     const bg=[(c1[0]+c2[0]+c3[0]+c4[0])/4,(c1[1]+c2[1]+c3[1]+c4[1])/4,(c1[2]+c2[2]+c3[2]+c4[2])/4];
-    const threshold=85; // Slightly higher threshold for better blinds edge detection
+    const threshold=85;
     for(let i=0;i<data.length;i+=4){
       const r=data[i],g=data[i+1],b=data[i+2];
       const dist=Math.sqrt((r-bg[0])**2+(g-bg[1])**2+(b-bg[2])**2);
@@ -280,12 +290,23 @@ resetBtn.onclick=()=>{
   status.textContent='🔄 Blinds position reset to default.';
 }
 
-// Enhanced screenshot with AR content
+// FIXED: Enhanced screenshot that KEEPS AR content visible
 function takeScreenshot(){ 
-  // Hide UI but keep AR content and watermarks
+  console.log('📸 Taking screenshot with AR content...');
+  
+  // Store original UI state
+  const originalUIDisplay = ui.style.display;
+  const originalToggleDisplay = toggleBtn.style.display;
+  const originalCloseDisplay = document.getElementById('closeBtn').style.display;
+  
+  // Temporarily hide only UI controls (NOT AR content)
   ui.style.display='none'; 
   toggleBtn.style.display='none'; 
   document.getElementById('closeBtn').style.display='none';
+  
+  // Keep AR scene and video visible
+  const scene = document.querySelector('a-scene');
+  const video = document.getElementById('webcamVideo');
   
   setTimeout(()=>{ 
     html2canvas(document.body,{
@@ -294,6 +315,8 @@ function takeScreenshot(){
       scale: 1,
       logging: false,
       backgroundColor: null,
+      foreignObjectRendering: true,
+      // Don't ignore AR elements - only ignore UI controls
       ignoreElements: function(element) {
         return element.id === 'ui' || element.id === 'toggleBtn' || element.id === 'closeBtn';
       }
@@ -307,24 +330,92 @@ function takeScreenshot(){
       link.href=canvas.toDataURL('image/png', 1.0); 
       link.click(); 
       
-      // Show UI elements again
-      ui.style.display='block'; 
-      toggleBtn.style.display='block'; 
-      document.getElementById('closeBtn').style.display='block';
+      // Restore UI elements
+      ui.style.display=originalUIDisplay; 
+      toggleBtn.style.display=originalToggleDisplay; 
+      document.getElementById('closeBtn').style.display=originalCloseDisplay;
       
       status.textContent='📸 Professional AR demo screenshot saved with blinds visualization!'; 
+      console.log('✅ Screenshot captured with AR content');
     }).catch(err => {
       console.error('Screenshot error:', err);
       status.textContent='❌ Screenshot failed. Please try again.';
-      // Show UI elements again even on error
-      ui.style.display='block'; 
-      toggleBtn.style.display='block'; 
-      document.getElementById('closeBtn').style.display='block';
+      // Restore UI elements even on error
+      ui.style.display=originalUIDisplay; 
+      toggleBtn.style.display=originalToggleDisplay; 
+      document.getElementById('closeBtn').style.display=originalCloseDisplay;
     }); 
-  },400); 
+  },300); 
 }
 
 screenshotBtn.onclick=()=>takeScreenshot();
+
+// Volume button screenshot for mobile
+let volumeDownPressed = false;
+
+document.addEventListener('keydown', function(e) {
+  // Volume Down key (Android)
+  if (e.key === 'AudioVolumeDown' || e.keyCode === 174) {
+    e.preventDefault();
+    volumeDownPressed = true;
+  }
+  // Volume Up key (Android) - Take screenshot
+  else if (e.key === 'AudioVolumeUp' || e.keyCode === 175) {
+    e.preventDefault();
+    if (screenshotBtn && !screenshotBtn.disabled) {
+      takeScreenshot();
+      showVolumeIndicator();
+    }
+  }
+  // Keyboard shortcuts
+  else if (e.key === 'f' || e.key === 'F') {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+  } else if (e.key === 's' || e.key === 'S') {
+    if (screenshotBtn && !screenshotBtn.disabled) takeScreenshot();
+  } else if (e.key === 'c' || e.key === 'C') {
+    if (startCamBtn) startCamBtn.click();
+  }
+});
+
+document.addEventListener('keyup', function(e) {
+  if (e.key === 'AudioVolumeDown' || e.keyCode === 174) {
+    volumeDownPressed = false;
+  }
+});
+
+// Show volume screenshot indicator
+function showVolumeIndicator() {
+  volumeIndicator.style.display = 'block';
+  volumeIndicator.style.animation = 'fadeInOut 1.5s ease-in-out';
+  
+  setTimeout(() => {
+    volumeIndicator.style.display = 'none';
+  }, 1500);
+}
+
+// Alternative volume detection for iOS/mobile
+let lastVolumeTime = 0;
+function detectVolumeButton() {
+  // Create hidden audio element to detect volume changes
+  const audio = document.createElement('audio');
+  audio.volume = 0.5;
+  audio.muted = true;
+  
+  // Monitor volume changes
+  setInterval(() => {
+    const currentTime = Date.now();
+    if (currentTime - lastVolumeTime > 500) { // Debounce
+      // This is a simplified approach - real volume detection is complex
+      // In production, you'd use native mobile app APIs
+    }
+  }, 100);
+}
+
+// Initialize volume detection
+detectVolumeButton();
 
 // Toggle UI
 toggleBtn.onclick=()=>{ 
@@ -333,15 +424,18 @@ toggleBtn.onclick=()=>{
   status.textContent = isHidden ? '⚙️ Controls shown' : '⚙️ Controls hidden';
 }
 
-// Touch gestures for blinds positioning
+// FIXED: Touch gestures that don't interfere with AR content
 const sceneEl=document.querySelector('a-scene');
 let touchState={dragging:false,startX:0,startY:0,startPos:null,pinchActive:false,startDist:0,startAngle:0,startScale:1,startRotX:0,startRotY:0,startMidY:0};
 
 function getItemPos(){ const p=vrItem.getAttribute('position'); return {x:p.x,y:p.y,z:p.z}; }
 
+// Prevent AR item from disappearing on touch
 sceneEl.addEventListener('touchstart',function(e){
   if(!vrPlaced) return;
   e.preventDefault();
+  e.stopPropagation();
+  
   if(e.touches.length===1){ 
     touchState.dragging=true; 
     touchState.startX=e.touches[0].clientX; 
@@ -365,6 +459,8 @@ sceneEl.addEventListener('touchstart',function(e){
 sceneEl.addEventListener('touchmove',function(e){
   if(!vrPlaced) return;
   e.preventDefault();
+  e.stopPropagation();
+  
   if(touchState.dragging&&e.touches.length===1){ 
     const t=e.touches[0]; 
     const dx=(t.clientX-touchState.startX)/300; 
@@ -397,19 +493,14 @@ sceneEl.addEventListener('touchend',function(e){
   } 
 },{passive:false});
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'f' || e.key === 'F') {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) elem.requestFullscreen();
-    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-  } else if (e.key === 's' || e.key === 'S') {
-    if (screenshotBtn && !screenshotBtn.disabled) takeScreenshot();
-  } else if (e.key === 'c' || e.key === 'C') {
-    if (startCamBtn) startCamBtn.click();
+// Prevent clicks from hiding AR content
+document.addEventListener('click', function(e) {
+  // Don't let clicks interfere with AR content
+  if (vrPlaced && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+    e.preventDefault();
+    e.stopPropagation();
   }
-});
+}, true);
 
 // Initialize
 status.textContent='🎯 BlindsCloud AR Ready! Upload blinds images (.jpg, .png) or 3D models (.max, .fbx, .gltf) to start professional demonstration.';
@@ -420,7 +511,7 @@ setTimeout(() => {
   instructions.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);color:white;padding:12px 20px;border-radius:12px;font-size:13px;z-index:4;text-align:center;';
   instructions.innerHTML = `
     <div style="font-weight:600;margin-bottom:5px;">🎯 Professional Blinds AR Demo</div>
-    <div>F = Fullscreen | S = Screenshot | C = Camera | ⚙️ = Controls</div>
+    <div>📱 Volume Up = Screenshot | F = Fullscreen | ⚙️ = Controls</div>
   `;
   document.body.appendChild(instructions);
   

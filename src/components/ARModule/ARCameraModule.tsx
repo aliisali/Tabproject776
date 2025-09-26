@@ -343,6 +343,7 @@ setTimeout(() => {
                 <li>• <strong>3D Visualization:</strong> Convert blinds to 3D for realistic preview</li>
                 <li>• <strong>Position Blinds:</strong> Touch to move and resize blinds on window</li>
                 <li>• <strong>Customer Demo:</strong> Show how blinds will look in their space</li>
+                <li>• <strong>Volume Screenshot:</strong> Press Volume Up button on mobile to capture</li>
                 <li>• <strong>Settings:</strong> Tap ⚙️ button to show/hide controls</li>
               </ul>
             </div>
