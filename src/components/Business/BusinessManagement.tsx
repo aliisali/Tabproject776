@@ -304,7 +304,8 @@ export function BusinessManagement() {
                 { id: 'job_management', name: 'Job Management', description: 'Create and manage jobs' },
                 { id: 'calendar', name: 'Calendar', description: 'Schedule and view appointments' },
                 { id: 'reports', name: 'Reports', description: 'Generate business reports' },
-                { id: 'vr_view', name: 'VR View', description: 'Access VR/AR camera features' }
+                { id: 'vr_view', name: 'VR View', description: 'Access VR/AR camera features' },
+                { id: '3d_models', name: '3D AR Models', description: 'Access to 3D models for AR visualization' }
               ].map((feature) => (
                 <div key={feature.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div className="flex-1">

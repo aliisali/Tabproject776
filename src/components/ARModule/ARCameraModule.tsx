@@ -207,7 +207,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">AR Camera Module</h1>
-            <p className="text-gray-600 mt-2">Advanced AR Camera with 2D to 3D conversion and background removal</p>
+            <p className="text-gray-600 mt-2">Advanced AR Camera with 3D model visualization and background removal</p>
           </div>
         </div>
 
@@ -219,13 +219,36 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
               <h3 className="font-semibold mb-2">How to use the AR Camera:</h3>
               <ul className="space-y-1 text-sm">
                 <li>• <strong>Start Camera:</strong> Click "Start Camera" to begin AR experience</li>
-                <li>• <strong>Upload Image:</strong> Select an image file - background will be auto-removed</li>
-                <li>• <strong>3D Conversion:</strong> Choose shape (Plane, Box, Curved, Sphere) to convert 2D to 3D</li>
+                <li>• <strong>Load 3D Model:</strong> Select from available 3D models created by admin</li>
+                <li>• <strong>AR Visualization:</strong> View 3D models in real-world environment</li>
                 <li>• <strong>Touch Controls:</strong> 1 finger to move, 2 fingers to pinch/twist/tilt</li>
                 <li>• <strong>Screenshot:</strong> Capture and save your AR creation</li>
                 <li>• <strong>Settings:</strong> Tap ⚙️ button to show/hide controls</li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        {/* Available 3D Models */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Available 3D Models</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { name: 'HVAC Unit', image: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=200' },
+              { name: 'Electrical Panel', image: 'https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=200' },
+              { name: 'Plumbing System', image: 'https://images.pexels.com/photos/1427107/pexels-photo-1427107.jpeg?auto=compress&cs=tinysrgb&w=200' },
+              { name: 'Industrial Tool', image: 'https://images.pexels.com/photos/159045/the-interior-of-the-repair-interior-159045.jpeg?auto=compress&cs=tinysrgb&w=200' }
+            ].map((model, index) => (
+              <div key={index} className="text-center">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2">
+                  <img src={model.image} alt={model.name} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-sm font-medium text-gray-700">{model.name}</p>
+                <button className="mt-1 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors">
+                  Load in AR
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>

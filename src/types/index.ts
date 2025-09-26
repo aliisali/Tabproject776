@@ -105,3 +105,23 @@ export interface Product {
   isActive: boolean;
   createdAt: string;
 }
+export interface ConversionSettings {
+  depth: number;
+  quality: 'low' | 'medium' | 'high';
+  style: 'realistic' | 'stylized' | 'geometric';
+  smoothing: boolean;
+  textureEnhancement: boolean;
+}
+
+export interface ARModel {
+  id: string;
+  name: string;
+  originalImage: string;
+  modelUrl: string;
+  thumbnailUrl: string;
+  settings: ConversionSettings;
+  status: 'processing' | 'completed' | 'failed';
+  createdAt: string;
+  fileSize: number;
+  businessAccess: string[];
+}

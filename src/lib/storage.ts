@@ -1,4 +1,4 @@
-import { User, Business, Job, Customer, Product, Notification } from '../types';
+import { User, Business, Job, Customer, Product, Notification, ARModel } from '../types';
 
 // Storage keys with version to prevent conflicts
 const STORAGE_KEYS = {
@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   JOBS: 'jobmanager_jobs_v4',
   CUSTOMERS: 'jobmanager_customers_v4',
   NOTIFICATIONS: 'jobmanager_notifications_v4',
-  PRODUCTS: 'jobmanager_products_v4'
+  PRODUCTS: 'jobmanager_products_v4',
+  AR_MODELS: 'jobmanager_ar_models_v1'
 };
 
 // Default data with proper UUIDs
@@ -129,6 +130,26 @@ const DEFAULT_NOTIFICATIONS: Notification[] = [
   }
 ];
 
+const DEFAULT_AR_MODELS: ARModel[] = [
+  {
+    id: 'model-1',
+    name: 'HVAC Unit Model',
+    originalImage: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
+    modelUrl: '/models/hvac-unit.glb',
+    thumbnailUrl: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=200',
+    settings: {
+      depth: 60,
+      quality: 'high',
+      style: 'realistic',
+      smoothing: true,
+      textureEnhancement: true
+    },
+    status: 'completed',
+    createdAt: '2024-01-15T10:30:00Z',
+    fileSize: 2.5,
+    businessAccess: ['business-1', 'business-2']
+  }
+];
 // Storage utilities with bulletproof error handling
 export const saveToStorage = (key: string, data: any): boolean => {
   try {
@@ -388,6 +409,42 @@ export class LocalStorageService {
     return saveToStorage(STORAGE_KEYS.NOTIFICATIONS, notifications);
   }
 
+  // AR Models
+  static getARModels(): ARModel[] {
+    return loadFromStorage(STORAGE_KEYS.AR_MODELS, DEFAULT_AR_MODELS);
+  }
+
+  static saveARModels(models: ARModel[]): boolean {
+    return saveToStorage(STORAGE_KEYS.AR_MODELS, models);
+  }
+
+  static createARModel(modelData: Omit<ARModel, 'id' | 'createdAt'>): ARModel {
+    const models = this.getARModels();
+    const newModel: ARModel = {
+      id: `model-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...modelData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedModels = [...models, newModel];
+    this.saveARModels(updatedModels);
+    
+    return newModel;
+  }
+
+  static updateARModel(id: string, updates: Partial<ARModel>): boolean {
+    const models = this.getARModels();
+    const updatedModels = models.map(model => 
+      model.id === id ? { ...model, ...updates } : model
+    );
+    return this.saveARModels(updatedModels);
+  }
+
+  static deleteARModel(id: string): boolean {
+    const models = this.getARModels();
+    const updatedModels = models.filter(model => model.id !== id);
+    return this.saveARModels(updatedModels);
+  }
   // Initialize all data
   static initializeData(): void {
     console.log('🚀 Initializing localStorage data...');
@@ -397,6 +454,7 @@ export class LocalStorageService {
     this.getCustomers();
     this.getProducts();
     this.getNotifications();
+    this.getARModels();
     console.log('✅ All data initialized successfully');
   }
 }

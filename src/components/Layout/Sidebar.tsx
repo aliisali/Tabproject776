@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Building2, Calendar, ClipboardList, FileText, Settings, BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield } from 'lucide-react';
+import { Users, Building2, Calendar, ClipboardList, FileText, Settings, BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield, Box, Layers } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
 
@@ -34,6 +34,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'users', label: 'User Management', icon: Users },
           { id: 'businesses', label: 'Businesses', icon: Building2 },
           { id: 'products', label: 'Products', icon: Package },
+          { id: 'model-converter', label: '3D Model Converter', icon: Box },
+          { id: 'model-access', label: 'Model Access', icon: Layers },
           { id: 'ar-camera', label: 'AR Camera', icon: Headphones },
           { id: 'permissions', label: 'Permissions', icon: Settings },
           { id: 'reports', label: 'Reports', icon: FileText },

@@ -20,6 +20,8 @@ import { CustomerManagement } from './Customers/CustomerManagement';
 import { ARCameraModule } from './ARModule/ARCameraModule';
 import { ModulePermissions } from './Admin/ModulePermissions';
 import { AdminHTMLManager } from './Admin/AdminHTMLManager';
+import { ModelConverter } from './Admin/ModelConverter';
+import { BusinessModelAccess } from './Admin/BusinessModelAccess';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -32,6 +34,8 @@ export function MainApp() {
         case 'dashboard': return <AdminDashboard />;
         case 'users': return <UserManagement />;
         case 'businesses': return <BusinessManagement />;
+        case 'model-converter': return <ModelConverter />;
+        case 'model-access': return <BusinessModelAccess />;
         case 'ar-camera': return <ARCameraModule />;
         case 'permissions': return <PermissionManagement />;
         case 'reports': return <ReportsManagement />;
