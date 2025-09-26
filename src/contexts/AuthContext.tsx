@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -11,82 +12,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Storage key for users - must match DataContext
-const USERS_STORAGE_KEY = 'jobmanager_users_v3';
-
-// Default users - must match DataContext
-const DEFAULT_USERS: User[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440003',
-    email: 'admin@platform.com',
-    name: 'Platform Admin',
-    role: 'admin',
-    permissions: ['all'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440004',
-    email: 'business@company.com',
-    name: 'Business Manager',
-    role: 'business',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    permissions: ['manage_employees', 'view_dashboard', 'create_jobs'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440005',
-    email: 'employee@company.com',
-    name: 'Field Employee',
-    role: 'employee',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    permissions: ['create_jobs', 'manage_tasks', 'capture_signatures'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-];
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-
-  // Load users from localStorage with proper error handling
-  const loadUsers = () => {
-    try {
-      const stored = localStorage.getItem(USERS_STORAGE_KEY);
-      if (stored && stored !== 'undefined' && stored !== 'null') {
-        const parsedUsers = JSON.parse(stored);
-        console.log('🔐 AuthContext: Loaded users from localStorage:', parsedUsers.length);
-        return parsedUsers;
-      }
-    } catch (error) {
-      console.error('❌ AuthContext: Failed to load users from localStorage:', error);
-    }
-    
-    console.log('📝 AuthContext: Using default users');
-    // Save defaults to localStorage
-    try {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
-    } catch (error) {
-      console.error('❌ AuthContext: Failed to save default users:', error);
-    }
-    return DEFAULT_USERS;
-  };
 
   useEffect(() => {
     console.log('🚀 AuthContext: Initializing...');
     
-    // Load users
-    const users = loadUsers();
-    setAllUsers(users);
+    // Initialize localStorage data
+    LocalStorageService.initializeData();
     
     // Check for stored user session
     const storedUser = localStorage.getItem('current_user');
@@ -96,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ AuthContext: Found stored session for:', parsedUser.email);
         
         // Verify user still exists in users list
+        const users = LocalStorageService.getUsers();
         const userExists = users.find(u => u.id === parsedUser.id && u.isActive);
         if (userExists) {
           setUser(parsedUser);
@@ -117,16 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleUsersUpdate = (event: any) => {
       console.log('🔄 AuthContext: Users updated, refreshing list');
-      const updatedUsers = event.detail;
-      setAllUsers(updatedUsers);
-      
-      // Also save to localStorage to ensure persistence
-      try {
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
-        console.log('✅ AuthContext: Saved updated users to localStorage');
-      } catch (error) {
-        console.error('❌ AuthContext: Failed to save users:', error);
-      }
     };
 
     window.addEventListener('usersUpdated', handleUsersUpdate);
@@ -136,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Function to update users list when new users are added
   const updateUsersList = (users: User[]) => {
     console.log('📝 AuthContext: Updating users list:', users.length);
-    setAllUsers(users);
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -145,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Get fresh users from localStorage
-      const currentUsers = loadUsers();
+      const currentUsers = LocalStorageService.getUsers();
       console.log('🔍 AuthContext: Checking against', currentUsers.length, 'users');
       
       // Find user by email (case insensitive)

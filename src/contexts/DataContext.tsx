@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
-import { DatabaseService } from '../lib/database';
-import { supabase } from '../lib/supabase';
+import { LocalStorageService } from '../lib/storage';
 
 interface DataContextType {
   // Users
@@ -46,172 +45,6 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Storage keys with version to prevent conflicts
-const STORAGE_KEYS = {
-  USERS: 'jobmanager_users_v3',
-  BUSINESSES: 'jobmanager_businesses_v3',
-  JOBS: 'jobmanager_jobs_v3',
-  CUSTOMERS: 'jobmanager_customers_v3',
-  NOTIFICATIONS: 'jobmanager_notifications_v3',
-  PRODUCTS: 'jobmanager_products_v3'
-};
-
-// Default data
-const DEFAULT_USERS: User[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440003',
-    email: 'admin@platform.com',
-    name: 'Platform Admin',
-    role: 'admin',
-    permissions: ['all'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440004',
-    email: 'business@company.com',
-    name: 'Business Manager',
-    role: 'business',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    permissions: ['manage_employees', 'view_dashboard', 'create_jobs'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440005',
-    email: 'employee@company.com',
-    name: 'Field Employee',
-    role: 'employee',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    permissions: ['create_jobs', 'manage_tasks', 'capture_signatures'],
-    createdAt: '2024-01-01',
-    isActive: true,
-    emailVerified: true,
-    password: 'password'
-  },
-];
-
-const DEFAULT_BUSINESSES: Business[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440001',
-    name: 'ABC Construction Co.',
-    address: '123 Main Street, City, State 12345',
-    phone: '+1 (555) 123-4567',
-    email: 'contact@abcconstruction.com',
-    adminId: '550e8400-e29b-41d4-a716-446655440004',
-    features: ['job_management', 'calendar', 'reports', 'camera'],
-    subscription: 'premium',
-    createdAt: '2024-01-01'
-  }
-];
-
-const DEFAULT_CUSTOMERS: Customer[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440006',
-    name: 'ABC Corp',
-    email: 'contact@abccorp.com',
-    phone: '+1 (555) 111-2222',
-    mobile: '+1 (555) 111-3333',
-    address: '123 Business Ave, City, State',
-    postcode: '12345',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    createdAt: '2024-01-01'
-  }
-];
-
-const DEFAULT_PRODUCTS: Product[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440008',
-    name: 'Industrial HVAC Unit',
-    category: 'HVAC Systems',
-    description: 'High-efficiency commercial HVAC system',
-    image: 'https://images.pexels.com/photos/8293778/pexels-photo-8293778.jpeg?auto=compress&cs=tinysrgb&w=400',
-    specifications: ['Cooling Capacity: 5 Tons', 'Heating Capacity: 120,000 BTU', 'Energy Rating: SEER 16'],
-    price: 2500,
-    isActive: true,
-    createdAt: '2024-01-01'
-  }
-];
-
-const DEFAULT_JOBS: Job[] = [
-  {
-    id: 'JOB-001',
-    title: 'HVAC Installation',
-    description: 'Install new HVAC system in office building',
-    status: 'completed',
-    customerId: '550e8400-e29b-41d4-a716-446655440006',
-    employeeId: '550e8400-e29b-41d4-a716-446655440005',
-    businessId: '550e8400-e29b-41d4-a716-446655440001',
-    scheduledDate: '2024-01-15T09:00:00Z',
-    completedDate: '2024-01-15T16:30:00Z',
-    quotation: 2500,
-    invoice: 2500,
-    images: [],
-    documents: [],
-    checklist: [
-      { id: '1', text: 'Site inspection', completed: true },
-      { id: '2', text: 'Equipment delivery', completed: true },
-      { id: '3', text: 'Installation', completed: true },
-      { id: '4', text: 'Testing', completed: true }
-    ],
-    createdAt: '2024-01-15T09:00:00Z'
-  }
-];
-
-const DEFAULT_NOTIFICATIONS: Notification[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-44665544000a',
-    userId: '550e8400-e29b-41d4-a716-446655440005',
-    title: 'Welcome to JobManager Pro',
-    message: 'Your account has been set up successfully!',
-    type: 'system',
-    read: false,
-    createdAt: '2024-01-01T10:00:00Z'
-  }
-];
-
-// Storage utilities with immediate persistence
-const saveToStorage = (key: string, data: any) => {
-  try {
-    const jsonData = JSON.stringify(data);
-    localStorage.setItem(key, jsonData);
-    console.log(`✅ SAVED ${key}:`, data.length || Object.keys(data).length, 'items');
-    
-    // Verify save worked
-    const verification = localStorage.getItem(key);
-    if (!verification) {
-      throw new Error('Save verification failed');
-    }
-    
-    return true;
-  } catch (error) {
-    console.error(`❌ FAILED TO SAVE ${key}:`, error);
-    return false;
-  }
-};
-
-const loadFromStorage = (key: string, defaultValue: any) => {
-  try {
-    const stored = localStorage.getItem(key);
-    if (stored && stored !== 'undefined' && stored !== 'null') {
-      const parsed = JSON.parse(stored);
-      console.log(`✅ LOADED ${key}:`, parsed.length || Object.keys(parsed).length, 'items');
-      return parsed;
-    }
-  } catch (error) {
-    console.error(`❌ FAILED TO LOAD ${key}:`, error);
-  }
-  
-  console.log(`📝 USING DEFAULT ${key}:`, defaultValue.length || Object.keys(defaultValue).length, 'items');
-  // Save defaults immediately
-  saveToStorage(key, defaultValue);
-  return defaultValue;
-};
-
 export function DataProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<User[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
@@ -223,82 +56,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Initialize data on mount
   useEffect(() => {
-    loadDataFromDatabase();
-  }, []);
-
-  const loadDataFromDatabase = async () => {
-    console.log('🚀 DataProvider: Loading data from database...');
-    setLoading(true);
+    console.log('🚀 DataProvider: Initializing...');
     
-    try {
-      // Load data from database with individual error handling
-      let loadedUsers = [];
-      let loadedBusinesses = [];
-      let loadedJobs = [];
-      
-      try {
-        loadedUsers = await DatabaseService.getUsers();
-        console.log('✅ Database users loaded:', loadedUsers.length);
-      } catch (error) {
-        console.log('⚠️ Database users not available, using localStorage');
-        loadedUsers = [];
-      }
-      
-      try {
-        loadedBusinesses = await DatabaseService.getBusinesses();
-        console.log('✅ Database businesses loaded:', loadedBusinesses.length);
-      } catch (error) {
-        console.log('⚠️ Database businesses not available, using localStorage');
-        loadedBusinesses = [];
-      }
-      
-      try {
-        loadedJobs = await DatabaseService.getJobs();
-        console.log('✅ Database jobs loaded:', loadedJobs.length);
-      } catch (error) {
-        console.log('⚠️ Database jobs not available, using localStorage');
-        loadedJobs = [];
-      }
-
-      // Fallback to localStorage for data not yet migrated
-      const loadedCustomers = loadFromStorage(STORAGE_KEYS.CUSTOMERS, DEFAULT_CUSTOMERS);
-      const loadedNotifications = loadFromStorage(STORAGE_KEYS.NOTIFICATIONS, DEFAULT_NOTIFICATIONS);
-      const loadedProducts = loadFromStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
-
-      // Set state
-      setUsers(loadedUsers.length > 0 ? loadedUsers : loadFromStorage(STORAGE_KEYS.USERS, DEFAULT_USERS));
-      setBusinesses(loadedBusinesses.length > 0 ? loadedBusinesses : loadFromStorage(STORAGE_KEYS.BUSINESSES, DEFAULT_BUSINESSES));
-      setJobs(loadedJobs.length > 0 ? loadedJobs : loadFromStorage(STORAGE_KEYS.JOBS, DEFAULT_JOBS));
-      setCustomers(loadedCustomers);
-      setNotifications(loadedNotifications);
-      setProducts(loadedProducts);
-      
-      console.log('✅ DataProvider: Data loaded successfully');
-    } catch (error) {
-      console.log('⚠️ DataProvider: Using localStorage fallback');
-      
-      // Fallback to localStorage
-      const loadedUsers = loadFromStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
-      const loadedBusinesses = loadFromStorage(STORAGE_KEYS.BUSINESSES, DEFAULT_BUSINESSES);
-      const loadedJobs = loadFromStorage(STORAGE_KEYS.JOBS, DEFAULT_JOBS);
-      const loadedCustomers = loadFromStorage(STORAGE_KEYS.CUSTOMERS, DEFAULT_CUSTOMERS);
-      const loadedNotifications = loadFromStorage(STORAGE_KEYS.NOTIFICATIONS, DEFAULT_NOTIFICATIONS);
-      const loadedProducts = loadFromStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
-
-      setUsers(loadedUsers);
-      setBusinesses(loadedBusinesses);
-      setJobs(loadedJobs);
-      setCustomers(loadedCustomers);
-      setNotifications(loadedNotifications);
-      setProducts(loadedProducts);
-    }
+    // Initialize localStorage data
+    LocalStorageService.initializeData();
+    
+    // Load all data
+    setUsers(LocalStorageService.getUsers());
+    setBusinesses(LocalStorageService.getBusinesses());
+    setJobs(LocalStorageService.getJobs());
+    setCustomers(LocalStorageService.getCustomers());
+    setNotifications(LocalStorageService.getNotifications());
+    setProducts(LocalStorageService.getProducts());
     
     setLoading(false);
-  };
+    console.log('✅ DataProvider: Initialization complete');
+  }, []);
+
   // Auto-save users whenever they change
   useEffect(() => {
     if (!loading && users.length > 0) {
-      const saved = saveToStorage(STORAGE_KEYS.USERS, users);
+      const saved = LocalStorageService.saveUsers(users);
       if (saved) {
         // Dispatch event for AuthContext
         window.dispatchEvent(new CustomEvent('usersUpdated', { detail: users }));
@@ -309,38 +87,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Auto-save other data when they change
   useEffect(() => {
     if (!loading && businesses.length > 0) {
-      saveToStorage(STORAGE_KEYS.BUSINESSES, businesses);
+      LocalStorageService.saveBusinesses(businesses);
     }
   }, [businesses, loading]);
 
   useEffect(() => {
     if (!loading && jobs.length > 0) {
-      saveToStorage(STORAGE_KEYS.JOBS, jobs);
+      LocalStorageService.saveJobs(jobs);
     }
   }, [jobs, loading]);
 
   useEffect(() => {
     if (!loading && customers.length > 0) {
-      saveToStorage(STORAGE_KEYS.CUSTOMERS, customers);
+      LocalStorageService.saveCustomers(customers);
     }
   }, [customers, loading]);
 
   useEffect(() => {
     if (!loading && notifications.length > 0) {
-      saveToStorage(STORAGE_KEYS.NOTIFICATIONS, notifications);
+      LocalStorageService.saveNotifications(notifications);
     }
   }, [notifications, loading]);
 
   useEffect(() => {
     if (!loading && products.length > 0) {
-      saveToStorage(STORAGE_KEYS.PRODUCTS, products);
+      LocalStorageService.saveProducts(products);
     }
   }, [products, loading]);
 
   const refreshData = async () => {
     console.log('🔄 Refreshing data...');
-    const loadedUsers = loadFromStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
-    setUsers(loadedUsers);
+    setUsers(LocalStorageService.getUsers());
+    setBusinesses(LocalStorageService.getBusinesses());
+    setJobs(LocalStorageService.getJobs());
+    setCustomers(LocalStorageService.getCustomers());
+    setNotifications(LocalStorageService.getNotifications());
+    setProducts(LocalStorageService.getProducts());
   };
 
   // User management with immediate persistence
@@ -348,43 +130,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      // Get current user from auth context
-      const currentUserData = JSON.parse(localStorage.getItem('current_user') || '{}');
-      
-      // Try database first, fallback to localStorage
-      try {
-        const newUser = await DatabaseService.createUser({
-          email: userData.email.trim().toLowerCase(),
-          name: userData.name.trim(),
-          role: userData.role,
-          parentId: currentUserData?.id,
-          permissions: userData.permissions || [],
-          businessId: userData.businessId,
-          password: userData.password || 'password'
-        });
-        
-        setUsers(prev => [...prev, newUser]);
-        console.log('✅ User created in database');
-      } catch (dbError) {
-        console.log('⚠️ Database creation failed, using localStorage');
-        
-        // Fallback to localStorage
-        const newUser: User = {
-          id: `user-${Date.now()}`,
-          email: userData.email.trim().toLowerCase(),
-          name: userData.name.trim(),
-          password: userData.password || 'password',
-          role: userData.role,
-          businessId: userData.businessId,
-          permissions: userData.permissions || [],
-          createdAt: new Date().toISOString(),
-          isActive: true,
-          emailVerified: false
-        };
-        
-        setUsers(prev => [...prev, newUser]);
-        console.log('✅ User created in localStorage');
-      }
+      const newUser = LocalStorageService.createUser(userData);
+      setUsers(prev => [...prev, newUser]);
       
       showSuccessMessage(`User "${userData.name}" created successfully!`);
       
@@ -397,10 +144,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (id: string, userData: Partial<User>) => {
     try {
-      // Update in database
-      await DatabaseService.updateUser(id, userData);
-      
-      // Update local state
+      LocalStorageService.updateUser(id, userData);
       setUsers(prev => prev.map(user => 
         user.id === id ? { ...user, ...userData } : user
       ));
@@ -414,10 +158,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      // Delete from database (soft delete)
-      await DatabaseService.deleteUser(id);
-      
-      // Update local state
+      LocalStorageService.deleteUser(id);
       setUsers(prev => prev.filter(user => user.id !== id));
       
       showSuccessMessage('User deleted successfully!');
@@ -430,10 +171,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Business management
   const addBusiness = async (businessData: Omit<Business, 'id' | 'createdAt'>) => {
     try {
-      // Create in database
-      const newBusiness = await DatabaseService.createBusiness(businessData);
-      
-      // Update local state
+      const newBusiness = LocalStorageService.createBusiness(businessData);
       setBusinesses(prev => [...prev, newBusiness]);
       
       showSuccessMessage(`Business "${newBusiness.name}" created successfully!`);
@@ -472,10 +210,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Job management
   const addJob = async (jobData: Omit<Job, 'id' | 'createdAt'>) => {
     try {
-      // Create in database
-      const newJob = await DatabaseService.createJob(jobData);
-      
-      // Update local state
+      const newJob = LocalStorageService.createJob(jobData);
       setJobs(prev => [...prev, newJob]);
       
       showSuccessMessage(`Job "${newJob.title}" created successfully!`);
@@ -514,20 +249,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Customer management
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt'>) => {
     try {
-      const newCustomer: Customer = {
-        id: `customer-${Date.now()}`,
-        name: customerData.name,
-        email: customerData.email || '',
-        phone: customerData.phone || '',
-        mobile: customerData.mobile || '',
-        address: customerData.address,
-        postcode: customerData.postcode,
-        businessId: customerData.businessId,
-        createdAt: new Date().toISOString()
-      };
-      
-      const updatedCustomers = [...customers, newCustomer];
-      setCustomers(updatedCustomers);
+      const newCustomer = LocalStorageService.createCustomer(customerData);
+      setCustomers(prev => [...prev, newCustomer]);
       
       showSuccessMessage(`Customer "${newCustomer.name}" added successfully!`);
     } catch (error) {
@@ -566,16 +289,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
       const newProduct: Product = {
-        id: `product-${Date.now()}`,
-        name: productData.name,
-        category: productData.category,
-        description: productData.description,
-        image: productData.image,
-        model3d: productData.model3d,
-        arModel: productData.arModel,
-        specifications: productData.specifications || [],
-        price: productData.price,
-        isActive: productData.isActive !== false,
+        id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...productData,
         createdAt: new Date().toISOString()
       };
       
@@ -619,12 +334,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addNotification = async (notificationData: Omit<Notification, 'id' | 'createdAt'>) => {
     try {
       const newNotification: Notification = {
-        id: `notification-${Date.now()}`,
-        userId: notificationData.userId,
-        title: notificationData.title,
-        message: notificationData.message,
-        type: notificationData.type,
-        read: notificationData.read || false,
+        id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...notificationData,
         createdAt: new Date().toISOString()
       };
       

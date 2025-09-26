@@ -1,22 +1,5 @@
 import React from 'react';
-import { 
-  Users, 
-  Building2, 
-  Calendar, 
-  ClipboardList, 
-  FileText, 
-  Settings, 
-  BarChart3,
-  Camera,
-  Mail,
-  Bell,
-  Package,
-  LogOut,
-  Database,
-  Headphones,
-  Code,
-  Shield
-} from 'lucide-react';
+import { Users, Building2, Calendar, ClipboardList, FileText, Settings, ChartBar as BarChart3, Camera, Mail, Bell, Package, LogOut, Headphones, Code, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModulePermissions } from '../../hooks/useModulePermissions';
 
@@ -49,7 +32,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         return [
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'users', label: 'User Management', icon: Users },
-          { id: 'database-users', label: 'Database Users', icon: Database },
           { id: 'businesses', label: 'Businesses', icon: Building2 },
           { id: 'products', label: 'Products', icon: Package },
           { id: 'ar-camera', label: 'AR Camera', icon: Headphones },
@@ -57,7 +39,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'permissions', label: 'Permissions', icon: Settings },
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'html-manager', label: 'HTML Manager', icon: Code },
-          { id: 'database-test', label: 'Database Test', icon: Database },
         ];
       case 'business':
         return [

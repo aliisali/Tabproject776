@@ -17,11 +17,9 @@ import { PermissionManagement } from './Permissions/PermissionManagement';
 import { ReportsManagement } from './Reports/ReportsManagement';
 import { ProductManagement } from './Products/ProductManagement';
 import { CustomerManagement } from './Customers/CustomerManagement';
-import { DatabaseTest } from './DatabaseTest';
 import { ARCameraModule } from './ARModule/ARCameraModule';
 import { ModulePermissions } from './Admin/ModulePermissions';
 import { AdminHTMLManager } from './Admin/AdminHTMLManager';
-import { DatabaseUserManager } from './Admin/DatabaseUserManager';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -33,7 +31,6 @@ export function MainApp() {
       switch (activeTab) {
         case 'dashboard': return <AdminDashboard />;
         case 'users': return <UserManagement />;
-        case 'database-users': return <DatabaseUserManager />;
         case 'businesses': return <BusinessManagement />;
         case 'ar-camera': return <ARCameraModule />;
         case 'module-permissions': return <ModulePermissions />;
@@ -41,7 +38,6 @@ export function MainApp() {
         case 'reports': return <ReportsManagement />;
         case 'products': return <ProductManagement />;
         case 'html-manager': return <AdminHTMLManager />;
-        case 'database-test': return <DatabaseTest />;
         default: return <AdminDashboard />;
       }
     }
