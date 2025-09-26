@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
+import { DatabaseService } from '../lib/supabase';
 import { LocalStorageService } from '../lib/storage';
 
 interface DataContextType {
@@ -53,88 +54,79 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [useDatabase, setUseDatabase] = useState(false);
 
   // Initialize data on mount
   useEffect(() => {
     console.log('🚀 DataProvider: Initializing...');
-    
-    // Initialize localStorage data
-    LocalStorageService.initializeData();
-    
-    // Load all data
-    setUsers(LocalStorageService.getUsers());
-    setBusinesses(LocalStorageService.getBusinesses());
-    setJobs(LocalStorageService.getJobs());
-    setCustomers(LocalStorageService.getCustomers());
-    setNotifications(LocalStorageService.getNotifications());
-    setProducts(LocalStorageService.getProducts());
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      // Try database first
+      console.log('🔄 Trying database connection...');
+      const dbUsers = await DatabaseService.getUsers();
+      
+      if (dbUsers && dbUsers.length > 0) {
+        console.log('✅ Database connected, loading from Supabase');
+        setUseDatabase(true);
+        
+        // Load all data from database
+        const [dbBusinesses, dbJobs, dbCustomers, dbNotifications, dbProducts] = await Promise.all([
+          DatabaseService.getBusinesses(),
+          DatabaseService.getJobs(),
+          DatabaseService.getCustomers(),
+          DatabaseService.getNotifications(),
+          DatabaseService.getProducts()
+        ]);
+        
+        setUsers(dbUsers);
+        setBusinesses(dbBusinesses);
+        setJobs(dbJobs);
+        setCustomers(dbCustomers);
+        setNotifications(dbNotifications);
+        setProducts(dbProducts);
+      } else {
+        throw new Error('No database data found');
+      }
+    } catch (error) {
+      console.log('⚠️ Database not available, using localStorage');
+      setUseDatabase(false);
+      
+      // Fallback to localStorage
+      LocalStorageService.initializeData();
+      setUsers(LocalStorageService.getUsers());
+      setBusinesses(LocalStorageService.getBusinesses());
+      setJobs(LocalStorageService.getJobs());
+      setCustomers(LocalStorageService.getCustomers());
+      setNotifications(LocalStorageService.getNotifications());
+      setProducts(LocalStorageService.getProducts());
+    }
     
     setLoading(false);
     console.log('✅ DataProvider: Initialization complete');
-  }, []);
-
-  // Auto-save users whenever they change
-  useEffect(() => {
-    if (!loading && users.length > 0) {
-      const saved = LocalStorageService.saveUsers(users);
-      if (saved) {
-        // Dispatch event for AuthContext
-        window.dispatchEvent(new CustomEvent('usersUpdated', { detail: users }));
-      }
-    }
-  }, [users, loading]);
-
-  // Auto-save other data when they change
-  useEffect(() => {
-    if (!loading && businesses.length > 0) {
-      LocalStorageService.saveBusinesses(businesses);
-    }
-  }, [businesses, loading]);
-
-  useEffect(() => {
-    if (!loading && jobs.length > 0) {
-      LocalStorageService.saveJobs(jobs);
-    }
-  }, [jobs, loading]);
-
-  useEffect(() => {
-    if (!loading && customers.length > 0) {
-      LocalStorageService.saveCustomers(customers);
-    }
-  }, [customers, loading]);
-
-  useEffect(() => {
-    if (!loading && notifications.length > 0) {
-      LocalStorageService.saveNotifications(notifications);
-    }
-  }, [notifications, loading]);
-
-  useEffect(() => {
-    if (!loading && products.length > 0) {
-      LocalStorageService.saveProducts(products);
-    }
-  }, [products, loading]);
+  };
 
   const refreshData = async () => {
     console.log('🔄 Refreshing data...');
-    setUsers(LocalStorageService.getUsers());
-    setBusinesses(LocalStorageService.getBusinesses());
-    setJobs(LocalStorageService.getJobs());
-    setCustomers(LocalStorageService.getCustomers());
-    setNotifications(LocalStorageService.getNotifications());
-    setProducts(LocalStorageService.getProducts());
+    await loadData();
   };
 
-  // User management with immediate persistence
+  // User management
   const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      const newUser = LocalStorageService.createUser(userData);
-      setUsers(prev => [...prev, newUser]);
+      if (useDatabase) {
+        const newUser = await DatabaseService.createUser(userData);
+        setUsers(prev => [...prev, newUser]);
+      } else {
+        const newUser = LocalStorageService.createUser(userData);
+        setUsers(prev => [...prev, newUser]);
+      }
       
       showSuccessMessage(`User "${userData.name}" created successfully!`);
-      
     } catch (error) {
       console.error('❌ Failed to create user:', error);
       showErrorMessage('Failed to create user. Please try again.');
@@ -144,7 +136,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (id: string, userData: Partial<User>) => {
     try {
-      LocalStorageService.updateUser(id, userData);
+      if (useDatabase) {
+        await DatabaseService.updateUser(id, userData);
+      } else {
+        LocalStorageService.updateUser(id, userData);
+      }
+      
       setUsers(prev => prev.map(user => 
         user.id === id ? { ...user, ...userData } : user
       ));
@@ -158,9 +155,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      LocalStorageService.deleteUser(id);
-      setUsers(prev => prev.filter(user => user.id !== id));
+      if (useDatabase) {
+        await DatabaseService.deleteUser(id);
+      } else {
+        LocalStorageService.deleteUser(id);
+      }
       
+      setUsers(prev => prev.filter(user => user.id !== id));
       showSuccessMessage('User deleted successfully!');
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -171,22 +172,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Business management
   const addBusiness = async (businessData: Omit<Business, 'id' | 'createdAt'>) => {
     try {
-      const newBusiness = LocalStorageService.createBusiness(businessData);
-      setBusinesses(prev => [...prev, newBusiness]);
+      if (useDatabase) {
+        const newBusiness = await DatabaseService.createBusiness(businessData);
+        setBusinesses(prev => [...prev, newBusiness]);
+      } else {
+        const newBusiness = LocalStorageService.createBusiness(businessData);
+        setBusinesses(prev => [...prev, newBusiness]);
+      }
       
-      showSuccessMessage(`Business "${newBusiness.name}" created successfully!`);
+      showSuccessMessage('Business created successfully!');
     } catch (error) {
       console.error('Error creating business:', error);
-      showErrorMessage('Failed to create business. Please try again.');
+      showErrorMessage('Failed to create business.');
     }
   };
 
   const updateBusiness = async (id: string, businessData: Partial<Business>) => {
     try {
-      const updatedBusinesses = businesses.map(business => 
+      if (useDatabase) {
+        await DatabaseService.updateBusiness(id, businessData);
+      }
+      
+      setBusinesses(prev => prev.map(business => 
         business.id === id ? { ...business, ...businessData } : business
-      );
-      setBusinesses(updatedBusinesses);
+      ));
       
       showSuccessMessage('Business updated successfully!');
     } catch (error) {
@@ -197,9 +206,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteBusiness = async (id: string) => {
     try {
-      const updatedBusinesses = businesses.filter(business => business.id !== id);
-      setBusinesses(updatedBusinesses);
+      if (useDatabase) {
+        await DatabaseService.deleteBusiness(id);
+      }
       
+      setBusinesses(prev => prev.filter(business => business.id !== id));
       showSuccessMessage('Business deleted successfully!');
     } catch (error) {
       console.error('Error deleting business:', error);
@@ -210,22 +221,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Job management
   const addJob = async (jobData: Omit<Job, 'id' | 'createdAt'>) => {
     try {
-      const newJob = LocalStorageService.createJob(jobData);
-      setJobs(prev => [...prev, newJob]);
+      if (useDatabase) {
+        const newJob = await DatabaseService.createJob(jobData);
+        setJobs(prev => [...prev, newJob]);
+      } else {
+        const newJob = LocalStorageService.createJob(jobData);
+        setJobs(prev => [...prev, newJob]);
+      }
       
-      showSuccessMessage(`Job "${newJob.title}" created successfully!`);
+      showSuccessMessage('Job created successfully!');
     } catch (error) {
       console.error('Error creating job:', error);
-      showErrorMessage('Failed to create job. Please try again.');
+      showErrorMessage('Failed to create job.');
     }
   };
 
   const updateJob = async (id: string, jobData: Partial<Job>) => {
     try {
-      const updatedJobs = jobs.map(job => 
+      if (useDatabase) {
+        await DatabaseService.updateJob(id, jobData);
+      }
+      
+      setJobs(prev => prev.map(job => 
         job.id === id ? { ...job, ...jobData } : job
-      );
-      setJobs(updatedJobs);
+      ));
       
       showSuccessMessage('Job updated successfully!');
     } catch (error) {
@@ -236,9 +255,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteJob = async (id: string) => {
     try {
-      const updatedJobs = jobs.filter(job => job.id !== id);
-      setJobs(updatedJobs);
+      if (useDatabase) {
+        await DatabaseService.deleteJob(id);
+      }
       
+      setJobs(prev => prev.filter(job => job.id !== id));
       showSuccessMessage('Job deleted successfully!');
     } catch (error) {
       console.error('Error deleting job:', error);
@@ -249,22 +270,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Customer management
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt'>) => {
     try {
-      const newCustomer = LocalStorageService.createCustomer(customerData);
-      setCustomers(prev => [...prev, newCustomer]);
+      if (useDatabase) {
+        const newCustomer = await DatabaseService.createCustomer(customerData);
+        setCustomers(prev => [...prev, newCustomer]);
+      } else {
+        const newCustomer = LocalStorageService.createCustomer(customerData);
+        setCustomers(prev => [...prev, newCustomer]);
+      }
       
-      showSuccessMessage(`Customer "${newCustomer.name}" added successfully!`);
+      showSuccessMessage('Customer added successfully!');
     } catch (error) {
       console.error('Error creating customer:', error);
-      showErrorMessage('Failed to create customer. Please try again.');
+      showErrorMessage('Failed to create customer.');
     }
   };
 
   const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
     try {
-      const updatedCustomers = customers.map(customer => 
+      if (useDatabase) {
+        await DatabaseService.updateCustomer(id, customerData);
+      }
+      
+      setCustomers(prev => prev.map(customer => 
         customer.id === id ? { ...customer, ...customerData } : customer
-      );
-      setCustomers(updatedCustomers);
+      ));
       
       showSuccessMessage('Customer updated successfully!');
     } catch (error) {
@@ -275,9 +304,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteCustomer = async (id: string) => {
     try {
-      const updatedCustomers = customers.filter(customer => customer.id !== id);
-      setCustomers(updatedCustomers);
+      if (useDatabase) {
+        await DatabaseService.deleteCustomer(id);
+      }
       
+      setCustomers(prev => prev.filter(customer => customer.id !== id));
       showSuccessMessage('Customer deleted successfully!');
     } catch (error) {
       console.error('Error deleting customer:', error);
@@ -288,28 +319,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Product management
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
-      const newProduct: Product = {
-        id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        ...productData,
-        createdAt: new Date().toISOString()
-      };
+      if (useDatabase) {
+        const newProduct = await DatabaseService.createProduct(productData);
+        setProducts(prev => [...prev, newProduct]);
+      } else {
+        const newProduct: Product = {
+          id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          ...productData,
+          createdAt: new Date().toISOString()
+        };
+        setProducts(prev => [...prev, newProduct]);
+      }
       
-      const updatedProducts = [...products, newProduct];
-      setProducts(updatedProducts);
-      
-      showSuccessMessage(`Product "${newProduct.name}" added successfully!`);
+      showSuccessMessage('Product added successfully!');
     } catch (error) {
       console.error('Error creating product:', error);
-      showErrorMessage('Failed to create product. Please try again.');
+      showErrorMessage('Failed to create product.');
     }
   };
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
     try {
-      const updatedProducts = products.map(product => 
+      if (useDatabase) {
+        await DatabaseService.updateProduct(id, productData);
+      }
+      
+      setProducts(prev => prev.map(product => 
         product.id === id ? { ...product, ...productData } : product
-      );
-      setProducts(updatedProducts);
+      ));
       
       showSuccessMessage('Product updated successfully!');
     } catch (error) {
@@ -320,9 +357,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
-      const updatedProducts = products.filter(product => product.id !== id);
-      setProducts(updatedProducts);
+      if (useDatabase) {
+        await DatabaseService.deleteProduct(id);
+      }
       
+      setProducts(prev => prev.filter(product => product.id !== id));
       showSuccessMessage('Product deleted successfully!');
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -333,14 +372,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Notification management
   const addNotification = async (notificationData: Omit<Notification, 'id' | 'createdAt'>) => {
     try {
-      const newNotification: Notification = {
-        id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        ...notificationData,
-        createdAt: new Date().toISOString()
-      };
-      
-      const updatedNotifications = [...notifications, newNotification];
-      setNotifications(updatedNotifications);
+      if (useDatabase) {
+        const newNotification = await DatabaseService.createNotification(notificationData);
+        setNotifications(prev => [...prev, newNotification]);
+      } else {
+        const newNotification: Notification = {
+          id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          ...notificationData,
+          createdAt: new Date().toISOString()
+        };
+        setNotifications(prev => [...prev, newNotification]);
+      }
     } catch (error) {
       console.error('Error creating notification:', error);
     }
@@ -348,10 +390,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const markNotificationRead = async (id: string) => {
     try {
-      const updatedNotifications = notifications.map(notification => 
+      if (useDatabase) {
+        await DatabaseService.markNotificationRead(id);
+      }
+      
+      setNotifications(prev => prev.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification
-      );
-      setNotifications(updatedNotifications);
+      ));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }

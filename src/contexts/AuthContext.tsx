@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+import { DatabaseService } from '../lib/supabase';
 import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
@@ -15,12 +16,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [useDatabase, setUseDatabase] = useState(false);
 
   useEffect(() => {
     console.log('🚀 AuthContext: Initializing...');
-    
-    // Initialize localStorage data
-    LocalStorageService.initializeData();
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = async () => {
+    try {
+      // Try database first
+      console.log('🔄 Checking database connection...');
+      const dbUsers = await DatabaseService.getUsers();
+      
+      if (dbUsers && dbUsers.length > 0) {
+        console.log('✅ Database available');
+        setUseDatabase(true);
+      } else {
+        throw new Error('Database not available');
+      }
+    } catch (error) {
+      console.log('⚠️ Database not available, using localStorage');
+      setUseDatabase(false);
+      LocalStorageService.initializeData();
+    }
     
     // Check for stored user session
     const storedUser = localStorage.getItem('current_user');
@@ -29,9 +48,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const parsedUser = JSON.parse(storedUser);
         console.log('✅ AuthContext: Found stored session for:', parsedUser.email);
         
-        // Verify user still exists in users list
-        const users = LocalStorageService.getUsers();
-        const userExists = users.find(u => u.id === parsedUser.id && u.isActive);
+        // Verify user still exists
+        let userExists = false;
+        if (useDatabase) {
+          try {
+            const dbUsers = await DatabaseService.getUsers();
+            userExists = dbUsers.some(u => u.id === parsedUser.id && u.is_active);
+          } catch (error) {
+            console.log('Database verification failed, checking localStorage');
+          }
+        }
+        
+        if (!userExists) {
+          const users = LocalStorageService.getUsers();
+          userExists = users.some(u => u.id === parsedUser.id && u.isActive);
+        }
+        
         if (userExists) {
           setUser(parsedUser);
         } else {
@@ -46,21 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setIsLoading(false);
     console.log('✅ AuthContext: Initialization complete');
-  }, []);
-
-  // Listen for user updates from DataContext
-  useEffect(() => {
-    const handleUsersUpdate = (event: any) => {
-      console.log('🔄 AuthContext: Users updated, refreshing list');
-    };
-
-    window.addEventListener('usersUpdated', handleUsersUpdate);
-    return () => window.removeEventListener('usersUpdated', handleUsersUpdate);
-  }, []);
-
-  // Function to update users list when new users are added
-  const updateUsersList = (users: User[]) => {
-    console.log('📝 AuthContext: Updating users list:', users.length);
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -68,42 +85,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      // Get fresh users from localStorage
-      const currentUsers = LocalStorageService.getUsers();
-      console.log('🔍 AuthContext: Checking against', currentUsers.length, 'users');
+      let foundUser = null;
       
-      // Find user by email (case insensitive)
-      const foundUser = currentUsers.find(u => 
-        u.email.toLowerCase() === email.toLowerCase() && u.isActive
-      );
-      
-      if (foundUser) {
-        console.log('👤 AuthContext: Found user:', foundUser.name, foundUser.role);
-        
-        // Check password
-        const passwordMatch = foundUser.password === password || password === 'password';
-        
-        if (passwordMatch) {
-          console.log('✅ AuthContext: Password correct, logging in');
-          setUser(foundUser);
-          
-          // Save session
-          try {
-            localStorage.setItem('current_user', JSON.stringify(foundUser));
-            console.log('✅ AuthContext: Session saved');
-          } catch (error) {
-            console.error('❌ AuthContext: Failed to save session:', error);
-          }
-          
-          setIsLoading(false);
-          return true;
-        } else {
-          console.log('❌ AuthContext: Password incorrect');
+      // Try database first
+      if (useDatabase) {
+        try {
+          foundUser = await DatabaseService.authenticateUser(email, password);
+          console.log('🔍 Database authentication result:', foundUser ? 'success' : 'failed');
+        } catch (error) {
+          console.log('Database auth failed, trying localStorage');
         }
-      } else {
-        console.log('❌ AuthContext: User not found or inactive');
       }
       
+      // Fallback to localStorage
+      if (!foundUser) {
+        const currentUsers = LocalStorageService.getUsers();
+        foundUser = currentUsers.find(u => 
+          u.email.toLowerCase() === email.toLowerCase() && 
+          u.isActive &&
+          (u.password === password || password === 'password')
+        );
+        console.log('🔍 localStorage authentication result:', foundUser ? 'success' : 'failed');
+      }
+      
+      if (foundUser) {
+        console.log('✅ AuthContext: Login successful for:', foundUser.name, foundUser.role);
+        setUser(foundUser);
+        
+        // Save session
+        try {
+          localStorage.setItem('current_user', JSON.stringify(foundUser));
+          console.log('✅ AuthContext: Session saved');
+        } catch (error) {
+          console.error('❌ AuthContext: Failed to save session:', error);
+        }
+        
+        setIsLoading(false);
+        return true;
+      }
+      
+      console.log('❌ AuthContext: Login failed');
       setIsLoading(false);
       return false;
     } catch (error) {
@@ -122,6 +143,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('❌ AuthContext: Failed to clear session:', error);
     }
+  };
+
+  const updateUsersList = (users: User[]) => {
+    console.log('📝 AuthContext: Updating users list:', users.length);
   };
 
   return (

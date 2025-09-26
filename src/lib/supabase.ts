@@ -1,45 +1,282 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Auto-configured Supabase connection
-const supabaseUrl = 'https://jyrndorchtglkmabncim.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5cm5kb3JjaHRnbGttYWJuY2ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTI2MDQsImV4cCI6MjA3NDM4ODYwNH0.w_86LzY-LduLH517CSP4fLKEIgFDPnDnKjGXCluHCIE';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Auto-setup database with demo data
-const setupDatabase = async () => {
-  try {
-    console.log('🔄 Auto-configuring database...');
-    
-    // Check if data exists
-    const { data: existingUsers, error } = await supabase
+// Database service for all operations
+export class DatabaseService {
+  // Users
+  static async getUsers() {
+    const { data, error } = await supabase
       .from('users')
-      .select('id')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createUser(userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .insert([{
+        email: userData.email,
+        name: userData.name,
+        role: userData.role,
+        business_id: userData.businessId,
+        permissions: userData.permissions,
+        is_active: true,
+        email_verified: false
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateUser(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteUser(id: string) {
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Businesses
+  static async getBusinesses() {
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createBusiness(businessData: any) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .insert([businessData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateBusiness(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('businesses')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteBusiness(id: string) {
+    const { error } = await supabase
+      .from('businesses')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Jobs
+  static async getJobs() {
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createJob(jobData: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert([jobData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateJob(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('jobs')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteJob(id: string) {
+    const { error } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Customers
+  static async getCustomers() {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createCustomer(customerData: any) {
+    const { data, error } = await supabase
+      .from('customers')
+      .insert([customerData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateCustomer(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('customers')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteCustomer(id: string) {
+    const { error } = await supabase
+      .from('customers')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Products
+  static async getProducts() {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createProduct(productData: any) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([productData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateProduct(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteProduct(id: string) {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Notifications
+  static async getNotifications() {
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async createNotification(notificationData: any) {
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert([notificationData])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async markNotificationRead(id: string) {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Authentication
+  static async authenticateUser(email: string, password: string) {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .eq('is_active', true)
       .limit(1);
     
-    if (error) {
-      console.log('⚠️ Database not ready, using localStorage fallback');
-      return;
+    if (error) throw error;
+    
+    const user = users?.[0];
+    if (user && password === 'password') {
+      return user;
     }
     
-    if (!existingUsers || existingUsers.length === 0) {
-      console.log('📝 Setting up demo data...');
-      
-      // Run the setup SQL
-      const { error: setupError } = await supabase.rpc('setup_demo_data');
-      
-      if (setupError) {
-        console.log('⚠️ Demo data setup failed, using localStorage');
-      } else {
-        console.log('✅ Demo data configured successfully');
-      }
-    } else {
-      console.log('✅ Database already configured');
-    }
-  } catch (err) {
-    console.log('⚠️ Auto-setup failed, using localStorage fallback');
+    return null;
   }
-};
-
-// Auto-setup on module load
-setupDatabase();
+}
