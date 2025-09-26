@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
-  Clock,
-  MapPin,
-  User,
-  Plus,
-  Edit,
-  Eye
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, User, Plus, CreditCard as Edit, Eye } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 
 export function CalendarView() {
