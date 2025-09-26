@@ -19,7 +19,6 @@ export function ProductManagement() {
     price: ''
   });
 
-  const categories = ['HVAC Systems', 'Electrical', 'Plumbing', 'Tools', 'Safety Equipment'];
   const categories = ['Window Blinds', 'Smart Blinds', 'Venetian Blinds', 'Roller Blinds', 'Vertical Blinds', 'Roman Blinds'];
 
   const filteredProducts = products.filter(product => {
