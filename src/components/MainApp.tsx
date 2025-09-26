@@ -17,7 +17,7 @@ import { PermissionManagement } from './Permissions/PermissionManagement';
 import { ReportsManagement } from './Reports/ReportsManagement';
 import { ProductManagement } from './Products/ProductManagement';
 import { CustomerManagement } from './Customers/CustomerManagement';
-import { ARCameraModule } from './ARModule/ARCameraModule';
+import ARCameraModule from './ARModule/ARCameraModule';
 import { ModulePermissions } from './Admin/ModulePermissions';
 import { AdminHTMLManager } from './Admin/AdminHTMLManager';
 import { ModelConverter } from './Admin/ModelConverter';
