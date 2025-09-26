@@ -1,13 +1,23 @@
 {
-  "name": "jobmanager-pro-complete",
+  "name": "jobmanager-pro",
   "private": true,
-  "version": "1.2.0",
+  "version": "2.1.0",
   "type": "module",
+  "description": "Complete Business Management Platform with AI-Powered 3D AR Model Conversion System",
+  "keywords": ["business-management", "job-tracking", "3d-ar", "ai-conversion", "react", "typescript"],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/jobmanager-pro.git"
+  },
+  "homepage": "https://yourusername.github.io/jobmanager-pro",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
@@ -23,6 +33,7 @@
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.11",
+    "gh-pages": "^6.1.1",
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
