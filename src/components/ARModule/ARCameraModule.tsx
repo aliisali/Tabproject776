@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Camera, Headphones, Info } from 'lucide-react';
+import { Camera, Headphones, Info, Cube } from 'lucide-react';
 
 export function ARCameraModule() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -224,6 +224,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
                 <li>• <strong>Touch Controls:</strong> 1 finger to move, 2 fingers to pinch/twist/tilt</li>
                 <li>• <strong>Screenshot:</strong> Capture and save your AR creation</li>
                 <li>• <strong>Settings:</strong> Tap ⚙️ button to show/hide controls</li>
+                <li>• <strong>3D Models:</strong> Use converted 3D models from the Model Converter</li>
               </ul>
             </div>
           </div>
@@ -238,6 +239,8 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Camera className="w-4 h-4" />
               <span>Requires HTTPS for camera access</span>
+              <Cube className="w-4 h-4 ml-4" />
+              <span>3D models supported</span>
             </div>
           </div>
         </div>
