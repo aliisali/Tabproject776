@@ -60,13 +60,12 @@
 - 🗄️ **Supabase** for database and authentication
 - 🔐 **Row Level Security** for data protection
 
-### **Database & Security**
-- 🗄️ **PostgreSQL** via Supabase for permanent storage
-- 🔐 **Row Level Security** policies for secure access
-- 👥 **User Hierarchy** with parent-child relationships
-- 📊 **Activity Logging** for audit trails
+### **Storage & Security**
+- 💾 **localStorage** for reliable data persistence
+- 🔐 **Role-based Security** for access control
+- 👥 **User Management** with proper permissions
 - 🔄 **Context API** for state management
-- 🛡️ **Database-level Access Control**
+- 🛡️ **Client-side Validation** and security
 
 ### **Advanced Features**
 - 📷 **WebRTC Camera API** for VR/AR

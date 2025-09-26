@@ -390,9 +390,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const markNotificationRead = async (id: string) => {
     try {
-      if (useDatabase) {
-        await DatabaseService.markNotificationRead(id);
-      }
+      LocalStorageService.markNotificationRead(id);
       
       setNotifications(prev => prev.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification

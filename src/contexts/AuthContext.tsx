@@ -85,28 +85,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      let foundUser = null;
-      
-      // Try database first
-      if (useDatabase) {
-        try {
-          foundUser = await DatabaseService.authenticateUser(email, password);
-          console.log('🔍 Database authentication result:', foundUser ? 'success' : 'failed');
-        } catch (error) {
-          console.log('Database auth failed, trying localStorage');
-        }
-      }
-      
-      // Fallback to localStorage
-      if (!foundUser) {
-        const currentUsers = LocalStorageService.getUsers();
-        foundUser = currentUsers.find(u => 
-          u.email.toLowerCase() === email.toLowerCase() && 
-          u.isActive &&
-          (u.password === password || password === 'password')
-        );
-        console.log('🔍 localStorage authentication result:', foundUser ? 'success' : 'failed');
-      }
+      const currentUsers = LocalStorageService.getUsers();
+      const foundUser = currentUsers.find(u => 
+        u.email.toLowerCase() === email.toLowerCase() && 
+        u.isActive &&
+        (u.password === password || password === 'password')
+      );
+      console.log('🔍 localStorage authentication result:', foundUser ? 'success' : 'failed');
       
       if (foundUser) {
         console.log('✅ AuthContext: Login successful for:', foundUser.name, foundUser.role);

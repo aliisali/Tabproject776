@@ -209,6 +209,98 @@ export class LocalStorageService {
     return this.saveUsers(updatedUsers);
   }
 
+  static updateBusiness(id: string, updates: Partial<Business>): boolean {
+    const businesses = this.getBusinesses();
+    const updatedBusinesses = businesses.map(business => 
+      business.id === id ? { ...business, ...updates } : business
+    );
+    return this.saveBusinesses(updatedBusinesses);
+  }
+
+  static deleteBusiness(id: string): boolean {
+    const businesses = this.getBusinesses();
+    const updatedBusinesses = businesses.filter(business => business.id !== id);
+    return this.saveBusinesses(updatedBusinesses);
+  }
+
+  static updateJob(id: string, updates: Partial<Job>): boolean {
+    const jobs = this.getJobs();
+    const updatedJobs = jobs.map(job => 
+      job.id === id ? { ...job, ...updates } : job
+    );
+    return this.saveJobs(updatedJobs);
+  }
+
+  static deleteJob(id: string): boolean {
+    const jobs = this.getJobs();
+    const updatedJobs = jobs.filter(job => job.id !== id);
+    return this.saveJobs(updatedJobs);
+  }
+
+  static updateCustomer(id: string, updates: Partial<Customer>): boolean {
+    const customers = this.getCustomers();
+    const updatedCustomers = customers.map(customer => 
+      customer.id === id ? { ...customer, ...updates } : customer
+    );
+    return this.saveCustomers(updatedCustomers);
+  }
+
+  static deleteCustomer(id: string): boolean {
+    const customers = this.getCustomers();
+    const updatedCustomers = customers.filter(customer => customer.id !== id);
+    return this.saveCustomers(updatedCustomers);
+  }
+
+  static createProduct(productData: Omit<Product, 'id' | 'createdAt'>): Product {
+    const products = this.getProducts();
+    const newProduct: Product = {
+      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...productData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedProducts = [...products, newProduct];
+    this.saveProducts(updatedProducts);
+    
+    return newProduct;
+  }
+
+  static updateProduct(id: string, updates: Partial<Product>): boolean {
+    const products = this.getProducts();
+    const updatedProducts = products.map(product => 
+      product.id === id ? { ...product, ...updates } : product
+    );
+    return this.saveProducts(updatedProducts);
+  }
+
+  static deleteProduct(id: string): boolean {
+    const products = this.getProducts();
+    const updatedProducts = products.filter(product => product.id !== id);
+    return this.saveProducts(updatedProducts);
+  }
+
+  static createNotification(notificationData: Omit<Notification, 'id' | 'createdAt'>): Notification {
+    const notifications = this.getNotifications();
+    const newNotification: Notification = {
+      id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...notificationData,
+      createdAt: new Date().toISOString()
+    };
+    
+    const updatedNotifications = [...notifications, newNotification];
+    this.saveNotifications(updatedNotifications);
+    
+    return newNotification;
+  }
+
+  static markNotificationRead(id: string): boolean {
+    const notifications = this.getNotifications();
+    const updatedNotifications = notifications.map(notification => 
+      notification.id === id ? { ...notification, read: true } : notification
+    );
+    return this.saveNotifications(updatedNotifications);
+  }
+
   // Businesses
   static getBusinesses(): Business[] {
     return loadFromStorage(STORAGE_KEYS.BUSINESSES, DEFAULT_BUSINESSES);

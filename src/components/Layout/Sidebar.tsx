@@ -35,7 +35,6 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           { id: 'businesses', label: 'Businesses', icon: Building2 },
           { id: 'products', label: 'Products', icon: Package },
           { id: 'ar-camera', label: 'AR Camera', icon: Headphones },
-          { id: 'module-permissions', label: 'Module Permissions', icon: Shield },
           { id: 'permissions', label: 'Permissions', icon: Settings },
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'html-manager', label: 'HTML Manager', icon: Code },

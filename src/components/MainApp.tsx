@@ -33,7 +33,6 @@ export function MainApp() {
         case 'users': return <UserManagement />;
         case 'businesses': return <BusinessManagement />;
         case 'ar-camera': return <ARCameraModule />;
-        case 'module-permissions': return <ModulePermissions />;
         case 'permissions': return <PermissionManagement />;
         case 'reports': return <ReportsManagement />;
         case 'products': return <ProductManagement />;
