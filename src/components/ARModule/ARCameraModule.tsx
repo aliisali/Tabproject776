@@ -199,7 +199,7 @@ status.textContent='Controls hidden. Tap ⚙️ to open. Upload image, backgroun
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="mb-8">
         <div className="flex items-center space-x-3 mb-4">
           <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">

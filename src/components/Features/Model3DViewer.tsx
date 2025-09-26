@@ -135,7 +135,7 @@ export function Model3DViewer() {
 
   if (!hasPermission) {
     return (
-      <div className="p-6">
+      <div className="min-h-full bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
           <Cube className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">3D Model Viewer</h2>
@@ -151,7 +151,7 @@ export function Model3DViewer() {
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">3D Model Viewer</h1>
         <p className="text-gray-600 mt-2">View and interact with 3D models</p>
