@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Eye, Trash2, Send, Clock, CheckCircle, X, Search, Filter } from 'lucide-react';
+import { Mail, Eye, Trash2, Send, Clock, CheckCircle, X, Search, Filter, Plus, Settings, Globe } from 'lucide-react';
 import { EmailService } from '../../services/EmailService';
 
 interface DemoEmail {
@@ -17,16 +17,85 @@ export function EmailManager() {
   const [emails, setEmails] = useState<DemoEmail[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<DemoEmail | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [newEmail, setNewEmail] = useState({
+    to: '',
+    cc: '',
+    bcc: '',
+    subject: '',
+    message: '',
+    isHTML: false
+  });
+  const [smtpSettings, setSMTPSettings] = useState({
+    host: 'mail.blindscloud.co.uk',
+    port: 587,
+    secure: false,
+    username: 'admin@blindscloud.co.uk',
+    password: ''
+  });
 
   useEffect(() => {
     loadEmails();
+    loadSMTPSettings();
   }, []);
 
   const loadEmails = () => {
     const demoEmails = EmailService.getDemoEmails();
     setEmails(demoEmails);
+  };
+
+  const loadSMTPSettings = () => {
+    try {
+      const stored = localStorage.getItem('smtp_settings');
+      if (stored) {
+        setSMTPSettings(JSON.parse(stored));
+      }
+    } catch (error) {
+      console.error('Failed to load SMTP settings:', error);
+    }
+  };
+
+  const saveSMTPSettings = () => {
+    try {
+      localStorage.setItem('smtp_settings', JSON.stringify(smtpSettings));
+      setShowSettingsModal(false);
+      showSuccessMessage('SMTP settings saved successfully!');
+    } catch (error) {
+      console.error('Failed to save SMTP settings:', error);
+    }
+  };
+
+  const handleSendEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const success = await EmailService.sendCustomEmail({
+        to: newEmail.to,
+        subject: newEmail.subject,
+        message: newEmail.message,
+        isHTML: newEmail.isHTML,
+        cc: newEmail.cc ? newEmail.cc.split(',').map(email => email.trim()) : undefined,
+        bcc: newEmail.bcc ? newEmail.bcc.split(',').map(email => email.trim()) : undefined
+      });
+      
+      if (success) {
+        setNewEmail({
+          to: '',
+          cc: '',
+          bcc: '',
+          subject: '',
+          message: '',
+          isHTML: false
+        });
+        setShowComposeModal(false);
+        loadEmails(); // Refresh email list
+      }
+    } catch (error) {
+      console.error('Failed to send email:', error);
+    }
   };
 
   const deleteEmail = (emailId: string) => {
@@ -89,6 +158,20 @@ export function EmailManager() {
           <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
             {emails.length} emails sent
           </span>
+          <button
+            onClick={() => setShowComposeModal(true)}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Compose Email
+          </button>
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <Settings className="w-5 h-5 mr-2" />
+            SMTP Settings
+          </button>
           <button
             onClick={clearAllEmails}
             className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -253,6 +336,262 @@ export function EmailManager() {
                   <div dangerouslySetInnerHTML={{ __html: selectedEmail.htmlBody }} />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Compose Email Modal */}
+      {showComposeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">Compose Email</h3>
+              <button
+                onClick={() => setShowComposeModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSendEmail} className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-blue-900">From: admin@blindscloud.co.uk</span>
+                </div>
+                <p className="text-blue-700 text-sm mt-1">BlindsCloud Solutions Ltd.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  To *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={newEmail.to}
+                  onChange={(e) => setNewEmail({...newEmail, to: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="recipient@example.com"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    CC
+                  </label>
+                  <input
+                    type="text"
+                    value={newEmail.cc}
+                    onChange={(e) => setNewEmail({...newEmail, cc: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="email1@example.com, email2@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    BCC
+                  </label>
+                  <input
+                    type="text"
+                    value={newEmail.bcc}
+                    onChange={(e) => setNewEmail({...newEmail, bcc: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="bcc@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newEmail.subject}
+                  onChange={(e) => setNewEmail({...newEmail, subject: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Email subject"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Message *
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={newEmail.isHTML}
+                      onChange={(e) => setNewEmail({...newEmail, isHTML: e.target.checked})}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">HTML Format</span>
+                  </label>
+                </div>
+                <textarea
+                  required
+                  rows={8}
+                  value={newEmail.message}
+                  onChange={(e) => setNewEmail({...newEmail, message: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder={newEmail.isHTML ? "Enter HTML content..." : "Type your message here..."}
+                />
+                {newEmail.isHTML && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    You can use HTML tags for formatting (e.g., &lt;b&gt;bold&lt;/b&gt;, &lt;br&gt; for line breaks)
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowComposeModal(false)}
+                  className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Email
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* SMTP Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900">SMTP Email Settings</h3>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-900 mb-2">Current Configuration</h4>
+                <p className="text-blue-800 text-sm">
+                  Emails will be sent from: <strong>admin@blindscloud.co.uk</strong>
+                </p>
+                <p className="text-blue-700 text-xs mt-1">
+                  Configure your domain's SMTP settings below
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SMTP Host *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={smtpSettings.host}
+                  onChange={(e) => setSMTPSettings({...smtpSettings, host: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="mail.blindscloud.co.uk"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Port *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={smtpSettings.port}
+                    onChange={(e) => setSMTPSettings({...smtpSettings, port: parseInt(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="587"
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-center space-x-2 mt-8">
+                    <input
+                      type="checkbox"
+                      checked={smtpSettings.secure}
+                      onChange={(e) => setSMTPSettings({...smtpSettings, secure: e.target.checked})}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700">Use SSL/TLS</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Username *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={smtpSettings.username}
+                  onChange={(e) => setSMTPSettings({...smtpSettings, username: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="admin@blindscloud.co.uk"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Password *
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={smtpSettings.password}
+                  onChange={(e) => setSMTPSettings({...smtpSettings, password: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Your email password"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Use an app-specific password for better security
+                </p>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 className="font-medium text-yellow-900 mb-2">⚠️ Security Note</h4>
+                <p className="text-yellow-800 text-sm">
+                  In production, SMTP credentials should be stored securely on the server, not in the browser.
+                  This is for demonstration purposes only.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-6">
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveSMTPSettings}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Settings
+              </button>
             </div>
           </div>
         </div>
