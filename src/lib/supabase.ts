@@ -18,9 +18,22 @@ export class DatabaseService {
     return supabase !== null;
   }
 
+  // Check if Supabase has valid credentials configured
+  static hasValidCredentials(): boolean {
+    return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co'));
+  }
+
   // Authentication
   static async signIn(email: string, password: string) {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using fallback authentication');
+      throw new Error('Supabase not configured');
+    }
+    
+    if (!this.hasValidCredentials()) {
+      console.warn('⚠️ Supabase credentials invalid, using fallback authentication');
+      throw new Error('Invalid Supabase credentials');
+    }
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -28,7 +41,7 @@ export class DatabaseService {
     });
     
     if (error) {
-      console.error('Supabase auth error:', error);
+      console.error('❌ Supabase auth error:', error.message);
       throw error;
     }
     

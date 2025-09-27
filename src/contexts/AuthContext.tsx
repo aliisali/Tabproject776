@@ -75,8 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       let foundUser = null;
       
-      // Try Supabase authentication first
-      if (DatabaseService.isAvailable()) {
+      // Try Supabase authentication first (only if properly configured)
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
         try {
           console.log('🗄️ Trying Supabase authentication...');
           const authResponse = await DatabaseService.signIn(email, password);
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (supabaseError) {
-          console.log('Supabase auth failed, trying API:', supabaseError);
+          console.log('⚠️ Supabase auth failed, trying API fallback:', supabaseError);
         }
       }
       
@@ -114,13 +114,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('✅ API authentication successful');
           }
         } catch (apiError) {
-          console.log('API auth failed, trying localStorage:', apiError);
+          console.log('⚠️ API auth failed, trying localStorage fallback:', apiError);
         }
       }
       
       // Fallback to localStorage authentication
       if (!foundUser) {
-        console.log('Trying localStorage authentication...');
+        console.log('📱 Trying localStorage authentication...');
         try {
           const users = LocalStorageService.getUsers();
           foundUser = users.find(u => 
@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('✅ localStorage authentication successful');
           }
         } catch (localError) {
-          console.error('localStorage auth failed:', localError);
+          console.error('❌ localStorage auth failed:', localError);
         }
       }
 
