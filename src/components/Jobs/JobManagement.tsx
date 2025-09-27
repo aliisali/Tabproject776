@@ -123,41 +123,42 @@ export function JobManagement() {
     setNewJob({
       title: job.title,
       description: job.description,
-      customerName: '',
+      customerName: job.customerId, // This would need to be resolved to customer name
       customerEmail: '',
       customerPhone: '',
       customerMobile: '',
       customerAddress: '',
       customerPostcode: '',
-      scheduledDate: job.scheduledDate,
-      quotation: job.quotation.toString()
+      scheduledDate: job.scheduledDate.slice(0, 16), // Format for datetime-local input
+      quotation: job.quotation?.toString() || ''
     });
   };
 
   const handleUpdateJob = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const updatedJobData = {
-      ...editingJob,
-      ...newJob,
-      quotation: parseFloat(newJob.quotation) || 0
-    };
-    
-    updateJob(editingJob.id, updatedJobData);
-    
-    setEditingJob(null);
-    setNewJob({
-      title: '',
-      description: '',
-      customerName: '',
-      customerEmail: '',
-      customerPhone: '',
-      customerMobile: '',
-      customerAddress: '',
-      customerPostcode: '',
-      scheduledDate: '',
-      quotation: ''
-    });
+    if (editingJob) {
+      const updatedJobData = {
+        ...newJob,
+        quotation: parseFloat(newJob.quotation) || 0,
+      };
+      
+      updateJob(editingJob.id, updatedJobData);
+      
+      setEditingJob(null);
+      setNewJob({
+        title: '',
+        description: '',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        customerMobile: '',
+        customerAddress: '',
+        customerPostcode: '',
+        scheduledDate: '',
+        quotation: ''
+      });
+    }
   };
 
   const canEditJob = (job: any) => {
@@ -364,7 +365,7 @@ export function JobManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Description *
+                  Description *
                 </label>
                 <textarea
                   required
@@ -464,7 +465,7 @@ export function JobManagement() {
                     Scheduled Date *
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     required
                     value={newJob.scheduledDate}
                     onChange={(e) => setNewJob({...newJob, scheduledDate: e.target.value})}
@@ -475,11 +476,12 @@ export function JobManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quotation Amount
+                  Quotation ($)
                 </label>
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   value={newJob.quotation}
                   onChange={(e) => setNewJob({...newJob, quotation: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
