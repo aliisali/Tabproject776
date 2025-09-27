@@ -2,12 +2,12 @@ import { User, Business, Job, Customer, Product, Notification } from '../types';
 
 // Storage keys with version to prevent conflicts
 const STORAGE_KEYS = {
-  USERS: 'blindscloud_users_v5',
-  BUSINESSES: 'blindscloud_businesses_v5',
-  JOBS: 'blindscloud_jobs_v5',
-  CUSTOMERS: 'blindscloud_customers_v5',
-  NOTIFICATIONS: 'blindscloud_notifications_v5',
-  PRODUCTS: 'blindscloud_products_v5'
+  USERS: 'blindscloud_users_v6',
+  BUSINESSES: 'blindscloud_businesses_v6',
+  JOBS: 'blindscloud_jobs_v6',
+  CUSTOMERS: 'blindscloud_customers_v6',
+  NOTIFICATIONS: 'blindscloud_notifications_v6',
+  PRODUCTS: 'blindscloud_products_v6'
 };
 
 // Migration function to handle domain changes
