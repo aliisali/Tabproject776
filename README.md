@@ -1,5 +1,14 @@
 # 🚀 BlindsCloud v1.3 - Advanced Business Management Platform
 
+[![Deploy to GitHub Pages](https://github.com/yourusername/blindscloud-platform/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/yourusername/blindscloud-platform/actions)
+
+## 🚀 Quick Deploy to GitHub
+
+1. **Fork this repository** to your GitHub account
+2. **Enable GitHub Pages** in repository settings
+3. **Push changes** - automatic deployment via GitHub Actions
+4. **Access your site** at `https://yourusername.github.io/blindscloud-platform/`
+
 ## ✨ **LATEST UPDATE - 3D AR Models + Email System!**
 
 ### 🔥 **What's New in v1.3:**
