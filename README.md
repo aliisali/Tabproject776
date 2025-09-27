@@ -472,7 +472,7 @@ JobManager Pro v1.3 is now a complete, enterprise-grade business management plat
 
 **BlindsCloud** is a complete, professional-grade business management platform ready for immediate deployment and use. With its advanced VR/AR capabilities, 3D model conversion, comprehensive user management, and modern design, it represents the future of business operations software.
 
-**🔗 Live Application**: https://www.blindscloud.co.uk
+**🔗 Live Application**: https://blindscloud.co.uk
 
 **🚀 Professional Blinds Business Management Platform**
 
