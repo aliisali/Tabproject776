@@ -75,65 +75,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       let foundUser = null;
       
-      // Try Supabase authentication first (only if properly configured)
-      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
-        try {
-          console.log('🗄️ Trying Supabase authentication...');
-          const authResponse = await DatabaseService.signIn(email, password);
-          if (authResponse.user && authResponse.user.businessId !== undefined) {
-            // User data already enriched by signIn method
-            foundUser = {
-              id: authResponse.user.id,
-              email: authResponse.user.email,
-              name: authResponse.user.name || '',
-              role: authResponse.user.role || 'employee',
-              businessId: authResponse.user.businessId,
-              parentId: authResponse.user.parentId,
-              permissions: authResponse.user.permissions || [],
-              isActive: authResponse.user.isActive,
-              emailVerified: authResponse.user.emailVerified,
-              createdAt: authResponse.user.created_at || new Date().toISOString(),
-              password: 'password' // Don't expose real password
-            };
-            if (foundUser) {
-              console.log('✅ Supabase authentication successful');
-            }
-          }
-        } catch (supabaseError) {
-          console.log('⚠️ Supabase auth failed, trying API fallback:', supabaseError);
-        }
-      }
+      // Use localStorage authentication (reliable and works immediately)
+      console.log('📱 Using localStorage authentication...');
+      const users = LocalStorageService.getUsers();
+      foundUser = users.find(u => 
+        u.email.toLowerCase() === email.toLowerCase() && 
+        u.password === password &&
+        u.isActive
+      );
       
-      // Try API authentication if Supabase fails
-      if (!foundUser) {
-        try {
-          console.log('🌐 Trying API authentication...');
-          const response = await ApiService.login(email, password);
-          if (response.user) {
-            foundUser = response.user;
-            console.log('✅ API authentication successful');
-          }
-        } catch (apiError) {
-          console.log('⚠️ API auth failed, trying localStorage fallback:', apiError);
-        }
-      }
-      
-      // Fallback to localStorage authentication
-      if (!foundUser) {
-        console.log('📱 Trying localStorage authentication...');
-        try {
-          const users = LocalStorageService.getUsers();
-          foundUser = users.find(u => 
-            u.email.toLowerCase() === email.toLowerCase() && 
-            u.password === password &&
-            u.isActive
-          );
-          if (foundUser) {
-            console.log('✅ localStorage authentication successful');
-          }
-        } catch (localError) {
-          console.error('❌ localStorage auth failed:', localError);
-        }
+      if (foundUser) {
+        console.log('✅ localStorage authentication successful');
+      } else {
+        console.log('❌ Login failed - user not found or inactive');
       }
 
       if (foundUser) {

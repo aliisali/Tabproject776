@@ -15,24 +15,19 @@ export const supabase = supabaseUrl && supabaseAnonKey
 export class DatabaseService {
   // Check if Supabase is available
   static isAvailable(): boolean {
-    return supabase !== null;
+    return supabase !== null && supabaseUrl && supabaseAnonKey;
   }
 
   // Check if Supabase has valid credentials configured
   static hasValidCredentials(): boolean {
-    return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co'));
+    return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co') && supabaseAnonKey.length > 20);
   }
 
   // Authentication
   static async signIn(email: string, password: string) {
-    if (!supabase) {
-      console.warn('⚠️ Supabase not configured, using fallback authentication');
+    if (!supabase || !this.hasValidCredentials()) {
+      console.log('⚠️ Supabase not properly configured, skipping database auth');
       throw new Error('Supabase not configured');
-    }
-    
-    if (!this.hasValidCredentials()) {
-      console.warn('⚠️ Supabase credentials invalid, using fallback authentication');
-      throw new Error('Invalid Supabase credentials');
     }
     
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -133,19 +128,20 @@ export class DatabaseService {
 
   // Users CRUD
   static async getUsers() {
-    if (!supabase) throw new Error('Supabase not configured');
+    if (!supabase || !this.hasValidCredentials()) {
+      console.log('⚠️ Supabase not configured, using localStorage');
+      throw new Error('Supabase not configured');
+    }
     
     const { data, error } = await supabase
       .from('users')
-      .select(`
-        *,
-        business:businesses!users_business_id_fkey(name),
-        parent:users!parent_id(name, email, role),
-        created_by_user:users!created_by(name, email)
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase users query failed:', error);
+      throw error;
+    }
     
     // Transform data to match frontend interface
     return data.map(user => ({

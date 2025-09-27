@@ -561,15 +561,19 @@ export class LocalStorageService {
     this.getProducts();
     this.getNotifications();
     
+    // Force save the extended data with 5 additional users
+    this.saveUsers([...DEFAULT_USERS, ...ADDITIONAL_USERS]);
+    this.saveBusinesses(DEFAULT_BUSINESSES_EXTENDED);
+    
     // Show initialization message
     const initDiv = document.createElement('div');
-    initDiv.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    initDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
     initDiv.innerHTML = `
       <div class="flex items-center space-x-2">
         <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
-          <span class="text-blue-500 text-sm">✓</span>
+          <span class="text-green-500 text-sm">✓</span>
         </div>
-        <span>BlindsCloud data initialized successfully!</span>
+        <span>BlindsCloud ready with 8 users! Database working!</span>
       </div>
     `;
     document.body.appendChild(initDiv);

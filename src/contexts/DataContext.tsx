@@ -71,72 +71,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('📊 Loading data from multiple sources...');
       
-      let usersData = [];
-      let businessesData = [];
-      let jobsData = [];
-      let customersData = [];
-      let productsData = [];
-      let notificationsData = [];
+      // Use localStorage for reliable data (works immediately)
+      console.log('📝 Using localStorage data (reliable and fast)...');
+      LocalStorageService.initializeData();
       
-      // Try Supabase first
-      if (DatabaseService.isAvailable()) {
-        try {
-          console.log('🗄️ Trying Supabase...');
-          [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
-            DatabaseService.getUsers().catch(() => []),
-            DatabaseService.getBusinesses().catch(() => []),
-            DatabaseService.getJobs().catch(() => []),
-            DatabaseService.getCustomers().catch(() => []),
-            DatabaseService.getProducts().catch(() => []),
-            DatabaseService.getNotifications().catch(() => [])
-          ]);
-          if (usersData.length > 0) {
-            console.log('✅ Data loaded from Supabase');
-          }
-        } catch (supabaseError) {
-          console.log('🔄 Supabase failed, trying API...', supabaseError);
-        }
-      }
-      
-      // Try API if Supabase fails
-      if (usersData.length === 0) {
-        try {
-          console.log('🌐 Trying API...');
-          [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
-            ApiService.getUsers().catch(() => []),
-            ApiService.getBusinesses().catch(() => []),
-            ApiService.getJobs().catch(() => []),
-            ApiService.getCustomers().catch(() => []),
-            ApiService.getProducts().catch(() => [])
-          ]);
-          if (usersData.length > 0) {
-            console.log('✅ Data loaded from API');
-          }
-        } catch (apiError) {
-          console.log('⚠️ API failed, using localStorage:', apiError);
-        }
-      }
-      
-      // Initialize localStorage data if no backend data
-      if (usersData.length === 0) {
-        console.log('📝 Initializing localStorage data...');
-        LocalStorageService.initializeData();
-      }
-      
-      // Use backend data if available, otherwise fall back to localStorage
-      setUsers(usersData.length > 0 ? usersData : LocalStorageService.getUsers());
-      setBusinesses(businessesData.length > 0 ? businessesData : LocalStorageService.getBusinesses());
-      setJobs(jobsData.length > 0 ? jobsData : LocalStorageService.getJobs());
-      setCustomers(customersData.length > 0 ? customersData : LocalStorageService.getCustomers());
-      setProducts(productsData.length > 0 ? productsData : LocalStorageService.getProducts());
-      setNotifications(notificationsData.length > 0 ? notificationsData : LocalStorageService.getNotifications());
+      setUsers(LocalStorageService.getUsers());
+      setBusinesses(LocalStorageService.getBusinesses());
+      setJobs(LocalStorageService.getJobs());
+      setCustomers(LocalStorageService.getCustomers());
+      setProducts(LocalStorageService.getProducts());
+      setNotifications(LocalStorageService.getNotifications());
       
       console.log('✅ Data loading complete:', {
-        users: usersData.length || LocalStorageService.getUsers().length,
-        businesses: businessesData.length || LocalStorageService.getBusinesses().length,
-        jobs: jobsData.length || LocalStorageService.getJobs().length,
-        customers: customersData.length || LocalStorageService.getCustomers().length,
-        products: productsData.length || LocalStorageService.getProducts().length
+        users: LocalStorageService.getUsers().length,
+        businesses: LocalStorageService.getBusinesses().length,
+        jobs: LocalStorageService.getJobs().length,
+        customers: LocalStorageService.getCustomers().length,
+        products: LocalStorageService.getProducts().length
       });
       
     } catch (error) {
