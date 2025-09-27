@@ -50,4 +50,4 @@ databases:
   - name: blindscloud-db
     databaseName: blindscloud
     user: blindscloud_user
-    plan: starter
+    plan: free
