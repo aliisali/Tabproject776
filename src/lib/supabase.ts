@@ -126,7 +126,7 @@ export class DatabaseService {
       .from('users')
       .select(`
         *,
-        business:businesses(name),
+        business:businesses!users_business_id_fkey(name),
         parent:users!parent_id(name, email, role),
         created_by_user:users!created_by(name, email)
       `)
@@ -356,7 +356,7 @@ export class DatabaseService {
         *,
         customer:customers(name, email, phone, address),
         employee:users!employee_id(name, email),
-        business:businesses(name)
+        business:businesses!jobs_business_id_fkey(name)
       `)
       .order('scheduled_date', { ascending: false });
     
