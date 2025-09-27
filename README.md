@@ -1,13 +1,15 @@
-# 🚀 BlindsCloud v1.3 - Advanced Business Management Platform
+# 🚀 BlindsCloud v1.3 - Professional Blinds Business Management Platform
 
-[![Deploy to GitHub Pages](https://github.com/yourusername/blindscloud-platform/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)](https://github.com/yourusername/blindscloud-platform/actions)
+[![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-blindscloud.co.uk-blue.svg)](https://blindscloud.co.uk)
+[![Backend API](https://img.shields.io/badge/API-api.blindscloud.co.uk-green.svg)](https://api.blindscloud.co.uk/health)
 
-## 🚀 Quick Deploy to GitHub
+## 🚀 Quick Deploy to Production
 
-1. **Push to GitHub** - `git push origin main`
-2. **Connect to Render** - Link your GitHub repository
-3. **Auto-deploy** - Render will deploy frontend + backend + database
-4. **Access your site** at your custom Render URL
+1. **Push to GitHub** - Follow the commands below
+2. **Deploy to Render** - Use our automated render.yaml
+3. **Connect Custom Domain** - Point blindscloud.co.uk to Render
+4. **Access your platform** at https://blindscloud.co.uk
 
 ## ✨ **LATEST UPDATE - 3D AR Models + Email System!**
 
