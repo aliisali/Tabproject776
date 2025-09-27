@@ -602,12 +602,12 @@ export function EmailManager() {
         <div className="flex items-start space-x-3">
           <Mail className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-blue-800">
-            <h3 className="font-semibold mb-2">📧 Email System Information</h3>
+            <h3 className="font-semibold mb-2">📧 Domain Migration Notice</h3>
             <ul className="space-y-1 text-sm">
-              <li>• <strong>Welcome Emails:</strong> Automatically sent when new users are created</li>
-              <li>• <strong>Password Reset:</strong> Sent when admin/business changes user passwords</li>
-              <li>• <strong>Demo Mode:</strong> Emails are stored locally for demonstration</li>
-              <li>• <strong>Production:</strong> Would integrate with SendGrid, AWS SES, or similar service</li>
+              <li>• <strong>Custom Domain:</strong> If you added a custom domain in Render, data may reset</li>
+              <li>• <strong>Data Migration:</strong> System automatically migrates data between domains</li>
+              <li>• <strong>Backup:</strong> Always backup important data before domain changes</li>
+              <li>• <strong>Refresh:</strong> Reload the page if users don't appear after domain change</li>
             </ul>
           </div>
         </div>

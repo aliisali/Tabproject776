@@ -2,12 +2,77 @@ import { User, Business, Job, Customer, Product, Notification } from '../types';
 
 // Storage keys with version to prevent conflicts
 const STORAGE_KEYS = {
-  USERS: 'jobmanager_users_v4',
-  BUSINESSES: 'jobmanager_businesses_v4',
-  JOBS: 'jobmanager_jobs_v4',
-  CUSTOMERS: 'jobmanager_customers_v4',
-  NOTIFICATIONS: 'jobmanager_notifications_v4',
-  PRODUCTS: 'jobmanager_products_v4'
+  USERS: 'blindscloud_users_v5',
+  BUSINESSES: 'blindscloud_businesses_v5',
+  JOBS: 'blindscloud_jobs_v5',
+  CUSTOMERS: 'blindscloud_customers_v5',
+  NOTIFICATIONS: 'blindscloud_notifications_v5',
+  PRODUCTS: 'blindscloud_products_v5'
+};
+
+// Migration function to handle domain changes
+const migrateOldData = () => {
+  console.log('🔄 Checking for data migration...');
+  
+  // Check for old data with different keys
+  const oldKeys = [
+    'jobmanager_users_v4',
+    'jobmanager_businesses_v4', 
+    'jobmanager_jobs_v4',
+    'jobmanager_customers_v4',
+    'jobmanager_notifications_v4',
+    'jobmanager_products_v4'
+  ];
+  
+  const newKeys = [
+    STORAGE_KEYS.USERS,
+    STORAGE_KEYS.BUSINESSES,
+    STORAGE_KEYS.JOBS,
+    STORAGE_KEYS.CUSTOMERS,
+    STORAGE_KEYS.NOTIFICATIONS,
+    STORAGE_KEYS.PRODUCTS
+  ];
+  
+  let migrated = false;
+  
+  oldKeys.forEach((oldKey, index) => {
+    const oldData = localStorage.getItem(oldKey);
+    const newKey = newKeys[index];
+    const newData = localStorage.getItem(newKey);
+    
+    if (oldData && !newData) {
+      console.log(`📦 Migrating ${oldKey} to ${newKey}`);
+      localStorage.setItem(newKey, oldData);
+      localStorage.removeItem(oldKey);
+      migrated = true;
+    }
+  });
+  
+  if (migrated) {
+    console.log('✅ Data migration completed successfully');
+    showMigrationMessage();
+  }
+};
+
+// Show migration success message
+const showMigrationMessage = () => {
+  const migrationDiv = document.createElement('div');
+  migrationDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+  migrationDiv.innerHTML = `
+    <div class="flex items-center space-x-2">
+      <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+        <span class="text-green-500 text-sm">✓</span>
+      </div>
+      <span>Data migrated to new domain successfully!</span>
+    </div>
+  `;
+  document.body.appendChild(migrationDiv);
+  
+  setTimeout(() => {
+    if (document.body.contains(migrationDiv)) {
+      document.body.removeChild(migrationDiv);
+    }
+  }, 5000);
 };
 
 // Default data with proper UUIDs
@@ -472,6 +537,11 @@ export class LocalStorageService {
   // Initialize all data
   static initializeData(): void {
     console.log('🚀 Initializing localStorage data...');
+    
+    // First, try to migrate old data
+    migrateOldData();
+    
+    // Then initialize with defaults if needed
     this.getUsers();
     this.getBusinesses();
     this.getJobs();
@@ -479,5 +549,36 @@ export class LocalStorageService {
     this.getProducts();
     this.getNotifications();
     console.log('✅ All data initialized successfully');
+  }
+  
+  // Force data refresh - useful after domain changes
+  static forceRefresh(): void {
+    console.log('🔄 Force refreshing all data...');
+    
+    // Check if we have any data, if not, reinitialize
+    const hasUsers = localStorage.getItem(STORAGE_KEYS.USERS);
+    const hasBusinesses = localStorage.getItem(STORAGE_KEYS.BUSINESSES);
+    
+    if (!hasUsers || !hasBusinesses) {
+      console.log('📝 No data found, reinitializing defaults...');
+      this.saveUsers(DEFAULT_USERS);
+      this.saveBusinesses(DEFAULT_BUSINESSES);
+      this.saveJobs(DEFAULT_JOBS);
+      this.saveCustomers(DEFAULT_CUSTOMERS);
+      this.saveProducts(DEFAULT_PRODUCTS);
+      this.saveNotifications(DEFAULT_NOTIFICATIONS);
+      
+      // Show success message
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      successDiv.textContent = 'Data reinitialized for new domain!';
+      document.body.appendChild(successDiv);
+      
+      setTimeout(() => {
+        if (document.body.contains(successDiv)) {
+          document.body.removeChild(successDiv);
+        }
+      }, 4000);
+    }
   }
 }

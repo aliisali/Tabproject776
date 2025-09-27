@@ -60,6 +60,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Initialize data on mount
   useEffect(() => {
     console.log('🚀 DataProvider: Initializing...');
+    
+    // Force refresh data to handle domain changes
+    LocalStorageService.forceRefresh();
+    
     loadData();
   }, []);
 
