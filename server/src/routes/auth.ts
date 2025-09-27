@@ -44,11 +44,9 @@ router.post('/login', [
       throw new Error('JWT_SECRET environment variable is required');
     }
     
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      jwtSecret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
-    );
+    const payload = { userId: user.id, email: user.email, role: user.role };
+    const options: jwt.SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || '7d' };
+    const token = jwt.sign(payload, jwtSecret, options);
 
     // Save session
     await pool.query(
