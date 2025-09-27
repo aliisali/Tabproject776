@@ -1,12 +1,9 @@
-/// <reference types="node" />
-import express from 'express';
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
-import * as process from 'process';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import businessRoutes from './routes/businesses';
@@ -53,7 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -72,7 +69,7 @@ app.use('/api/products', authenticateToken, productRoutes);
 app.use('/api/uploads', authenticateToken, uploadRoutes);
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Server error:', err);
   res.status(500).json({ 
     error: 'Internal server error',
@@ -81,7 +78,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('*', (req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 

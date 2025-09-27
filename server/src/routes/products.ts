@@ -1,5 +1,4 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest, requireRole } from '../middleware/auth';
@@ -31,7 +30,7 @@ router.post('/', [
   body('name').isLength({ min: 2 }),
   body('category').isLength({ min: 2 }),
   body('price').isNumeric()
-], requireRole(['admin']), async (req: AuthRequest, res) => {
+], requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -76,7 +75,7 @@ router.post('/', [
 });
 
 // Update product
-router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -128,7 +127,7 @@ router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
 });
 
 // Delete product
-router.delete('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.delete('/:id', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

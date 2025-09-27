@@ -1,5 +1,4 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest, requireRole } from '../middleware/auth';
@@ -36,7 +35,7 @@ router.post('/', [
   body('name').isLength({ min: 2 }),
   body('address').isLength({ min: 5 }),
   body('email').isEmail().normalizeEmail()
-], requireRole(['admin']), async (req: AuthRequest, res) => {
+], requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -71,7 +70,7 @@ router.post('/', [
 });
 
 // Update business
-router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -122,7 +121,7 @@ router.put('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
 });
 
 // Delete business
-router.delete('/:id', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.delete('/:id', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

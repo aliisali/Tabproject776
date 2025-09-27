@@ -1,5 +1,4 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest } from '../middleware/auth';
@@ -40,7 +39,7 @@ router.post('/', [
   body('name').isLength({ min: 2 }),
   body('address').isLength({ min: 5 }),
   body('postcode').isLength({ min: 3 })
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -75,7 +74,7 @@ router.post('/', [
 });
 
 // Update customer
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -134,7 +133,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 });
 
 // Delete customer
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

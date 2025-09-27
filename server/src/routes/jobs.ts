@@ -1,5 +1,4 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest } from '../middleware/auth';
@@ -57,7 +56,7 @@ router.post('/', [
   body('description').isLength({ min: 5 }),
   body('customerId').isUUID(),
   body('scheduledDate').isISO8601()
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -109,7 +108,7 @@ router.post('/', [
 });
 
 // Update job
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -174,7 +173,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 });
 
 // Delete job
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

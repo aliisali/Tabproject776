@@ -1,5 +1,4 @@
-import express from 'express';
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
@@ -38,71 +37,64 @@ router.post('/', [
   body('password').isLength({ min: 6 }),
   body('name').isLength({ min: 2 }),
   body('role').isIn(['admin', 'business', 'employee'])
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, name, role, businessId, permissions = [] } = req.body;
+    const {
+      title,
+      description,
+      customerId,
+      employeeId,
+      scheduledDate,
+      quotation,
+      checklist = []
+    } = req.body;
 
-    // Check permissions
-    if (req.user?.role !== 'admin' && req.user?.role !== 'business') {
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
+    // Generate job ID
+    const jobId = `JOB-${Date.now().toString().slice(-6)}`;
 
-    // Business users can only create employees
-    if (req.user?.role === 'business' && role !== 'employee') {
-      return res.status(403).json({ error: 'Business users can only create employees' });
-    }
+    // Use user's business ID
+    const businessId = req.user?.businessId;
 
-    // Check if user already exists
-    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Set business ID for employees created by business users
-    const finalBusinessId = req.user?.role === 'business' ? req.user.businessId : businessId;
-
-    // Create user
-    const userResult = await pool.query(
-      `INSERT INTO users (email, name, password_hash, role, business_id, parent_id, permissions, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [email, name, passwordHash, role, finalBusinessId, req.user?.id, permissions, req.user?.id]
+    const result = await pool.query(
+      `INSERT INTO jobs (id, title, description, customer_id, employee_id, business_id, scheduled_date, quotation, checklist)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [jobId, title, description, customerId, employeeId, businessId, scheduledDate, quotation, JSON.stringify(checklist)]
     );
 
-    const newUser = userResult.rows[0];
+    const newJob = result.rows[0];
     
     // Log activity
-    await logActivity(req.user!.id, 'user_created', 'user', newUser.id, req);
+    await logActivity(req.user!.id, 'job_created', 'job', newJob.id, req);
 
-    const { password_hash, ...userWithoutPassword } = newUser;
     res.status(201).json({
-      user: {
-        ...userWithoutPassword,
-        businessId: newUser.business_id,
-        parentId: newUser.parent_id
+      job: {
+        ...newJob,
+        customerId: newJob.customer_id,
+        employeeId: newJob.employee_id,
+        businessId: newJob.business_id,
+        scheduledDate: newJob.scheduled_date,
+        completedDate: newJob.completed_date
       }
     });
 
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: 'Failed to create user' });
+    console.error('Error creating job:', error);
+    res.status(500).json({ error: 'Failed to create job' });
   }
 });
 
 // Update user
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updates = req.body;
 
-    // Check permissions
+    // Check if user can update this user
     if (req.user?.role !== 'admin' && req.user?.id !== id) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -158,7 +150,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 });
 
 // Delete user
-router.delete('/:id', requireRole(['admin', 'business']), async (req: AuthRequest, res) => {
+router.delete('/:id', requireRole(['admin', 'business']), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 

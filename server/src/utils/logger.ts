@@ -1,14 +1,12 @@
-/// <reference types="node" />
-import express from 'express';
+import { Request } from 'express';
 import { pool } from '../server';
-import * as process from 'process';
 
 export const logActivity = async (
   userId: string,
   action: string,
   targetType: string,
   targetId: string,
-  req: express.Request,
+  req: Request,
   details?: any
 ) => {
   try {
