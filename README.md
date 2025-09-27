@@ -4,10 +4,10 @@
 
 ## 🚀 Quick Deploy to GitHub
 
-1. **Fork this repository** to your GitHub account
-2. **Enable GitHub Pages** in repository settings
-3. **Push changes** - automatic deployment via GitHub Actions
-4. **Access your site** at `https://yourusername.github.io/blindscloud-platform/`
+1. **Push to GitHub** - `git push origin main`
+2. **Connect to Render** - Link your GitHub repository
+3. **Auto-deploy** - Render will deploy frontend + backend + database
+4. **Access your site** at your custom Render URL
 
 ## ✨ **LATEST UPDATE - 3D AR Models + Email System!**
 

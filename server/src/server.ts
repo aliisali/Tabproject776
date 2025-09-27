@@ -86,4 +86,5 @@ app.listen(PORT, () => {
   console.log(`🚀 BlindsCloud Backend running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
   console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL}`);
+  console.log(`🌐 Server binding to: 0.0.0.0:${PORT}`);
 });
