@@ -80,9 +80,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           console.log('🗄️ Trying Supabase authentication...');
           const authResponse = await DatabaseService.signIn(email, password);
-          if (authResponse.user) {
-            const users = await DatabaseService.getUsers();
-            foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+          if (authResponse.user && authResponse.user.businessId !== undefined) {
+            // User data already enriched by signIn method
+            foundUser = {
+              id: authResponse.user.id,
+              email: authResponse.user.email,
+              name: authResponse.user.name || '',
+              role: authResponse.user.role || 'employee',
+              businessId: authResponse.user.businessId,
+              parentId: authResponse.user.parentId,
+              permissions: authResponse.user.permissions || [],
+              isActive: authResponse.user.isActive,
+              emailVerified: authResponse.user.emailVerified,
+              createdAt: authResponse.user.created_at || new Date().toISOString(),
+              password: 'password' // Don't expose real password
+            };
             if (foundUser) {
               console.log('✅ Supabase authentication successful');
             }

@@ -281,11 +281,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      // Create user via multiple backends
-      await saveToMultipleSources('create', 'user', userData);
+      // Try Supabase first (with auth integration)
+      let newUser = null;
       
-      // Create user locally for immediate UI update
-      const newUser = LocalStorageService.createUser(userData);
+      if (DatabaseService.isAvailable()) {
+        try {
+          console.log('🗄️ Creating user via Supabase with auth...');
+          const authResponse = await DatabaseService.signUp(userData.email, userData.password, userData);
+          
+          if (authResponse.user) {
+            // Get the complete user data
+            const users = await DatabaseService.getUsers();
+            newUser = users.find(u => u.id === authResponse.user.id);
+            console.log('✅ User created via Supabase with auth');
+          }
+        } catch (supabaseError) {
+          console.log('Supabase user creation failed, trying API:', supabaseError);
+        }
+      }
+      
+      // Fallback to API or localStorage
+      if (!newUser) {
+        await saveToMultipleSources('create', 'user', userData);
+        newUser = LocalStorageService.createUser(userData);
+      }
       
       setUsers(prev => [...prev, newUser]);
       

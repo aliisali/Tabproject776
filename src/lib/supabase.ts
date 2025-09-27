@@ -27,7 +27,37 @@ export class DatabaseService {
       password
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase auth error:', error);
+      throw error;
+    }
+    
+    // Get the user data from our custom users table
+    if (data.user) {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+        throw userError;
+      }
+      
+      return {
+        ...data,
+        user: {
+          ...data.user,
+          ...userData,
+          businessId: userData.business_id,
+          parentId: userData.parent_id,
+          isActive: userData.is_active,
+          emailVerified: userData.email_verified
+        }
+      };
+    }
+    
     return data;
   }
 
@@ -38,12 +68,39 @@ export class DatabaseService {
       email,
       password,
       options: {
-        data: userData,
+        data: {
+          name: userData.name,
+          role: userData.role || 'employee'
+        },
         emailRedirectTo: undefined // Disable email confirmation for demo
       }
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase signup error:', error);
+      throw error;
+    }
+    
+    // The trigger will automatically create the users table entry
+    // But we need to update it with additional data
+    if (data.user) {
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          name: userData.name,
+          role: userData.role || 'employee',
+          business_id: userData.businessId,
+          permissions: userData.permissions || [],
+          parent_id: userData.parentId,
+          created_by: userData.createdBy
+        })
+        .eq('id', data.user.id);
+      
+      if (updateError) {
+        console.error('Error updating user data:', updateError);
+      }
+    }
+    
     return data;
   }
 
