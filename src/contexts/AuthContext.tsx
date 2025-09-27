@@ -73,30 +73,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      // Try API authentication first
       let foundUser = null;
       
-      try {
-        const response = await ApiService.login(email, password);
-        if (response.user) {
-          foundUser = response.user;
-          console.log('✅ API authentication successful');
-        }
-      } catch (apiError) {
-        console.log('API auth failed, trying Supabase:', apiError);
-        
-        // Try Supabase authentication
-        if (DatabaseService.isAvailable()) {
-          try {
-            const authResponse = await DatabaseService.signIn(email, password);
-            if (authResponse.user) {
-              const users = await DatabaseService.getUsers();
-              foundUser = users.find(u => u.email === email);
+      // Try Supabase authentication first
+      if (DatabaseService.isAvailable()) {
+        try {
+          console.log('🗄️ Trying Supabase authentication...');
+          const authResponse = await DatabaseService.signIn(email, password);
+          if (authResponse.user) {
+            const users = await DatabaseService.getUsers();
+            foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+            if (foundUser) {
               console.log('✅ Supabase authentication successful');
             }
-          } catch (supabaseError) {
-            console.log('Supabase auth failed, trying localStorage:', supabaseError);
           }
+        } catch (supabaseError) {
+          console.log('Supabase auth failed, trying API:', supabaseError);
+        }
+      }
+      
+      // Try API authentication if Supabase fails
+      if (!foundUser) {
+        try {
+          console.log('🌐 Trying API authentication...');
+          const response = await ApiService.login(email, password);
+          if (response.user) {
+            foundUser = response.user;
+            console.log('✅ API authentication successful');
+          }
+        } catch (apiError) {
+          console.log('API auth failed, trying localStorage:', apiError);
         }
       }
       
