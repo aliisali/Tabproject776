@@ -299,7 +299,7 @@ The JobManager Pro Team
     businessName?: string;
   }): Promise<boolean> {
     try {
-      const loginUrl = window.location.origin;
+      const loginUrl = getFrontendUrl();
       const template = this.getWelcomeEmailTemplate({
         ...userData,
         loginUrl

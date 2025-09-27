@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { getApiUrl } from '../lib/config';
+
+const API_BASE_URL = getApiUrl();
 
 export class ApiService {
   private static getAuthHeaders() {
