@@ -99,6 +99,23 @@ class ApiService {
     return this.handleResponse(response);
   }
 
+  static async updateBusiness(id: string, businessData: any) {
+    const response = await fetch(`${API_BASE_URL}/businesses/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(businessData)
+    });
+    return this.handleResponse(response);
+  }
+
+  static async deleteBusiness(id: string) {
+    const response = await fetch(`${API_BASE_URL}/businesses/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+    return this.handleResponse(response);
+  }
+
   // Jobs endpoints
   static async getJobs() {
     const response = await fetch(`${API_BASE_URL}/jobs`, {

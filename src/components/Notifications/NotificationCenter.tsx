@@ -55,7 +55,6 @@ export function NotificationCenter() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex flex-wrap gap-2">
           {[
-            { id: 'all', label: 'All', count: mockNotifications.length },
             { id: 'all', label: 'All', count: notifications.length },
             { id: 'unread', label: 'Unread', count: unreadCount },
             { id: 'job', label: 'Jobs', count: notifications.filter(n => n.type === 'job').length },

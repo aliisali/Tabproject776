@@ -68,6 +68,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const loadData = async () => {
     try {
+      // Initialize localStorage data first
+      LocalStorageService.initializeData();
+      
       // Load data from backend API
       const [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
         ApiService.getUsers().catch(() => []),
@@ -77,14 +80,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ApiService.getProducts().catch(() => [])
       ]);
       
-      setUsers(usersData);
-      setBusinesses(businessesData);
-      setJobs(jobsData);
-      setCustomers(customersData);
-      setProducts(productsData);
-      setNotifications([]); // Will be loaded separately
+      // Use backend data if available, otherwise fall back to localStorage
+      setUsers(usersData.length > 0 ? usersData : LocalStorageService.getUsers());
+      setBusinesses(businessesData.length > 0 ? businessesData : LocalStorageService.getBusinesses());
+      setJobs(jobsData.length > 0 ? jobsData : LocalStorageService.getJobs());
+      setCustomers(customersData.length > 0 ? customersData : LocalStorageService.getCustomers());
+      setProducts(productsData.length > 0 ? productsData : LocalStorageService.getProducts());
+      setNotifications(LocalStorageService.getNotifications());
     } catch (error) {
       console.error('Error loading data:', error);
+      // Fall back to localStorage if API fails
+      setUsers(LocalStorageService.getUsers());
+      setBusinesses(LocalStorageService.getBusinesses());
+      setJobs(LocalStorageService.getJobs());
+      setCustomers(LocalStorageService.getCustomers());
+      setProducts(LocalStorageService.getProducts());
+      setNotifications(LocalStorageService.getNotifications());
     }
     
     setLoading(false);
@@ -321,10 +332,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
     try {
-      LocalStorageService.updateProduct(id, productData);
+      const response = await ApiService.updateProduct(id, productData);
+      const updatedProduct = response.product;
       
       setProducts(prev => prev.map(product => 
-        product.id === id ? { ...product, ...productData } : product
+        product.id === id ? updatedProduct : product
       ));
       
       showSuccessMessage('Product updated successfully!');
@@ -336,7 +348,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
-      LocalStorageService.deleteProduct(id);
+      await ApiService.deleteProduct(id);
       
       setProducts(prev => prev.filter(product => product.id !== id));
       showSuccessMessage('Product deleted successfully!');

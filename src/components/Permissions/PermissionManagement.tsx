@@ -88,21 +88,21 @@ export function PermissionManagement() {
       name: 'Administrator',
       description: 'Full platform access with all permissions',
       permissions: ['all'],
-      userCount: 3
+      userCount: users.filter(u => u.role === 'admin').length
     },
     {
       id: 'business',
       name: 'Business Manager',
       description: 'Manage business operations, employees, and jobs',
       permissions: ['manage_employees', 'view_dashboard', 'create_jobs', 'manage_customers', 'view_calendar'],
-      userCount: 12
+      userCount: users.filter(u => u.role === 'business').length
     },
     {
       id: 'employee',
       name: 'Field Employee',
       description: 'Handle job tasks, capture data, and manage schedules',
       permissions: ['create_jobs', 'manage_tasks', 'capture_signatures', 'view_dashboard', 'view_calendar'],
-      userCount: 45
+      userCount: users.filter(u => u.role === 'employee').length
     }
   ];
 

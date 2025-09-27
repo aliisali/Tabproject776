@@ -45,46 +45,47 @@ router.post('/', [
     }
 
     const {
-      title,
-      description,
-      customerId,
-      employeeId,
-      scheduledDate,
-      quotation,
-      checklist = []
+      email,
+      password,
+      name,
+      role,
+      businessId,
+      permissions = []
     } = req.body;
 
-    // Generate job ID
-    const jobId = `JOB-${Date.now().toString().slice(-6)}`;
+    // Check if user already exists
+    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
 
-    // Use user's business ID
-    const businessId = req.user?.businessId;
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
 
-    const result = await pool.query(
-      `INSERT INTO jobs (id, title, description, customer_id, employee_id, business_id, scheduled_date, quotation, checklist)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [jobId, title, description, customerId, employeeId, businessId, scheduledDate, quotation, JSON.stringify(checklist)]
+    // Create user
+    const userResult = await pool.query(
+      `INSERT INTO users (email, name, password_hash, role, business_id, permissions, is_active, email_verified)
+       VALUES ($1, $2, $3, $4, $5, $6, true, false) RETURNING *`,
+      [email, name, passwordHash, role, businessId || null, permissions]
     );
 
-    const newJob = result.rows[0];
+    const newUser = userResult.rows[0];
     
     // Log activity
-    await logActivity(req.user!.id, 'job_created', 'job', newJob.id, req);
+    await logActivity(req.user!.id, 'user_created', 'user', newUser.id, req);
 
+    const { password_hash, ...userWithoutPassword } = newUser;
     res.status(201).json({
-      job: {
-        ...newJob,
-        customerId: newJob.customer_id,
-        employeeId: newJob.employee_id,
-        businessId: newJob.business_id,
-        scheduledDate: newJob.scheduled_date,
-        completedDate: newJob.completed_date
+      user: {
+        ...userWithoutPassword,
+        businessId: newUser.business_id,
+        parentId: newUser.parent_id
       }
     });
 
   } catch (error) {
-    console.error('Error creating job:', error);
-    res.status(500).json({ error: 'Failed to create job' });
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Failed to create user' });
   }
 });
 

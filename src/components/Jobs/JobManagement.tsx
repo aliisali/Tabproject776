@@ -329,11 +329,6 @@ export function JobManagement() {
                     title: '',
                     description: '',
                     customerId: '',
-                    scheduledDate: '',
-                    quotation: ''
-                  });
-                }}
-                className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -410,76 +405,6 @@ export function JobManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Postcode *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newJob.customerPostcode}
-                  onChange={(e) => setNewJob({...newJob, customerPostcode: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="12345"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={newJob.description}
-                  onChange={(e) => setNewJob({...newJob, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe the job details"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Customer ID *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newJob.customerId}
-                    onChange={(e) => setNewJob({...newJob, customerId: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Customer ID or name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Scheduled Date *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={newJob.scheduledDate}
-                    onChange={(e) => setNewJob({...newJob, scheduledDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quotation Amount
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={newJob.quotation}
-                  onChange={(e) => setNewJob({...newJob, quotation: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                />
-              </div>
-
               <div className="flex justify-end space-x-3 pt-6">
                 <button
                   type="button"

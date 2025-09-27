@@ -118,6 +118,49 @@ export function UserManagement() {
     }
   };
 
+  const handleUpdateUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    handleUpdateUserAsync();
+  };
+
+  const handleUpdateUserAsync = async () => {
+    if (editingUser) {
+      try {
+        // Validate passwords match if password is being changed
+        if (editUser.password && editUser.password !== editUser.confirmPassword) {
+          alert('Passwords do not match!');
+          return;
+        }
+        
+        const updatedData = {
+          name: editUser.name,
+          email: editUser.email,
+          role: editUser.role,
+          businessId: editUser.businessId || null,
+          permissions: editUser.permissions,
+          ...(editUser.password && { password: editUser.password })
+        };
+        
+        await updateUser(editingUser.id, updatedData);
+        
+        setShowEditModal(false);
+        setEditingUser(null);
+        setEditUser({
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          role: 'employee',
+          businessId: '',
+          permissions: []
+        });
+      } catch (error) {
+        console.error('Error updating user:', error);
+      }
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
