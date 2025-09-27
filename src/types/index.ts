@@ -40,19 +40,97 @@ export interface Job {
   id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  jobType: 'measurement' | 'installation';
+  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'tbd' | 'awaiting-deposit' | 'awaiting-payment';
   customerId: string;
   employeeId: string;
   businessId: string;
   scheduledDate: string;
+  scheduledTime: string;
   completedDate?: string;
+  startTime?: string;
+  endTime?: string;
   quotation?: number;
   invoice?: number;
+  deposit?: number;
+  depositPaid?: boolean;
+  paymentMethod?: 'card' | 'cash' | 'bank-transfer';
+  customerReference?: string;
   signature?: string;
   images: string[];
   documents: string[];
   checklist: ChecklistItem[];
+  measurements?: JobMeasurement[];
+  selectedProducts?: SelectedProduct[];
+  jobHistory: JobHistoryEntry[];
+  parentJobId?: string; // For linking measurement to installation
   createdAt: string;
+}
+
+export interface JobMeasurement {
+  id: string;
+  windowId: string;
+  width: number;
+  height: number;
+  notes: string;
+  location: string;
+  createdAt: string;
+}
+
+export interface SelectedProduct {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+  arScreenshot?: string;
+  customerApproved: boolean;
+  createdAt: string;
+}
+
+export interface JobHistoryEntry {
+  id: string;
+  timestamp: string;
+  action: string;
+  description: string;
+  userId: string;
+  userName: string;
+  data?: any;
+}
+
+export interface EmployeeWorkingHours {
+  userId: string;
+  monday: { start: string; end: string; available: boolean };
+  tuesday: { start: string; end: string; available: boolean };
+  wednesday: { start: string; end: string; available: boolean };
+  thursday: { start: string; end: string; available: boolean };
+  friday: { start: string; end: string; available: boolean };
+  saturday: { start: string; end: string; available: boolean };
+  sunday: { start: string; end: string; available: boolean };
+}
+
+export interface BusinessSettings {
+  id: string;
+  businessId: string;
+  bookingMode: 'automated' | 'manual';
+  quotationTemplates: QuotationTemplate[];
+  invoiceTemplates: InvoiceTemplate[];
+  paymentGatewayEnabled: boolean;
+  depositPercentage: number;
+}
+
+export interface QuotationTemplate {
+  id: string;
+  name: string;
+  htmlContent: string;
+  isDefault: boolean;
+}
+
+export interface InvoiceTemplate {
+  id: string;
+  name: string;
+  htmlContent: string;
+  isDefault: boolean;
 }
 
 export interface ChecklistItem {
