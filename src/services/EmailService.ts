@@ -26,17 +26,17 @@ interface SMTPConfig {
 }
 
 export class EmailService {
-  private static readonly FROM_EMAIL = 'admin@blindscloud.co.uk';
-  private static readonly FROM_NAME = 'BlindsCloud Solutions';
-  private static readonly REPLY_TO = 'support@blindscloud.co.uk';
+  private static readonly FROM_EMAIL = 'admin@jobmanager.com';
+  private static readonly FROM_NAME = 'JobManager Pro';
+  private static readonly REPLY_TO = 'support@jobmanager.com';
   
   // SMTP Configuration for custom domain
   private static readonly SMTP_CONFIG: SMTPConfig = {
-    host: 'mail.blindscloud.co.uk', // Your domain's mail server
+    host: 'mail.jobmanager.com', // Your domain's mail server
     port: 587, // or 465 for SSL
     secure: false, // true for 465, false for other ports
     auth: {
-      user: 'admin@blindscloud.co.uk',
+      user: 'admin@jobmanager.com',
       pass: 'your-email-password' // This should be in environment variables
     }
   };
@@ -122,15 +122,15 @@ export class EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>BlindsCloud Solutions</h1>
-      <p>Professional Blinds & Window Solutions</p>
+      <h1>JobManager Pro</h1>
+      <p>Professional Business Management Platform</p>
     </div>
     <div class="content">
       <p>${text.replace(/\n/g, '<br>')}</p>
     </div>
     <div class="footer">
-      <p>© 2025 BlindsCloud Solutions Ltd. All rights reserved.</p>
-      <p>Email: admin@blindscloud.co.uk | Web: blindscloud.co.uk</p>
+      <p>© 2025 JobManager Pro. All rights reserved.</p>
+      <p>Email: admin@jobmanager.com | Web: jobmanager.com</p>
     </div>
   </div>
 </body>
