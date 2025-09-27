@@ -75,19 +75,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       let foundUser = null;
       
-      // Use localStorage authentication (reliable and works immediately)
-      console.log('📱 Using localStorage authentication...');
-      const users = LocalStorageService.getUsers();
-      foundUser = users.find(u => 
-        u.email.toLowerCase() === email.toLowerCase() && 
-        u.password === password &&
-        u.isActive
-      );
+      // Try Supabase authentication first
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+        try {
+          console.log('🗄️ Attempting Supabase authentication...');
+          const authResult = await DatabaseService.signIn(email, password);
+          
+          if (authResult && authResult.user) {
+            foundUser = authResult.user;
+            console.log('✅ Supabase authentication successful');
+          }
+        } catch (supabaseError) {
+          console.log('⚠️ Supabase auth failed, trying localStorage:', supabaseError);
+        }
+      }
       
-      if (foundUser) {
-        console.log('✅ localStorage authentication successful');
-      } else {
-        console.log('❌ Login failed - user not found or inactive');
+      // Fallback to localStorage authentication
+      if (!foundUser) {
+        console.log('📱 Using localStorage authentication...');
+        const users = LocalStorageService.getUsers();
+        foundUser = users.find(u => 
+          u.email.toLowerCase() === email.toLowerCase() && 
+          u.password === password &&
+          u.isActive
+        );
+        
+        if (foundUser) {
+          console.log('✅ localStorage authentication successful');
+        } else {
+          console.log('❌ Login failed - user not found or inactive');
+        }
       }
 
       if (foundUser) {

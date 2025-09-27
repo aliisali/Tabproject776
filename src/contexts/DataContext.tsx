@@ -71,8 +71,46 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('📊 Loading data from multiple sources...');
       
-      // Use localStorage for reliable data (works immediately)
-      console.log('📝 Using localStorage data (reliable and fast)...');
+      // Try Supabase first
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+        try {
+          console.log('🗄️ Loading data from Supabase...');
+          
+          const [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
+            DatabaseService.getUsers(),
+            DatabaseService.getBusinesses(),
+            DatabaseService.getJobs(),
+            DatabaseService.getCustomers(),
+            DatabaseService.getProducts(),
+            DatabaseService.getNotifications()
+          ]);
+          
+          setUsers(usersData);
+          setBusinesses(businessesData);
+          setJobs(jobsData);
+          setCustomers(customersData);
+          setProducts(productsData);
+          setNotifications(notificationsData);
+          
+          console.log('✅ Supabase data loaded successfully:', {
+            users: usersData.length,
+            businesses: businessesData.length,
+            jobs: jobsData.length,
+            customers: customersData.length,
+            products: productsData.length,
+            notifications: notificationsData.length
+          });
+          
+          return; // Exit early if Supabase works
+        } catch (supabaseError) {
+          console.log('⚠️ Supabase failed, falling back to localStorage:', supabaseError);
+        }
+      } else {
+        console.log('⚠️ Supabase not configured, using localStorage');
+      }
+      
+      // Fallback to localStorage
+      console.log('📝 Using localStorage data...');
       LocalStorageService.initializeData();
       
       setUsers(LocalStorageService.getUsers());
@@ -82,7 +120,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setProducts(LocalStorageService.getProducts());
       setNotifications(LocalStorageService.getNotifications());
       
-      console.log('✅ Data loading complete:', {
+      console.log('✅ localStorage data loaded:', {
         users: LocalStorageService.getUsers().length,
         businesses: LocalStorageService.getBusinesses().length,
         jobs: LocalStorageService.getJobs().length,
@@ -91,7 +129,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       });
       
     } catch (error) {
-      console.error('❌ Error loading data, using localStorage fallback:', error);
+      console.error('❌ Error loading data:', error);
       // Initialize localStorage as final fallback
       LocalStorageService.initializeData();
       setUsers(LocalStorageService.getUsers());
@@ -232,29 +270,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      // Try Supabase first (with auth integration)
       let newUser = null;
       
-      if (DatabaseService.isAvailable()) {
+      // Try Supabase first
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
         try {
-          console.log('🗄️ Creating user via Supabase with auth...');
-          const authResponse = await DatabaseService.signUp(userData.email, userData.password, userData);
+          console.log('🗄️ Creating user via Supabase...');
+          const supabaseUser = await DatabaseService.createUser(userData);
           
-          if (authResponse.user) {
-            // Get the complete user data
-            const users = await DatabaseService.getUsers();
-            newUser = users.find(u => u.id === authResponse.user.id);
-            console.log('✅ User created via Supabase with auth');
+          if (supabaseUser) {
+            newUser = supabaseUser;
+            console.log('✅ User created via Supabase');
           }
         } catch (supabaseError) {
-          console.log('Supabase user creation failed, trying API:', supabaseError);
+          console.log('⚠️ Supabase user creation failed, using localStorage:', supabaseError);
         }
       }
       
-      // Fallback to API or localStorage
+      // Fallback to localStorage
       if (!newUser) {
-        await saveToMultipleSources('create', 'user', userData);
         newUser = LocalStorageService.createUser(userData);
+        console.log('✅ User created via localStorage');
       }
       
       setUsers(prev => [...prev, newUser]);
@@ -289,17 +325,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (id: string, userData: Partial<User>) => {
     try {
-      // Update user via multiple backends
-      await saveToMultipleSources('update', 'user', userData, id);
+      console.log('📝 Updating user:', id);
       
-      const originalUser = users.find(u => u.id === id);
-      const updatedUser = { ...originalUser, ...userData };
+      let success = false;
+      
+      // Try Supabase first
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+        try {
+          await DatabaseService.updateUser(id, userData);
+          console.log('✅ User updated via Supabase');
+          success = true;
+        } catch (supabaseError) {
+          console.log('⚠️ Supabase update failed, using localStorage:', supabaseError);
+        }
+      }
+      
+      // Fallback to localStorage
+      if (!success) {
+        LocalStorageService.updateUser(id, userData);
+        console.log('✅ User updated via localStorage');
+      }
       
       setUsers(prev => prev.map(user => 
-        user.id === id ? updatedUser : user
+        user.id === id ? { ...user, ...userData } : user
       ));
       
       // Send password reset email if password was changed
+      const originalUser = users.find(u => u.id === id);
       if (userData.password && originalUser) {
         try {
           await EmailService.sendPasswordResetEmail({
@@ -322,8 +374,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      // Delete user via multiple backends
-      await saveToMultipleSources('delete', 'user', null, id);
+      console.log('🗑️ Deleting user:', id);
+      
+      let success = false;
+      
+      // Try Supabase first
+      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+        try {
+          await DatabaseService.deleteUser(id);
+          console.log('✅ User deleted via Supabase');
+          success = true;
+        } catch (supabaseError) {
+          console.log('⚠️ Supabase delete failed, using localStorage:', supabaseError);
+        }
+      }
+      
+      // Fallback to localStorage
+      if (!success) {
+        LocalStorageService.deleteUser(id);
+        console.log('✅ User deleted via localStorage');
+      }
       
       setUsers(prev => prev.filter(user => user.id !== id));
       showSuccessMessage('User deleted successfully!');

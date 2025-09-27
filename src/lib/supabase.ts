@@ -15,19 +15,23 @@ export const supabase = supabaseUrl && supabaseAnonKey
 export class DatabaseService {
   // Check if Supabase is available
   static isAvailable(): boolean {
-    return supabase !== null && supabaseUrl && supabaseAnonKey;
+    return supabase !== null && supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co');
   }
 
   // Check if Supabase has valid credentials configured
   static hasValidCredentials(): boolean {
-    return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co') && supabaseAnonKey.length > 20);
+    return !!(supabaseUrl && supabaseAnonKey && supabaseUrl.includes('supabase.co') && supabaseAnonKey.length > 50);
   }
 
   // Authentication
   static async signIn(email: string, password: string) {
-    if (!supabase || !this.hasValidCredentials()) {
-      console.log('⚠️ Supabase not properly configured, skipping database auth');
-      throw new Error('Supabase not configured');
+    if (!supabase) {
+      throw new Error('Supabase client not initialized');
+    }
+    
+    if (!this.hasValidCredentials()) {
+      console.log('⚠️ Supabase credentials invalid, using fallback auth');
+      throw new Error('Invalid Supabase credentials');
     }
     
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -128,18 +132,20 @@ export class DatabaseService {
 
   // Users CRUD
   static async getUsers() {
-    if (!supabase || !this.hasValidCredentials()) {
-      console.log('⚠️ Supabase not configured, using localStorage');
-      throw new Error('Supabase not configured');
-    }
+    if (!supabase) throw new Error('Supabase not configured');
     
     const { data, error } = await supabase
       .from('users')
-      .select('*')
+      .select(`
+        *,
+        business:businesses(name),
+        parent:users!parent_id(name, email),
+        created_by_user:users!created_by(name, email)
+      `)
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error('Supabase users query failed:', error);
+      console.error('❌ Supabase users query failed:', error);
       throw error;
     }
     
@@ -153,7 +159,10 @@ export class DatabaseService {
       emailVerified: user.email_verified,
       createdAt: user.created_at,
       updatedAt: user.updated_at,
-      password: 'password' // Don't expose real password hash
+      password: 'password', // Don't expose real password hash
+      businessName: user.business?.name,
+      parentName: user.parent?.name,
+      createdByName: user.created_by_user?.name
     }));
   }
 
@@ -161,43 +170,39 @@ export class DatabaseService {
     if (!supabase) throw new Error('Supabase not configured');
     
     try {
-      // Create auth user first
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: userData.password,
-        email_confirm: false // Skip email confirmation
-      });
-      
-      if (authError) throw authError;
-      
-      // Create user record
+      // Create user record directly (auth will be handled by trigger)
       const { data, error } = await supabase
         .from('users')
         .insert([{
-          id: authData.user?.id,
           email: userData.email,
           name: userData.name,
           role: userData.role,
           business_id: userData.businessId,
+          parent_id: userData.parentId,
+          created_by: userData.createdBy,
           permissions: userData.permissions,
           is_active: userData.isActive,
-          email_verified: userData.emailVerified
+          email_verified: userData.emailVerified || false
         }])
         .select()
         .single();
       
       if (error) throw error;
       
+      console.log('✅ User created in Supabase:', data.email);
+      
       return {
         ...data,
         businessId: data.business_id,
+        parentId: data.parent_id,
+        createdBy: data.created_by,
         isActive: data.is_active,
         emailVerified: data.email_verified,
         createdAt: data.created_at,
         password: userData.password
       };
     } catch (error) {
-      console.error('Error creating user in Supabase:', error);
+      console.error('❌ Error creating user in Supabase:', error);
       throw error;
     }
   }
@@ -212,6 +217,14 @@ export class DatabaseService {
       updateData.business_id = userData.businessId;
       delete updateData.businessId;
     }
+    if (userData.parentId !== undefined) {
+      updateData.parent_id = userData.parentId;
+      delete updateData.parentId;
+    }
+    if (userData.createdBy !== undefined) {
+      updateData.created_by = userData.createdBy;
+      delete updateData.createdBy;
+    }
     if (userData.isActive !== undefined) {
       updateData.is_active = userData.isActive;
       delete updateData.isActive;
@@ -221,18 +234,8 @@ export class DatabaseService {
       delete updateData.emailVerified;
     }
     
-    // Update password in auth if provided
-    if (userData.password) {
-      try {
-        const { error: authError } = await supabase.auth.admin.updateUserById(id, {
-          password: userData.password
-        });
-        if (authError) console.warn('Failed to update auth password:', authError);
-      } catch (error) {
-        console.warn('Auth password update failed:', error);
-      }
-      delete updateData.password;
-    }
+    // Remove password from update data (handled separately if needed)
+    delete updateData.password;
     
     const { data, error } = await supabase
       .from('users')
@@ -243,9 +246,13 @@ export class DatabaseService {
     
     if (error) throw error;
     
+    console.log('✅ User updated in Supabase:', data.email);
+    
     return {
       ...data,
       businessId: data.business_id,
+      parentId: data.parent_id,
+      createdBy: data.created_by,
       isActive: data.is_active,
       emailVerified: data.email_verified,
       createdAt: data.created_at
@@ -255,13 +262,6 @@ export class DatabaseService {
   static async deleteUser(id: string) {
     if (!supabase) throw new Error('Supabase not configured');
     
-    // Delete from auth
-    try {
-      await supabase.auth.admin.deleteUser(id);
-    } catch (error) {
-      console.warn('Failed to delete auth user:', error);
-    }
-    
     // Delete from users table
     const { error } = await supabase
       .from('users')
@@ -269,6 +269,8 @@ export class DatabaseService {
       .eq('id', id);
     
     if (error) throw error;
+    
+    console.log('✅ User deleted from Supabase');
   }
 
   // Businesses CRUD
