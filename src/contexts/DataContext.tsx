@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
-import ApiService from '../services/api';
+import { DatabaseService } from '../lib/supabase';
 import { EmailService } from '../services/EmailService';
 import { LocalStorageService } from '../lib/storage';
 
@@ -71,29 +71,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
       // Initialize localStorage data first
       LocalStorageService.initializeData();
       
-      // Load data from backend API
-      const [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
-        ApiService.getUsers().catch((error) => {
-          console.log('API getUsers failed:', error.message);
-          return [];
-        }),
-        ApiService.getBusinesses().catch((error) => {
-          console.log('API getBusinesses failed:', error.message);
-          return [];
-        }),
-        ApiService.getJobs().catch((error) => {
-          console.log('API getJobs failed:', error.message);
-          return [];
-        }),
-        ApiService.getCustomers().catch((error) => {
-          console.log('API getCustomers failed:', error.message);
-          return [];
-        }),
-        ApiService.getProducts().catch((error) => {
-          console.log('API getProducts failed:', error.message);
-          return [];
-        })
-      ]);
+      // Load data from Supabase if available, otherwise use localStorage
+      let usersData = [];
+      let businessesData = [];
+      let jobsData = [];
+      let customersData = [];
+      let productsData = [];
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
+            DatabaseService.getUsers().catch(() => []),
+            DatabaseService.getBusinesses().catch(() => []),
+            DatabaseService.getJobs().catch(() => []),
+            DatabaseService.getCustomers().catch(() => []),
+            DatabaseService.getProducts().catch(() => [])
+          ]);
+          console.log('✅ Data loaded from Supabase');
+        } catch (error) {
+          console.log('⚠️ Supabase failed, using localStorage:', error);
+        }
+      }
       
       // Use backend data if available, otherwise fall back to localStorage
       setUsers(usersData.length > 0 ? usersData : LocalStorageService.getUsers());
@@ -127,8 +125,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      const response = await ApiService.createUser(userData);
-      const newUser = response.user;
+      let newUser;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          newUser = await DatabaseService.createUser(userData);
+        } catch (error) {
+          console.log('Supabase create failed, using localStorage:', error);
+          newUser = LocalStorageService.createUser(userData);
+        }
+      } else {
+        newUser = LocalStorageService.createUser(userData);
+      }
       
       setUsers(prev => [...prev, newUser]);
       
@@ -164,8 +172,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       const originalUser = users.find(u => u.id === id);
       
-      const response = await ApiService.updateUser(id, userData);
-      const updatedUser = response.user;
+      let updatedUser;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          updatedUser = await DatabaseService.updateUser(id, userData);
+        } catch (error) {
+          console.log('Supabase update failed, using localStorage:', error);
+          LocalStorageService.updateUser(id, userData);
+          updatedUser = { ...originalUser, ...userData };
+        }
+      } else {
+        LocalStorageService.updateUser(id, userData);
+        updatedUser = { ...originalUser, ...userData };
+      }
       
       setUsers(prev => prev.map(user => 
         user.id === id ? updatedUser : user
@@ -194,7 +214,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      await ApiService.deleteUser(id);
+      if (DatabaseService.isAvailable()) {
+        try {
+          await DatabaseService.deleteUser(id);
+        } catch (error) {
+          console.log('Supabase delete failed, using localStorage:', error);
+          LocalStorageService.deleteUser(id);
+        }
+      } else {
+        LocalStorageService.deleteUser(id);
+      }
       
       setUsers(prev => prev.filter(user => user.id !== id));
       showSuccessMessage('User deleted successfully!');
@@ -207,8 +236,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Business management
   const addBusiness = async (businessData: Omit<Business, 'id' | 'createdAt'>) => {
     try {
-      const response = await ApiService.createBusiness(businessData);
-      const newBusiness = response.business;
+      let newBusiness;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          newBusiness = await DatabaseService.createBusiness(businessData);
+        } catch (error) {
+          console.log('Supabase create failed, using localStorage:', error);
+          newBusiness = LocalStorageService.createBusiness(businessData);
+        }
+      } else {
+        newBusiness = LocalStorageService.createBusiness(businessData);
+      }
       
       setBusinesses(prev => [...prev, newBusiness]);
       
@@ -249,8 +288,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Job management
   const addJob = async (jobData: Omit<Job, 'id' | 'createdAt'>) => {
     try {
-      const response = await ApiService.createJob(jobData);
-      const newJob = response.job;
+      let newJob;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          newJob = await DatabaseService.createJob(jobData);
+        } catch (error) {
+          console.log('Supabase create failed, using localStorage:', error);
+          newJob = LocalStorageService.createJob(jobData);
+        }
+      } else {
+        newJob = LocalStorageService.createJob(jobData);
+      }
       
       setJobs(prev => [...prev, newJob]);
       
@@ -291,8 +340,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Customer management
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt'>) => {
     try {
-      const response = await ApiService.createCustomer(customerData);
-      const newCustomer = response.customer;
+      let newCustomer;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          newCustomer = await DatabaseService.createCustomer(customerData);
+        } catch (error) {
+          console.log('Supabase create failed, using localStorage:', error);
+          newCustomer = LocalStorageService.createCustomer(customerData);
+        }
+      } else {
+        newCustomer = LocalStorageService.createCustomer(customerData);
+      }
       
       setCustomers(prev => [...prev, newCustomer]);
       
@@ -333,8 +392,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Product management
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
-      const response = await ApiService.createProduct(productData);
-      const newProduct = response.product;
+      let newProduct;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          newProduct = await DatabaseService.createProduct(productData);
+        } catch (error) {
+          console.log('Supabase create failed, using localStorage:', error);
+          newProduct = LocalStorageService.createProduct(productData);
+        }
+      } else {
+        newProduct = LocalStorageService.createProduct(productData);
+      }
       
       setProducts(prev => [...prev, newProduct]);
       
@@ -347,8 +416,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
     try {
-      const response = await ApiService.updateProduct(id, productData);
-      const updatedProduct = response.product;
+      let updatedProduct;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          updatedProduct = await DatabaseService.updateProduct(id, productData);
+        } catch (error) {
+          console.log('Supabase update failed, using localStorage:', error);
+          LocalStorageService.updateProduct(id, productData);
+          const originalProduct = products.find(p => p.id === id);
+          updatedProduct = { ...originalProduct, ...productData };
+        }
+      } else {
+        LocalStorageService.updateProduct(id, productData);
+        const originalProduct = products.find(p => p.id === id);
+        updatedProduct = { ...originalProduct, ...productData };
+      }
       
       setProducts(prev => prev.map(product => 
         product.id === id ? updatedProduct : product
@@ -363,7 +446,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
-      await ApiService.deleteProduct(id);
+      if (DatabaseService.isAvailable()) {
+        try {
+          await DatabaseService.deleteProduct(id);
+        } catch (error) {
+          console.log('Supabase delete failed, using localStorage:', error);
+          LocalStorageService.deleteProduct(id);
+        }
+      } else {
+        LocalStorageService.deleteProduct(id);
+      }
       
       setProducts(prev => prev.filter(product => product.id !== id));
       showSuccessMessage('Product deleted successfully!');

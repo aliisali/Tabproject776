@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
-import ApiService from '../services/api';
+import { DatabaseService } from '../lib/supabase';
 import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
@@ -55,7 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(parsedUser);
         } else {
           console.log('⚠️ AuthContext: Stored user no longer exists, clearing session');
-          localStorage.removeItem('current_user');
+        if (DatabaseService.isAvailable()) {
+          const users = await DatabaseService.getUsers();
+        }
         }
       } catch (error) {
         console.error('❌ AuthContext: Failed to parse stored user:', error);
@@ -72,8 +74,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      const response = await ApiService.login(email, password);
-      const foundUser = response.user;
+      // Try Supabase authentication first
+      let foundUser = null;
+      
+      if (DatabaseService.isAvailable()) {
+        try {
+          const authResponse = await DatabaseService.signIn(email, password);
+          if (authResponse.user) {
+            // Get user details from database
+            const users = await DatabaseService.getUsers();
+            foundUser = users.find(u => u.email === email);
+          }
+        } catch (supabaseError) {
+          console.log('Supabase auth failed, trying localStorage:', supabaseError);
+        }
+      }
+      
+      // Fallback to localStorage authentication
+      if (!foundUser) {
+        const users = LocalStorageService.getUsers();
+        foundUser = users.find(u => 
+          u.email.toLowerCase() === email.toLowerCase() && 
+          u.password === password &&
+          u.isActive
+        );
+      }
       
       if (foundUser) {
         console.log('✅ AuthContext: Login successful for:', foundUser.name, foundUser.role);
@@ -103,7 +128,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     console.log('🚪 AuthContext: Logging out');
-    ApiService.logout();
+    
+    // Sign out from Supabase if available
+    if (DatabaseService.isAvailable()) {
+      DatabaseService.signOut().catch(console.error);
+    }
+    
     setUser(null);
     try {
       localStorage.removeItem('current_user');
