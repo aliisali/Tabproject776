@@ -15,6 +15,7 @@
     "build": "tsc && vite build",
     "build:backend": "cd server && npm run build",
     "build:full": "npm run build && npm run build:backend",
+    "deploy:render": "npm run build && cd server && npm run build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",

@@ -38,15 +38,23 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT
+    // Generate JWT with proper typing
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       throw new Error('JWT_SECRET environment variable is required');
     }
     
-    const payload = { userId: user.id, email: user.email, role: user.role };
-    const options: jwt.SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || '7d' };
-    const token = jwt.sign(payload, jwtSecret, options);
+    const payload = { 
+      userId: user.id, 
+      email: user.email, 
+      role: user.role 
+    };
+    
+    const token = jwt.sign(
+      payload, 
+      jwtSecret, 
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
 
     // Save session
     await pool.query(
