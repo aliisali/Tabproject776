@@ -562,8 +562,8 @@ export class LocalStorageService {
     this.getNotifications();
     
     // Force save the extended data with 5 additional users
-    this.saveUsers([...DEFAULT_USERS, ...ADDITIONAL_USERS]);
-    this.saveBusinesses(DEFAULT_BUSINESSES_EXTENDED);
+    this.saveUsers(DEFAULT_USERS);
+    this.saveBusinesses(DEFAULT_BUSINESSES);
     
     // Show initialization message
     const initDiv = document.createElement('div');
@@ -573,7 +573,7 @@ export class LocalStorageService {
         <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
           <span class="text-green-500 text-sm">✓</span>
         </div>
-        <span>BlindsCloud ready with 8 users! Database working!</span>
+        <span>BlindsCloud ready with 3 users! Database working!</span>
       </div>
     `;
     document.body.appendChild(initDiv);
