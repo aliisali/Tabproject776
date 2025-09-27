@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Business, Job, Customer, Notification, Product } from '../types';
 import { DatabaseService } from '../lib/supabase';
 import { EmailService } from '../services/EmailService';
+import ApiService from '../services/api';
 import { LocalStorageService } from '../lib/storage';
 
 interface DataContextType {
@@ -68,29 +69,55 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const loadData = async () => {
     try {
-      // Initialize localStorage data first
-      LocalStorageService.initializeData();
+      console.log('📊 Loading data from multiple sources...');
       
-      // Load data from Supabase if available, otherwise use localStorage
       let usersData = [];
       let businessesData = [];
       let jobsData = [];
       let customersData = [];
       let productsData = [];
+      let notificationsData = [];
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
-            DatabaseService.getUsers().catch(() => []),
-            DatabaseService.getBusinesses().catch(() => []),
-            DatabaseService.getJobs().catch(() => []),
-            DatabaseService.getCustomers().catch(() => []),
-            DatabaseService.getProducts().catch(() => [])
-          ]);
-          console.log('✅ Data loaded from Supabase');
-        } catch (error) {
-          console.log('⚠️ Supabase failed, using localStorage:', error);
+      // Try API first
+      try {
+        console.log('🌐 Trying API...');
+        [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
+          ApiService.getUsers().catch(() => []),
+          ApiService.getBusinesses().catch(() => []),
+          ApiService.getJobs().catch(() => []),
+          ApiService.getCustomers().catch(() => []),
+          ApiService.getProducts().catch(() => [])
+        ]);
+        if (usersData.length > 0) {
+          console.log('✅ Data loaded from API');
         }
+      } catch (apiError) {
+        console.log('🔄 API failed, trying Supabase...');
+        
+        // Try Supabase if API fails
+        if (DatabaseService.isAvailable()) {
+          try {
+            [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
+              DatabaseService.getUsers().catch(() => []),
+              DatabaseService.getBusinesses().catch(() => []),
+              DatabaseService.getJobs().catch(() => []),
+              DatabaseService.getCustomers().catch(() => []),
+              DatabaseService.getProducts().catch(() => []),
+              DatabaseService.getNotifications().catch(() => [])
+            ]);
+            if (usersData.length > 0) {
+              console.log('✅ Data loaded from Supabase');
+            }
+          } catch (supabaseError) {
+            console.log('⚠️ Supabase failed, using localStorage:', supabaseError);
+          }
+        }
+      }
+      
+      // Initialize localStorage data if no backend data
+      if (usersData.length === 0) {
+        console.log('📝 Initializing localStorage data...');
+        LocalStorageService.initializeData();
       }
       
       // Use backend data if available, otherwise fall back to localStorage
@@ -99,10 +126,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setJobs(jobsData.length > 0 ? jobsData : LocalStorageService.getJobs());
       setCustomers(customersData.length > 0 ? customersData : LocalStorageService.getCustomers());
       setProducts(productsData.length > 0 ? productsData : LocalStorageService.getProducts());
-      setNotifications(LocalStorageService.getNotifications());
+      setNotifications(notificationsData.length > 0 ? notificationsData : LocalStorageService.getNotifications());
+      
+      console.log('✅ Data loading complete:', {
+        users: usersData.length || LocalStorageService.getUsers().length,
+        businesses: businessesData.length || LocalStorageService.getBusinesses().length,
+        jobs: jobsData.length || LocalStorageService.getJobs().length,
+        customers: customersData.length || LocalStorageService.getCustomers().length,
+        products: productsData.length || LocalStorageService.getProducts().length
+      });
+      
     } catch (error) {
-      console.error('Error loading data:', error);
-      // Fall back to localStorage if API fails
+      console.error('❌ Error loading data, using localStorage fallback:', error);
+      // Initialize localStorage as final fallback
+      LocalStorageService.initializeData();
       setUsers(LocalStorageService.getUsers());
       setBusinesses(LocalStorageService.getBusinesses());
       setJobs(LocalStorageService.getJobs());
@@ -112,7 +149,123 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
     
     setLoading(false);
-    console.log('✅ DataProvider: Initialization complete');
+  };
+
+  // Enhanced data persistence with multiple backends
+  const saveToMultipleSources = async (
+    operation: 'create' | 'update' | 'delete',
+    type: 'user' | 'business' | 'job' | 'customer' | 'product',
+    data: any,
+    id?: string
+  ) => {
+    const operations = [];
+    
+    // Try API first
+    try {
+      switch (operation) {
+        case 'create':
+          if (type === 'user') operations.push(ApiService.createUser(data));
+          else if (type === 'business') operations.push(ApiService.createBusiness(data));
+          else if (type === 'job') operations.push(ApiService.createJob(data));
+          else if (type === 'customer') operations.push(ApiService.createCustomer(data));
+          else if (type === 'product') operations.push(ApiService.createProduct(data));
+          break;
+        case 'update':
+          if (id) {
+            if (type === 'user') operations.push(ApiService.updateUser(id, data));
+            else if (type === 'business') operations.push(ApiService.updateBusiness(id, data));
+            else if (type === 'job') operations.push(ApiService.updateJob(id, data));
+            else if (type === 'customer') operations.push(ApiService.updateCustomer(id, data));
+            else if (type === 'product') operations.push(ApiService.updateProduct(id, data));
+          }
+          break;
+        case 'delete':
+          if (id) {
+            if (type === 'user') operations.push(ApiService.deleteUser(id));
+            else if (type === 'business') operations.push(ApiService.deleteBusiness(id));
+            else if (type === 'job') operations.push(ApiService.deleteJob(id));
+            else if (type === 'customer') operations.push(ApiService.deleteCustomer(id));
+            else if (type === 'product') operations.push(ApiService.deleteProduct(id));
+          }
+          break;
+      }
+      
+      // Execute API operation
+      if (operations.length > 0) {
+        await Promise.all(operations);
+        console.log(`✅ ${operation} ${type} via API successful`);
+        return;
+      }
+    } catch (apiError) {
+      console.log(`API ${operation} failed, trying Supabase:`, apiError);
+    }
+    
+    // Try Supabase if API fails
+    if (DatabaseService.isAvailable()) {
+      try {
+        switch (operation) {
+          case 'create':
+            if (type === 'user') await DatabaseService.createUser(data);
+            else if (type === 'business') await DatabaseService.createBusiness(data);
+            else if (type === 'job') await DatabaseService.createJob(data);
+            else if (type === 'customer') await DatabaseService.createCustomer(data);
+            else if (type === 'product') await DatabaseService.createProduct(data);
+            break;
+          case 'update':
+            if (id) {
+              if (type === 'user') await DatabaseService.updateUser(id, data);
+              else if (type === 'business') await DatabaseService.updateBusiness(id, data);
+              else if (type === 'job') await DatabaseService.updateJob(id, data);
+              else if (type === 'customer') await DatabaseService.updateCustomer(id, data);
+              else if (type === 'product') await DatabaseService.updateProduct(id, data);
+            }
+            break;
+          case 'delete':
+            if (id) {
+              if (type === 'user') await DatabaseService.deleteUser(id);
+              else if (type === 'business') await DatabaseService.deleteBusiness(id);
+              else if (type === 'job') await DatabaseService.deleteJob(id);
+              else if (type === 'customer') await DatabaseService.deleteCustomer(id);
+              else if (type === 'product') await DatabaseService.deleteProduct(id);
+            }
+            break;
+        }
+        console.log(`✅ ${operation} ${type} via Supabase successful`);
+        return;
+      } catch (supabaseError) {
+        console.log(`Supabase ${operation} failed, using localStorage:`, supabaseError);
+      }
+    }
+    
+    // Final fallback to localStorage
+    switch (operation) {
+      case 'create':
+        if (type === 'user') LocalStorageService.createUser(data);
+        else if (type === 'business') LocalStorageService.createBusiness(data);
+        else if (type === 'job') LocalStorageService.createJob(data);
+        else if (type === 'customer') LocalStorageService.createCustomer(data);
+        else if (type === 'product') LocalStorageService.createProduct(data);
+        break;
+      case 'update':
+        if (id) {
+          if (type === 'user') LocalStorageService.updateUser(id, data);
+          else if (type === 'business') LocalStorageService.updateBusiness(id, data);
+          else if (type === 'job') LocalStorageService.updateJob(id, data);
+          else if (type === 'customer') LocalStorageService.updateCustomer(id, data);
+          else if (type === 'product') LocalStorageService.updateProduct(id, data);
+        }
+        break;
+      case 'delete':
+        if (id) {
+          if (type === 'user') LocalStorageService.deleteUser(id);
+          else if (type === 'business') LocalStorageService.deleteBusiness(id);
+          else if (type === 'job') LocalStorageService.deleteJob(id);
+          else if (type === 'customer') LocalStorageService.deleteCustomer(id);
+          else if (type === 'product') LocalStorageService.deleteProduct(id);
+        }
+        break;
+    }
+    console.log(`✅ ${operation} ${type} via localStorage successful`);
   };
 
   const refreshData = async () => {
@@ -125,18 +278,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      let newUser;
+      // Create user via multiple backends
+      await saveToMultipleSources('create', 'user', userData);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          newUser = await DatabaseService.createUser(userData);
-        } catch (error) {
-          console.log('Supabase create failed, using localStorage:', error);
-          newUser = LocalStorageService.createUser(userData);
-        }
-      } else {
-        newUser = LocalStorageService.createUser(userData);
-      }
+      // Create user locally for immediate UI update
+      const newUser = LocalStorageService.createUser(userData);
       
       setUsers(prev => [...prev, newUser]);
       
@@ -170,22 +316,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateUser = async (id: string, userData: Partial<User>) => {
     try {
+      // Update user via multiple backends
+      await saveToMultipleSources('update', 'user', userData, id);
+      
       const originalUser = users.find(u => u.id === id);
-      
-      let updatedUser;
-      
-      if (DatabaseService.isAvailable()) {
-        try {
-          updatedUser = await DatabaseService.updateUser(id, userData);
-        } catch (error) {
-          console.log('Supabase update failed, using localStorage:', error);
-          LocalStorageService.updateUser(id, userData);
-          updatedUser = { ...originalUser, ...userData };
-        }
-      } else {
-        LocalStorageService.updateUser(id, userData);
-        updatedUser = { ...originalUser, ...userData };
-      }
+      const updatedUser = { ...originalUser, ...userData };
       
       setUsers(prev => prev.map(user => 
         user.id === id ? updatedUser : user
@@ -214,16 +349,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      if (DatabaseService.isAvailable()) {
-        try {
-          await DatabaseService.deleteUser(id);
-        } catch (error) {
-          console.log('Supabase delete failed, using localStorage:', error);
-          LocalStorageService.deleteUser(id);
-        }
-      } else {
-        LocalStorageService.deleteUser(id);
-      }
+      // Delete user via multiple backends
+      await saveToMultipleSources('delete', 'user', null, id);
       
       setUsers(prev => prev.filter(user => user.id !== id));
       showSuccessMessage('User deleted successfully!');
@@ -236,18 +363,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Business management
   const addBusiness = async (businessData: Omit<Business, 'id' | 'createdAt'>) => {
     try {
-      let newBusiness;
+      // Create business via multiple backends
+      await saveToMultipleSources('create', 'business', businessData);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          newBusiness = await DatabaseService.createBusiness(businessData);
-        } catch (error) {
-          console.log('Supabase create failed, using localStorage:', error);
-          newBusiness = LocalStorageService.createBusiness(businessData);
-        }
-      } else {
-        newBusiness = LocalStorageService.createBusiness(businessData);
-      }
+      const newBusiness = LocalStorageService.createBusiness(businessData);
       
       setBusinesses(prev => [...prev, newBusiness]);
       
@@ -260,7 +379,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateBusiness = async (id: string, businessData: Partial<Business>) => {
     try {
-      LocalStorageService.updateBusiness(id, businessData);
+      // Update business via multiple backends
+      await saveToMultipleSources('update', 'business', businessData, id);
       
       setBusinesses(prev => prev.map(business => 
         business.id === id ? { ...business, ...businessData } : business
@@ -275,7 +395,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteBusiness = async (id: string) => {
     try {
-      LocalStorageService.deleteBusiness(id);
+      // Delete business via multiple backends
+      await saveToMultipleSources('delete', 'business', null, id);
       
       setBusinesses(prev => prev.filter(business => business.id !== id));
       showSuccessMessage('Business deleted successfully!');
@@ -288,18 +409,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Job management
   const addJob = async (jobData: Omit<Job, 'id' | 'createdAt'>) => {
     try {
-      let newJob;
+      // Create job via multiple backends
+      await saveToMultipleSources('create', 'job', jobData);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          newJob = await DatabaseService.createJob(jobData);
-        } catch (error) {
-          console.log('Supabase create failed, using localStorage:', error);
-          newJob = LocalStorageService.createJob(jobData);
-        }
-      } else {
-        newJob = LocalStorageService.createJob(jobData);
-      }
+      const newJob = LocalStorageService.createJob(jobData);
       
       setJobs(prev => [...prev, newJob]);
       
@@ -312,7 +425,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateJob = async (id: string, jobData: Partial<Job>) => {
     try {
-      LocalStorageService.updateJob(id, jobData);
+      // Update job via multiple backends
+      await saveToMultipleSources('update', 'job', jobData, id);
       
       setJobs(prev => prev.map(job => 
         job.id === id ? { ...job, ...jobData } : job
@@ -327,7 +441,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteJob = async (id: string) => {
     try {
-      LocalStorageService.deleteJob(id);
+      // Delete job via multiple backends
+      await saveToMultipleSources('delete', 'job', null, id);
       
       setJobs(prev => prev.filter(job => job.id !== id));
       showSuccessMessage('Job deleted successfully!');
@@ -340,18 +455,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Customer management
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt'>) => {
     try {
-      let newCustomer;
+      // Create customer via multiple backends
+      await saveToMultipleSources('create', 'customer', customerData);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          newCustomer = await DatabaseService.createCustomer(customerData);
-        } catch (error) {
-          console.log('Supabase create failed, using localStorage:', error);
-          newCustomer = LocalStorageService.createCustomer(customerData);
-        }
-      } else {
-        newCustomer = LocalStorageService.createCustomer(customerData);
-      }
+      const newCustomer = LocalStorageService.createCustomer(customerData);
       
       setCustomers(prev => [...prev, newCustomer]);
       
@@ -364,7 +471,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateCustomer = async (id: string, customerData: Partial<Customer>) => {
     try {
-      LocalStorageService.updateCustomer(id, customerData);
+      // Update customer via multiple backends
+      await saveToMultipleSources('update', 'customer', customerData, id);
       
       setCustomers(prev => prev.map(customer => 
         customer.id === id ? { ...customer, ...customerData } : customer
@@ -379,7 +487,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteCustomer = async (id: string) => {
     try {
-      LocalStorageService.deleteCustomer(id);
+      // Delete customer via multiple backends
+      await saveToMultipleSources('delete', 'customer', null, id);
       
       setCustomers(prev => prev.filter(customer => customer.id !== id));
       showSuccessMessage('Customer deleted successfully!');
@@ -392,18 +501,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Product management
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
-      let newProduct;
+      // Create product via multiple backends
+      await saveToMultipleSources('create', 'product', productData);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          newProduct = await DatabaseService.createProduct(productData);
-        } catch (error) {
-          console.log('Supabase create failed, using localStorage:', error);
-          newProduct = LocalStorageService.createProduct(productData);
-        }
-      } else {
-        newProduct = LocalStorageService.createProduct(productData);
-      }
+      const newProduct = LocalStorageService.createProduct(productData);
       
       setProducts(prev => [...prev, newProduct]);
       
@@ -416,22 +517,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const updateProduct = async (id: string, productData: Partial<Product>) => {
     try {
-      let updatedProduct;
+      // Update product via multiple backends
+      await saveToMultipleSources('update', 'product', productData, id);
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          updatedProduct = await DatabaseService.updateProduct(id, productData);
-        } catch (error) {
-          console.log('Supabase update failed, using localStorage:', error);
-          LocalStorageService.updateProduct(id, productData);
-          const originalProduct = products.find(p => p.id === id);
-          updatedProduct = { ...originalProduct, ...productData };
-        }
-      } else {
-        LocalStorageService.updateProduct(id, productData);
-        const originalProduct = products.find(p => p.id === id);
-        updatedProduct = { ...originalProduct, ...productData };
-      }
+      const originalProduct = products.find(p => p.id === id);
+      const updatedProduct = { ...originalProduct, ...productData };
       
       setProducts(prev => prev.map(product => 
         product.id === id ? updatedProduct : product
@@ -446,16 +536,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteProduct = async (id: string) => {
     try {
-      if (DatabaseService.isAvailable()) {
-        try {
-          await DatabaseService.deleteProduct(id);
-        } catch (error) {
-          console.log('Supabase delete failed, using localStorage:', error);
-          LocalStorageService.deleteProduct(id);
-        }
-      } else {
-        LocalStorageService.deleteProduct(id);
-      }
+      // Delete product via multiple backends
+      await saveToMultipleSources('delete', 'product', null, id);
       
       setProducts(prev => prev.filter(product => product.id !== id));
       showSuccessMessage('Product deleted successfully!');
@@ -477,7 +559,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const markNotificationRead = async (id: string) => {
     try {
-      LocalStorageService.markNotificationRead(id);
+      // Try database first, then localStorage
+      if (DatabaseService.isAvailable()) {
+        try {
+          await DatabaseService.markNotificationRead(id);
+        } catch (error) {
+          LocalStorageService.markNotificationRead(id);
+        }
+      } else {
+        LocalStorageService.markNotificationRead(id);
+      }
       
       setNotifications(prev => prev.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification

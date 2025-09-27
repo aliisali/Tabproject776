@@ -10,6 +10,9 @@ import businessRoutes from './routes/businesses';
 import jobRoutes from './routes/jobs';
 import customerRoutes from './routes/customers';
 import productRoutes from './routes/products';
+import notificationRoutes from './routes/notifications';
+import modelRoutes from './routes/models';
+import permissionRoutes from './routes/permissions';
 import uploadRoutes from './routes/uploads';
 import { authenticateToken } from './middleware/auth';
 
@@ -70,6 +73,9 @@ app.use('/api/businesses', authenticateToken, businessRoutes);
 app.use('/api/jobs', authenticateToken, jobRoutes);
 app.use('/api/customers', authenticateToken, customerRoutes);
 app.use('/api/products', authenticateToken, productRoutes);
+app.use('/api/notifications', authenticateToken, notificationRoutes);
+app.use('/api/models', authenticateToken, modelRoutes);
+app.use('/api/permissions', authenticateToken, permissionRoutes);
 app.use('/api/uploads', authenticateToken, uploadRoutes);
 
 // Error handling middleware

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { DatabaseService } from '../lib/supabase';
+import ApiService from '../services/api';
 import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
@@ -24,45 +25,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      // Check for stored auth token
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        // Verify token with backend
+      // Check for stored user session
+      const storedUser = localStorage.getItem('current_user');
+      if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
         try {
-          const users = await ApiService.getUsers();
-          // Token is valid, user will be set by login flow
+          const parsedUser = JSON.parse(storedUser);
+          console.log('✅ AuthContext: Found stored session for:', parsedUser.email);
+          
+          // Verify user still exists in database or localStorage
+          let userExists = false;
+          
+          if (DatabaseService.isAvailable()) {
+            try {
+              const users = await DatabaseService.getUsers();
+              userExists = users.some(u => u.id === parsedUser.id && u.isActive);
+            } catch (error) {
+              console.log('Database check failed, using localStorage');
+              const users = LocalStorageService.getUsers();
+              userExists = users.some(u => u.id === parsedUser.id && u.isActive);
+            }
+          } else {
+            const users = LocalStorageService.getUsers();
+            userExists = users.some(u => u.id === parsedUser.id && u.isActive);
+          }
+          
+          if (userExists) {
+            setUser(parsedUser);
+          } else {
+            console.log('⚠️ AuthContext: Stored user no longer exists, clearing session');
+            localStorage.removeItem('current_user');
+          }
         } catch (error) {
-          // Token is invalid, remove it
-          localStorage.removeItem('auth_token');
+          console.error('❌ AuthContext: Failed to parse stored user:', error);
+          localStorage.removeItem('current_user');
         }
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
-    }
-    
-    // Check for stored user session
-    const storedUser = localStorage.getItem('current_user');
-    if (storedUser && storedUser !== 'undefined' && storedUser !== 'null') {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        console.log('✅ AuthContext: Found stored session for:', parsedUser.email);
-        
-        // Verify user still exists
-        const users = LocalStorageService.getUsers();
-        const userExists = users.some(u => u.id === parsedUser.id && u.isActive);
-        
-        if (userExists) {
-          setUser(parsedUser);
-        } else {
-          console.log('⚠️ AuthContext: Stored user no longer exists, clearing session');
-        if (DatabaseService.isAvailable()) {
-          const users = await DatabaseService.getUsers();
-        }
-        }
-      } catch (error) {
-        console.error('❌ AuthContext: Failed to parse stored user:', error);
-        localStorage.removeItem('current_user');
-      }
     }
     
     setIsLoading(false);
@@ -74,32 +73,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      // Try Supabase authentication first
+      // Try API authentication first
       let foundUser = null;
       
-      if (DatabaseService.isAvailable()) {
-        try {
-          const authResponse = await DatabaseService.signIn(email, password);
-          if (authResponse.user) {
-            // Get user details from database
-            const users = await DatabaseService.getUsers();
-            foundUser = users.find(u => u.email === email);
+      try {
+        const response = await ApiService.login(email, password);
+        if (response.user) {
+          foundUser = response.user;
+          console.log('✅ API authentication successful');
+        }
+      } catch (apiError) {
+        console.log('API auth failed, trying Supabase:', apiError);
+        
+        // Try Supabase authentication
+        if (DatabaseService.isAvailable()) {
+          try {
+            const authResponse = await DatabaseService.signIn(email, password);
+            if (authResponse.user) {
+              const users = await DatabaseService.getUsers();
+              foundUser = users.find(u => u.email === email);
+              console.log('✅ Supabase authentication successful');
+            }
+          } catch (supabaseError) {
+            console.log('Supabase auth failed, trying localStorage:', supabaseError);
           }
-        } catch (supabaseError) {
-          console.log('Supabase auth failed, trying localStorage:', supabaseError);
         }
       }
       
       // Fallback to localStorage authentication
       if (!foundUser) {
-        const users = LocalStorageService.getUsers();
-        foundUser = users.find(u => 
-          u.email.toLowerCase() === email.toLowerCase() && 
-          u.password === password &&
-          u.isActive
-        );
+        console.log('Trying localStorage authentication...');
+        try {
+          const users = LocalStorageService.getUsers();
+          foundUser = users.find(u => 
+            u.email.toLowerCase() === email.toLowerCase() && 
+            u.password === password &&
+            u.isActive
+          );
+          if (foundUser) {
+            console.log('✅ localStorage authentication successful');
+          }
+        } catch (localError) {
+          console.error('localStorage auth failed:', localError);
+        }
       }
-      
+
       if (foundUser) {
         console.log('✅ AuthContext: Login successful for:', foundUser.name, foundUser.role);
         setUser(foundUser);
@@ -128,6 +146,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     console.log('🚪 AuthContext: Logging out');
+    
+    // Sign out from API if available
+    ApiService.logout().catch(console.error);
     
     // Sign out from Supabase if available
     if (DatabaseService.isAvailable()) {
