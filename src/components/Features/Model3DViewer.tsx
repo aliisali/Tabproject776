@@ -57,42 +57,50 @@ export function Model3DViewer() {
   };
 
   const loadAvailableModels = () => {
-    // In a real implementation, this would load models from the server
-    // For now, we'll use mock data
-    const mockModels: Model3D[] = [
-      {
-        id: 'model-1',
-        name: 'Premium Blackout Blinds 3D',
-        originalImage: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
-        model3D: 'mock-3d-model-url',
-        thumbnail: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
-        status: 'completed',
-        createdAt: '2024-01-15T10:00:00Z',
-        settings: {
-          depth: 0.8,
-          quality: 'high',
-          style: 'full3d'
+    try {
+      // Load models from localStorage (created by admin)
+      const stored = localStorage.getItem('admin_3d_models');
+      const storedModels = stored ? JSON.parse(stored) : [];
+      
+      // Add some default models if none exist
+      const defaultModels: Model3D[] = storedModels.length === 0 ? [
+        {
+          id: 'model-1',
+          name: 'Premium Blackout Blinds 3D',
+          originalImage: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+          model3D: 'mock-3d-model-url',
+          thumbnail: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=400',
+          status: 'completed',
+          createdAt: '2024-01-15T10:00:00Z',
+          settings: {
+            depth: 0.8,
+            quality: 'high',
+            style: 'full3d'
+          }
+        },
+        {
+          id: 'model-2',
+          name: 'Smart Motorized Blinds 3D',
+          originalImage: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
+          model3D: 'mock-3d-model-url-2',
+          thumbnail: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
+          status: 'completed',
+          createdAt: '2024-01-16T14:30:00Z',
+          settings: {
+            depth: 0.5,
+            quality: 'medium',
+            style: 'extrude'
+          }
         }
-      },
-      {
-        id: 'model-2',
-        name: 'Smart Motorized Blinds 3D',
-        originalImage: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
-        model3D: 'mock-3d-model-url-2',
-        thumbnail: 'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=400',
-        status: 'completed',
-        createdAt: '2024-01-16T14:30:00Z',
-        settings: {
-          depth: 0.5,
-          quality: 'medium',
-          style: 'extrude'
-        }
-      }
-    ];
+      ] : storedModels;
 
-    setModels(mockModels);
-    if (mockModels.length > 0) {
-      setSelectedModel(mockModels[0]);
+      setModels(defaultModels);
+      if (defaultModels.length > 0) {
+        setSelectedModel(defaultModels[0]);
+      }
+    } catch (error) {
+      console.error('Error loading 3D models:', error);
+      setModels([]);
     }
   };
 

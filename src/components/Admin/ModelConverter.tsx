@@ -29,6 +29,15 @@ export function ModelConverter() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const saveModels = (updatedModels: Model3D[]) => {
+    try {
+      localStorage.setItem('admin_3d_models', JSON.stringify(updatedModels));
+      console.log('✅ Saved 3D models:', updatedModels.length);
+    } catch (error) {
+      console.error('❌ Failed to save models:', error);
+    }
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
