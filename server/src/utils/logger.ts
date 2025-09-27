@@ -1,5 +1,4 @@
-import { Request } from 'express';
-import * as process from 'process';
+import express from 'express';
 import { pool } from '../server';
 
 export const logActivity = async (
@@ -7,7 +6,7 @@ export const logActivity = async (
   action: string,
   targetType: string,
   targetId: string,
-  req: Request,
+  req: express.Request,
   details?: any
 ) => {
   try {

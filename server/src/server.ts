@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import * as process from 'process';
 import express from 'express';
+import { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
