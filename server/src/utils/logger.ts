@@ -1,5 +1,7 @@
+/// <reference types="node" />
 import express from 'express';
 import { pool } from '../server';
+import * as process from 'process';
 
 export const logActivity = async (
   userId: string,

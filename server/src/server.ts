@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -5,6 +6,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import * as process from 'process';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import businessRoutes from './routes/businesses';
