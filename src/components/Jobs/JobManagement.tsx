@@ -123,12 +123,7 @@ export function JobManagement() {
     setNewJob({
       title: job.title,
       description: job.description,
-      customerName: job.customerId, // This would need to be resolved to customer name
-      customerEmail: '',
-      customerPhone: '',
-      customerMobile: '',
-      customerAddress: '',
-      customerPostcode: '',
+      customerId: job.customerId,
       scheduledDate: job.scheduledDate.slice(0, 16), // Format for datetime-local input
       quotation: job.quotation?.toString() || ''
     });
@@ -149,12 +144,7 @@ export function JobManagement() {
       setNewJob({
         title: '',
         description: '',
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        customerMobile: '',
-        customerAddress: '',
-        customerPostcode: '',
+        customerId: '',
         scheduledDate: '',
         quotation: ''
       });
@@ -351,34 +341,6 @@ export function JobManagement() {
             <form onSubmit={editingJob ? handleUpdateJob : handleCreateJob} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newJob.title}
-                  onChange={(e) => setNewJob({...newJob, title: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter job title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={newJob.description}
-                  onChange={(e) => setNewJob({...newJob, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe the job requirements"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Customer Name *
                 </label>
                 <input
@@ -443,49 +405,6 @@ export function JobManagement() {
                   onChange={(e) => setNewJob({...newJob, customerAddress: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter complete address"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Postcode
-                  </label>
-                  <input
-                    type="text"
-                    value={newJob.customerPostcode}
-                    onChange={(e) => setNewJob({...newJob, customerPostcode: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="12345"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Scheduled Date *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={newJob.scheduledDate}
-                    onChange={(e) => setNewJob({...newJob, scheduledDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quotation ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newJob.quotation}
-                  onChange={(e) => setNewJob({...newJob, quotation: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
                 />
               </div>
 
