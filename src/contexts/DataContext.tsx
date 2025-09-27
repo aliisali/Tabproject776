@@ -73,11 +73,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
       
       // Load data from backend API
       const [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
-        ApiService.getUsers().catch(() => []),
-        ApiService.getBusinesses().catch(() => []),
-        ApiService.getJobs().catch(() => []),
-        ApiService.getCustomers().catch(() => []),
-        ApiService.getProducts().catch(() => [])
+        ApiService.getUsers().catch((error) => {
+          console.log('API getUsers failed:', error.message);
+          return [];
+        }),
+        ApiService.getBusinesses().catch((error) => {
+          console.log('API getBusinesses failed:', error.message);
+          return [];
+        }),
+        ApiService.getJobs().catch((error) => {
+          console.log('API getJobs failed:', error.message);
+          return [];
+        }),
+        ApiService.getCustomers().catch((error) => {
+          console.log('API getCustomers failed:', error.message);
+          return [];
+        }),
+        ApiService.getProducts().catch((error) => {
+          console.log('API getProducts failed:', error.message);
+          return [];
+        })
       ]);
       
       // Use backend data if available, otherwise fall back to localStorage
