@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { LocalStorageService } from '../lib/storage';
-import { DatabaseService } from '../lib/database';
 
 interface AuthContextType {
   user: User | null;
@@ -16,7 +15,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [useDatabase, setUseDatabase] = useState(false);
 
   useEffect(() => {
     console.log('🚀 AuthContext: Initializing...');
@@ -25,24 +23,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      // Try Render database first
-      console.log('🔄 Connecting to Render PostgreSQL...');
-      
-      // Initialize database if needed
-      await DatabaseService.initialize();
-      
-      const dbUsers = await DatabaseService.getUsers();
-      
-      if (dbUsers && dbUsers.length > 0) {
-        console.log('✅ Render database connected');
-        setUseDatabase(true);
-      } else {
-        throw new Error('Render database not available');
-      }
-    } catch (error) {
-      console.log('⚠️ Render database not available, using localStorage');
-      setUseDatabase(false);
+      // Initialize localStorage data
       LocalStorageService.initializeData();
+    } catch (error) {
+      console.error('Error initializing data:', error);
     }
     
     // Check for stored user session
@@ -53,20 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ AuthContext: Found stored session for:', parsedUser.email);
         
         // Verify user still exists
-        let userExists = false;
-        if (useDatabase) {
-          try {
-            const dbUsers = await DatabaseService.getUsers();
-            userExists = dbUsers.some(u => u.id === parsedUser.id && u.is_active);
-          } catch (error) {
-            console.log('Database verification failed, checking localStorage');
-          }
-        }
-        
-        if (!userExists) {
-          const users = LocalStorageService.getUsers();
-          userExists = users.some(u => u.id === parsedUser.id && u.isActive);
-        }
+        const users = LocalStorageService.getUsers();
+        const userExists = users.some(u => u.id === parsedUser.id && u.isActive);
         
         if (userExists) {
           setUser(parsedUser);
