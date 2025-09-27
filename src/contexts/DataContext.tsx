@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
-import { LocalStorageService } from '../lib/storage';
+import ApiService from '../services/api';
 import { EmailService } from '../services/EmailService';
 
 interface DataContextType {
@@ -67,14 +67,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const loadData = async () => {
     try {
-      // Use localStorage for data persistence
-      LocalStorageService.initializeData();
-      setUsers(LocalStorageService.getUsers());
-      setBusinesses(LocalStorageService.getBusinesses());
-      setJobs(LocalStorageService.getJobs());
-      setCustomers(LocalStorageService.getCustomers());
-      setNotifications(LocalStorageService.getNotifications());
-      setProducts(LocalStorageService.getProducts());
+      // Load data from backend API
+      const [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
+        ApiService.getUsers().catch(() => []),
+        ApiService.getBusinesses().catch(() => []),
+        ApiService.getJobs().catch(() => []),
+        ApiService.getCustomers().catch(() => []),
+        ApiService.getProducts().catch(() => [])
+      ]);
+      
+      setUsers(usersData);
+      setBusinesses(businessesData);
+      setJobs(jobsData);
+      setCustomers(customersData);
+      setProducts(productsData);
+      setNotifications([]); // Will be loaded separately
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -93,8 +100,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('👤 Creating user:', userData.name);
       
-      let newUser: User;
-      newUser = LocalStorageService.createUser(userData);
+      const response = await ApiService.createUser(userData);
+      const newUser = response.user;
+      
       setUsers(prev => [...prev, newUser]);
       
       // Send welcome email with credentials
@@ -129,10 +137,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       const originalUser = users.find(u => u.id === id);
       
-      LocalStorageService.updateUser(id, userData);
+      const response = await ApiService.updateUser(id, userData);
+      const updatedUser = response.user;
       
       setUsers(prev => prev.map(user => 
-        user.id === id ? { ...user, ...userData } : user
+        user.id === id ? updatedUser : user
       ));
       
       // Send password reset email if password was changed
@@ -158,7 +167,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const deleteUser = async (id: string) => {
     try {
-      LocalStorageService.deleteUser(id);
+      await ApiService.deleteUser(id);
       
       setUsers(prev => prev.filter(user => user.id !== id));
       showSuccessMessage('User deleted successfully!');
@@ -171,7 +180,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Business management
   const addBusiness = async (businessData: Omit<Business, 'id' | 'createdAt'>) => {
     try {
-      const newBusiness = LocalStorageService.createBusiness(businessData);
+      const response = await ApiService.createBusiness(businessData);
+      const newBusiness = response.business;
+      
       setBusinesses(prev => [...prev, newBusiness]);
       
       showSuccessMessage('Business created successfully!');
@@ -211,7 +222,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Job management
   const addJob = async (jobData: Omit<Job, 'id' | 'createdAt'>) => {
     try {
-      const newJob = LocalStorageService.createJob(jobData);
+      const response = await ApiService.createJob(jobData);
+      const newJob = response.job;
+      
       setJobs(prev => [...prev, newJob]);
       
       showSuccessMessage('Job created successfully!');
@@ -251,7 +264,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Customer management
   const addCustomer = async (customerData: Omit<Customer, 'id' | 'createdAt'>) => {
     try {
-      const newCustomer = LocalStorageService.createCustomer(customerData);
+      const response = await ApiService.createCustomer(customerData);
+      const newCustomer = response.customer;
+      
       setCustomers(prev => [...prev, newCustomer]);
       
       showSuccessMessage('Customer added successfully!');
@@ -291,7 +306,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Product management
   const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
     try {
-      const newProduct = LocalStorageService.createProduct(productData);
+      const response = await ApiService.createProduct(productData);
+      const newProduct = response.product;
+      
       setProducts(prev => [...prev, newProduct]);
       
       showSuccessMessage('Product added successfully!');

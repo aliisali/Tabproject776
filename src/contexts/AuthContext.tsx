@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
-import { LocalStorageService } from '../lib/storage';
+import ApiService from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -23,10 +23,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      // Initialize localStorage data
-      LocalStorageService.initializeData();
+      // Check for stored auth token
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        // Verify token with backend
+        try {
+          const users = await ApiService.getUsers();
+          // Token is valid, user will be set by login flow
+        } catch (error) {
+          // Token is invalid, remove it
+          localStorage.removeItem('auth_token');
+        }
+      }
     } catch (error) {
-      console.error('Error initializing data:', error);
+      console.error('Error initializing auth:', error);
     }
     
     // Check for stored user session
@@ -61,13 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      const currentUsers = LocalStorageService.getUsers();
-      const foundUser = currentUsers.find(u => 
-        u.email.toLowerCase() === email.toLowerCase() && 
-        u.isActive &&
-        (u.password === password || password === 'password')
-      );
-      console.log('🔍 localStorage authentication result:', foundUser ? 'success' : 'failed');
+      const response = await ApiService.login(email, password);
+      const foundUser = response.user;
       
       if (foundUser) {
         console.log('✅ AuthContext: Login successful for:', foundUser.name, foundUser.role);
@@ -97,9 +102,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     console.log('🚪 AuthContext: Logging out');
+    ApiService.logout();
     setUser(null);
     try {
       localStorage.removeItem('current_user');
+      localStorage.removeItem('auth_token');
       console.log('✅ AuthContext: Session cleared');
     } catch (error) {
       console.error('❌ AuthContext: Failed to clear session:', error);

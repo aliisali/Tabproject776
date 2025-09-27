@@ -1,6 +1,29 @@
 services:
+  # Backend API Service
   - type: web
-    name: blindscloud-platform
+    name: blindscloud-backend
+    env: node
+    plan: starter
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://blindscloud.co.uk
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_FILE_SIZE
+        value: 10485760
+    autoDeploy: false
+
+  # Frontend Static Site
+  - type: web
+    name: blindscloud-frontend
     env: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
@@ -18,3 +41,10 @@ services:
       - path: /assets/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
+
+# Database
+databases:
+  - name: blindscloud-db
+    databaseName: blindscloud
+    user: blindscloud_user
+    plan: starter
