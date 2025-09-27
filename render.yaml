@@ -1,53 +1,25 @@
+# Exported from Render on 2025-09-27T04:08:11Z
+version: "1"
 services:
-  # Frontend Static Site
-  - type: web
-    name: blindscloud-frontend
-    env: static
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: SAMEORIGIN
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-
-  # Backend API Service
-  - type: web
-    name: blindscloud-backend
-    env: node
-    plan: free
-    buildCommand: cd server && npm install --include=dev && npm run build
-    startCommand: cd server && npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: JWT_SECRET
-        generateValue: true
-      - key: JWT_EXPIRES_IN
-        value: 7d
-      - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: blindscloud-frontend
-          property: host
-      - key: UPLOAD_DIR
-        value: uploads
-      - key: MAX_FILE_SIZE
-        value: 10485760
-    autoDeploy: false
-
-# Database
-databases:
-  - name: blindscloud-db
-    databaseName: blindscloud
-    user: blindscloud_user
-    plan: free
+- type: web
+  name: blindscloud-backend-0s88
+  runtime: node
+  repo: https://github.com/aliisali/Tabproject776
+  plan: free
+  envVars:
+  - key: MAX_FILE_SIZE
+    sync: false
+  - key: UPLOAD_DIR
+    sync: false
+  - key: FRONTEND_URL
+    sync: false
+  - key: JWT_EXPIRES_IN
+    sync: false
+  - key: JWT_SECRET
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: oregon
+  buildCommand: cd server && npm install --include=dev && npm run build
+  startCommand: cd server && npm start
+  autoDeployTrigger: "off"
