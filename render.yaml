@@ -7,7 +7,7 @@ services:
     plan: free
     region: oregon
     databases:
-      - name: blindscloud_db
+      - name: blindscloud-db-0s88
         user: blindscloud_user
 
   # Backend API Service
