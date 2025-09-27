@@ -25,6 +25,9 @@ import { ModelPermissions } from './Admin/ModelPermissions';
 import { Model3DViewer } from './Features/Model3DViewer';
 import { EmailManager } from './Admin/EmailManager';
 import PermissionManagementWrapper from './Permissions/PermissionManagement';
+import { BusinessSettingsManager } from './Admin/BusinessSettings';
+import { JobAssignmentCenter } from './Business/JobAssignment';
+import { WorkingHoursManager } from './Employee/WorkingHours';
 
 export function MainApp() {
   const { user } = useAuth();
@@ -47,6 +50,7 @@ export function MainApp() {
         case 'model-converter': return <ModelConverter />;
         case 'model-permissions': return <ModelPermissions />;
         case 'email-manager': return <EmailManager />;
+        case 'business-settings': return <BusinessSettingsManager />;
         default: return <AdminDashboard />;
       }
     }
@@ -62,6 +66,7 @@ export function MainApp() {
         case 'customers': return <CustomerManagement />;
         case 'ar-camera': return <ARCameraModule />;
         case '3d-viewer': return <Model3DViewer />;
+        case 'job-assignment': return <JobAssignmentCenter />;
         default: return <BusinessDashboard />;
       }
     }
@@ -79,6 +84,7 @@ export function MainApp() {
         case 'notifications': return <NotificationCenter />;
         case 'products': return <ProductVisualizer />;
         case '3d-viewer': return <Model3DViewer />;
+        case 'working-hours': return <WorkingHoursManager />;
         default: return <EmployeeDashboard />;
       }
     }

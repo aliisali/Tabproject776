@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Calendar, MapPin, User, DollarSign, Camera, FileText, CheckCircle, Clock, XCircle, X, Trash2, ClipboardList, CreditCard as Edit } from 'lucide-react';
+import { Plus, Search, Filter, Calendar, MapPin, User, DollarSign, Camera, FileText, CheckCircle, Clock, XCircle, X, Trash2, ClipboardList, CreditCard as Edit, Play, Eye, Settings } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { CreateJobModal } from './CreateJobModal';
+import { JobWorkflow } from './JobWorkflow';
+import { JobDetailsModal } from './JobDetailsModal';
 
 export function JobManagement() {
   const { jobs, addJob, deleteJob, updateJob } = useData();
@@ -9,19 +12,9 @@ export function JobManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingJob, setEditingJob] = useState<any>(null);
-  const [newJob, setNewJob] = useState({
-    title: '',
-    description: '',
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
-    customerMobile: '',
-    customerAddress: '',
-    customerPostcode: '',
-    scheduledDate: '',
-    quotation: ''
-  });
+  const [showWorkflow, setShowWorkflow] = useState(false);
+  const [showJobDetails, setShowJobDetails] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
 
   // Filter jobs based on user role and permissions
   const getVisibleJobs = () => {
@@ -43,8 +36,12 @@ export function JobManagement() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case 'confirmed': return <CheckCircle className="w-5 h-5 text-blue-500" />;
       case 'in-progress': return <Clock className="w-5 h-5 text-blue-500" />;
       case 'pending': return <Clock className="w-5 h-5 text-yellow-500" />;
+      case 'tbd': return <Clock className="w-5 h-5 text-orange-500" />;
+      case 'awaiting-deposit': return <DollarSign className="w-5 h-5 text-purple-500" />;
+      case 'awaiting-payment': return <DollarSign className="w-5 h-5 text-red-500" />;
       case 'cancelled': return <XCircle className="w-5 h-5 text-red-500" />;
       default: return <Clock className="w-5 h-5 text-gray-500" />;
     }
@@ -53,8 +50,12 @@ export function JobManagement() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'in-progress': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'tbd': return 'bg-orange-100 text-orange-800';
+      case 'awaiting-deposit': return 'bg-purple-100 text-purple-800';
+      case 'awaiting-payment': return 'bg-red-100 text-red-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -203,8 +204,12 @@ export function JobManagement() {
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
                 <option value="in-progress">In Progress</option>
                 <option value="completed">Completed</option>
+                <option value="tbd">TBD</option>
+                <option value="awaiting-deposit">Awaiting Deposit</option>
+                <option value="awaiting-payment">Awaiting Payment</option>
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
@@ -220,7 +225,12 @@ export function JobManagement() {
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-3">
                   {getStatusIcon(job.status)}
-                  <h3 className="text-lg font-semibold text-gray-900">{job.title}</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{job.title}</h3>
+                    <span className="text-sm text-blue-600 font-medium">
+                      {job.jobType === 'measurement' ? '📏 Measurement' : '🔧 Installation'} Job
+                    </span>
+                  </div>
                   <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(job.status)}`}>
                     {job.status.replace('-', ' ')}
                   </span>
@@ -231,17 +241,26 @@ export function JobManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {new Date(job.scheduledDate).toLocaleDateString()}
+                    {new Date(job.scheduledDate).toLocaleDateString()} at {job.scheduledTime || '09:00'}
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <User className="w-4 h-4 mr-2" />
-                    Employee ID: {job.employeeId}
+                    {job.employeeId ? `Employee: ${job.employeeId}` : 'Unassigned'}
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <DollarSign className="w-4 h-4 mr-2" />
-                    ${job.quotation?.toLocaleString()}
+                    ${job.quotation?.toLocaleString() || 'TBD'}
                   </div>
                 </div>
+
+                {/* Customer Reference */}
+                {job.customerReference && (
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Customer Reference:</strong> {job.customerReference}
+                    </p>
+                  </div>
+                )}
 
                 {/* Progress Bar */}
                 <div className="mb-4">
@@ -259,18 +278,43 @@ export function JobManagement() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-3">
+                  {(job.status === 'confirmed' || job.status === 'in-progress') && (
+                    <button 
+                      onClick={() => {
+                        setSelectedJob(job);
+                        setShowWorkflow(true);
+                      }}
+                      className="flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
+                    >
+                      <Play className="w-4 h-4 mr-1" />
+                      {job.status === 'confirmed' ? 'Start Job' : 'Continue'}
+                    </button>
+                  )}
                   <button className="flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
                     <FileText className="w-4 h-4 mr-1" />
                     Details
                   </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedJob(job);
+                      setShowJobDetails(true);
+                    }}
+                    className="flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors"
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    History
+                  </button>
                   {canEditJob(job) && (
-                    <button 
-                      onClick={() => handleEditJob(job)}
-                      className="flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors"
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </button>
+                    <>
+                      <button className="flex items-center px-3 py-1 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </button>
+                      <button className="flex items-center px-3 py-1 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors">
+                        <Settings className="w-4 h-4 mr-1" />
+                        Assign
+                      </button>
+                    </>
                   )}
                   <button className="flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
                     <Camera className="w-4 h-4 mr-1" />
@@ -308,139 +352,41 @@ export function JobManagement() {
         </div>
       )}
 
-      {/* Create/Edit Job Modal */}
-      {(showCreateModal || editingJob) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">
-                {editingJob ? 'Edit Job' : 'Create New Job'}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  setEditingJob(null);
-                  setNewJob({
-                    title: '',
-                    description: '',
-                    customerName: '',
-                    customerEmail: '',
-                    customerPhone: '',
-                    customerMobile: '',
-                    customerAddress: '',
-                    customerPostcode: '',
-                    scheduledDate: '',
-                    quotation: ''
-                  });
-                }}
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      
+      {/* Create Job Modal */}
+      <CreateJobModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onJobCreated={() => {
+          // Refresh jobs list
+          window.location.reload();
+        }}
+      />
 
-            <form onSubmit={editingJob ? handleUpdateJob : handleCreateJob} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Customer Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newJob.customerName}
-                  onChange={(e) => setNewJob({...newJob, customerName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter customer name"
-                />
-              </div>
+      {/* Job Workflow Modal */}
+      {showWorkflow && selectedJob && (
+        <JobWorkflow
+          job={selectedJob}
+          onUpdateJob={(updates) => {
+            updateJob(selectedJob.id, updates);
+            setSelectedJob({ ...selectedJob, ...updates });
+          }}
+          onClose={() => {
+            setShowWorkflow(false);
+            setSelectedJob(null);
+          }}
+        />
+      )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Customer Email
-                </label>
-                <input
-                  type="email"
-                  value={newJob.customerEmail}
-                  onChange={(e) => setNewJob({...newJob, customerEmail: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="customer@email.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={newJob.customerPhone}
-                    onChange={(e) => setNewJob({...newJob, customerPhone: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mobile Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={newJob.customerMobile}
-                    onChange={(e) => setNewJob({...newJob, customerMobile: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+1 (555) 987-6543"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Customer Address *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={newJob.customerAddress}
-                  onChange={(e) => setNewJob({...newJob, customerAddress: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter complete address"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingJob(null);
-                    setNewJob({
-                      title: '',
-                      description: '',
-                      customerName: '',
-                      customerEmail: '',
-                      customerPhone: '',
-                      customerMobile: '',
-                      customerAddress: '',
-                      customerPostcode: '',
-                      scheduledDate: '',
-                      quotation: ''
-                    });
-                  }}
-                  className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {editingJob ? 'Update Job' : 'Create Job'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      {/* Job Details Modal */}
+      {showJobDetails && selectedJob && (
+        <JobDetailsModal
+          job={selectedJob}
+          onClose={() => {
+            setShowJobDetails(false);
+            setSelectedJob(null);
+          }}
+        />
       )}
     </div>
   );

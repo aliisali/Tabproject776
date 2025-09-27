@@ -42,6 +42,7 @@ export function Sidebar({ activeTab, onTabChange, isMinimized, onToggleMinimize 
           { id: 'model-permissions', label: '3D Model Permissions', icon: Settings },
           { id: 'module-permissions', label: 'Module Permissions', icon: Shield },
           { id: 'permissions', label: 'Permissions', icon: Settings },
+          { id: 'business-settings', label: 'Business Settings', icon: Building2 },
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'html-manager', label: 'HTML Manager', icon: Code },
           { id: 'email-manager', label: 'Email Manager', icon: Mail },
@@ -55,6 +56,7 @@ export function Sidebar({ activeTab, onTabChange, isMinimized, onToggleMinimize 
           { id: 'reports', label: 'Reports', icon: FileText },
           { id: 'customers', label: 'Customers', icon: Building2 },
           ...(hasModuleAccess('ar-camera') ? [{ id: 'ar-camera', label: 'AR Camera', icon: Headphones }] : []),
+          { id: 'job-assignment', label: 'Job Assignment', icon: Users },
           { id: '3d-viewer', label: '3D Model Viewer', icon: Cube },
         ];
       case 'employee':
@@ -69,6 +71,7 @@ export function Sidebar({ activeTab, onTabChange, isMinimized, onToggleMinimize 
           { id: 'notifications', label: 'Notifications', icon: Bell },
           { id: 'products', label: 'Product Viewer', icon: Package },
           { id: '3d-viewer', label: '3D Model Viewer', icon: Cube },
+          { id: 'working-hours', label: 'Working Hours', icon: Clock },
         ];
       default:
         return [];
