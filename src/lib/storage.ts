@@ -270,7 +270,8 @@ const DEFAULT_NOTIFICATIONS: Notification[] = [
   },
   {
     id: '550e8400-e29b-41d4-a716-44665544000b',
-    name: 'New Blinds Installation Job',
+    userId: '550e8400-e29b-41d4-a716-446655440005',
+    title: 'New Blinds Installation Job',
     message: 'Premium blackout blinds installation scheduled for Luxury Homes Ltd.',
     type: 'job',
     read: false,
@@ -561,7 +562,7 @@ export class LocalStorageService {
     this.getProducts();
     this.getNotifications();
     
-    // Force save the extended data with 5 additional users
+    // Force save the default data
     this.saveUsers(DEFAULT_USERS);
     this.saveBusinesses(DEFAULT_BUSINESSES);
     
@@ -573,7 +574,7 @@ export class LocalStorageService {
         <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
           <span class="text-green-500 text-sm">✓</span>
         </div>
-        <span>BlindsCloud ready with 3 users! Database working!</span>
+        <span>BlindsCloud ready with 3 users! Ready for Render!</span>
       </div>
     `;
     document.body.appendChild(initDiv);

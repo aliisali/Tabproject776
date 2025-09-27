@@ -41,14 +41,13 @@ export const getEnvironment = (): 'production' | 'staging' | 'development' => {
 
 // Get API URL for current environment
 export const getApiUrl = (): string => {
-  const env = getEnvironment();
-  
   // Check for environment variable first
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
   
-  // Fallback to config
+  // Fallback to config based on environment
+  const env = getEnvironment();
   switch (env) {
     case 'production': return `${CONFIG.API.PRODUCTION}/api`;
     case 'staging': return `${CONFIG.API.STAGING}/api`;

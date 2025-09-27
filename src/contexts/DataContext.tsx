@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Business, Job, Customer, Notification, Product } from '../types';
-import { DatabaseService } from '../lib/supabase';
 import { EmailService } from '../services/EmailService';
 import ApiService from '../services/api';
 import { LocalStorageService } from '../lib/storage';
@@ -71,45 +70,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       console.log('📊 Loading data from multiple sources...');
       
-      // Try Supabase first
-      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
-        try {
-          console.log('🗄️ Loading data from Supabase...');
-          
-          const [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
-            DatabaseService.getUsers(),
-            DatabaseService.getBusinesses(),
-            DatabaseService.getJobs(),
-            DatabaseService.getCustomers(),
-            DatabaseService.getProducts(),
-            DatabaseService.getNotifications()
-          ]);
-          
-          setUsers(usersData);
-          setBusinesses(businessesData);
-          setJobs(jobsData);
-          setCustomers(customersData);
-          setProducts(productsData);
-          setNotifications(notificationsData);
-          
-          console.log('✅ Supabase data loaded successfully:', {
-            users: usersData.length,
-            businesses: businessesData.length,
-            jobs: jobsData.length,
-            customers: customersData.length,
-            products: productsData.length,
-            notifications: notificationsData.length
-          });
-          
-          return; // Exit early if Supabase works
-        } catch (supabaseError) {
-          console.log('⚠️ Supabase failed, falling back to localStorage:', supabaseError);
-        }
-      } else {
-        console.log('⚠️ Supabase not configured, using localStorage');
-      }
-      
-      // Fallback to localStorage
+      // Use localStorage for data
       console.log('📝 Using localStorage data...');
       LocalStorageService.initializeData();
       
@@ -150,46 +111,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     data: any,
     id?: string
   ) => {
-    const operations = [];
-    
-    // Try Supabase first
-    if (DatabaseService.isAvailable()) {
-      try {
-        switch (operation) {
-          case 'create':
-            if (type === 'user') await DatabaseService.createUser(data);
-            else if (type === 'business') await DatabaseService.createBusiness(data);
-            else if (type === 'job') await DatabaseService.createJob(data);
-            else if (type === 'customer') await DatabaseService.createCustomer(data);
-            else if (type === 'product') await DatabaseService.createProduct(data);
-            break;
-          case 'update':
-            if (id) {
-              if (type === 'user') await DatabaseService.updateUser(id, data);
-              else if (type === 'business') await DatabaseService.updateBusiness(id, data);
-              else if (type === 'job') await DatabaseService.updateJob(id, data);
-              else if (type === 'customer') await DatabaseService.updateCustomer(id, data);
-              else if (type === 'product') await DatabaseService.updateProduct(id, data);
-            }
-            break;
-          case 'delete':
-            if (id) {
-              if (type === 'user') await DatabaseService.deleteUser(id);
-              else if (type === 'business') await DatabaseService.deleteBusiness(id);
-              else if (type === 'job') await DatabaseService.deleteJob(id);
-              else if (type === 'customer') await DatabaseService.deleteCustomer(id);
-              else if (type === 'product') await DatabaseService.deleteProduct(id);
-            }
-            break;
-        }
-        console.log(`✅ ${operation} ${type} via Supabase successful`);
-        return;
-      } catch (supabaseError) {
-        console.log(`Supabase ${operation} failed, trying API:`, supabaseError);
-      }
-    }
-    
     // Try API if Supabase fails
+    const operations = [];
     try {
       switch (operation) {
         case 'create':

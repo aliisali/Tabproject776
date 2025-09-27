@@ -61,7 +61,11 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://api.blindscloud.co.uk/api
+        fromService:
+          type: web
+          name: blindscloud-backend
+          envVarKey: RENDER_EXTERNAL_URL
+          property: url
       - key: VITE_APP_DOMAIN
         value: blindscloud.co.uk
     routes:
