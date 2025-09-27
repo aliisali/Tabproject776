@@ -25,18 +25,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const initializeAuth = async () => {
     try {
-      // Try database first
-      console.log('🔄 Checking database connection...');
+      // Try Render database first
+      console.log('🔄 Connecting to Render PostgreSQL...');
+      
+      // Initialize database if needed
+      await DatabaseService.initialize();
+      
       const dbUsers = await DatabaseService.getUsers();
       
       if (dbUsers && dbUsers.length > 0) {
-        console.log('✅ Database available');
+        console.log('✅ Render database connected');
         setUseDatabase(true);
       } else {
-        throw new Error('Database not available');
+        throw new Error('Render database not available');
       }
     } catch (error) {
-      console.log('⚠️ Database not available, using localStorage');
+      console.log('⚠️ Render database not available, using localStorage');
       setUseDatabase(false);
       LocalStorageService.initializeData();
     }

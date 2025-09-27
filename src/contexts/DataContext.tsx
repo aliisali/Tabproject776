@@ -69,12 +69,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const loadData = async () => {
     try {
-      // Try database first
-      console.log('🔄 Trying database connection...');
+      // Try Render database first
+      console.log('🔄 Connecting to Render PostgreSQL database...');
+      
+      // Initialize database if needed
+      await DatabaseService.initialize();
+      
       const dbUsers = await DatabaseService.getUsers();
       
       if (dbUsers && dbUsers.length > 0) {
-        console.log('✅ Database connected, loading from Supabase');
+        console.log('✅ Render database connected successfully');
         setUseDatabase(true);
         
         // Load all data from database
@@ -93,10 +97,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setNotifications(dbNotifications);
         setProducts(dbProducts);
       } else {
-        throw new Error('No database data found');
+        throw new Error('Render database not available');
       }
     } catch (error) {
-      console.log('⚠️ Database not available, using localStorage');
+      console.log('⚠️ Render database not available, using localStorage fallback');
       setUseDatabase(false);
       
       // Fallback to localStorage
