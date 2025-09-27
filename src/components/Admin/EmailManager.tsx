@@ -30,10 +30,10 @@ export function EmailManager() {
     isHTML: false
   });
   const [smtpSettings, setSMTPSettings] = useState({
-    host: 'mail.blindscloud.co.uk',
+    host: 'mail.jobmanager.com',
     port: 587,
     secure: false,
-    username: 'admin@blindscloud.co.uk',
+    username: 'admin@jobmanager.com',
     password: ''
   });
 
@@ -359,9 +359,9 @@ export function EmailManager() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center space-x-2">
                   <Globe className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-blue-900">From: admin@blindscloud.co.uk</span>
+                  <span className="font-medium text-blue-900">From: admin@jobmanager.com</span>
                 </div>
-                <p className="text-blue-700 text-sm mt-1">BlindsCloud Solutions Ltd.</p>
+                <p className="text-blue-700 text-sm mt-1">JobManager Pro</p>
               </div>
 
               <div>
@@ -506,7 +506,7 @@ export function EmailManager() {
                   value={smtpSettings.host}
                   onChange={(e) => setSMTPSettings({...smtpSettings, host: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="mail.blindscloud.co.uk"
+                  placeholder="mail.jobmanager.com"
                 />
               </div>
 
@@ -548,7 +548,7 @@ export function EmailManager() {
                   value={smtpSettings.username}
                   onChange={(e) => setSMTPSettings({...smtpSettings, username: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="admin@blindscloud.co.uk"
+                  placeholder="admin@jobmanager.com"
                 />
               </div>
 
