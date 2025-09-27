@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import * as process from 'process';
 import { pool } from '../server';
 
 export const logActivity = async (
