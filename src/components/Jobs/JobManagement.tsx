@@ -137,33 +137,27 @@ export function JobManagement() {
   const handleUpdateJob = (e: React.FormEvent) => {
     e.preventDefault();
     
-    handleUpdateJobAsync();
-  };
-
-  const handleUpdateJobAsync = async () => {
     if (editingJob) {
-      try {
-        const updatedJobData = {
-          title: newJob.title,
-          description: newJob.description,
-          customerId: newJob.customerId,
-          scheduledDate: newJob.scheduledDate,
-          quotation: parseFloat(newJob.quotation) || 0,
-        };
-        
-        await updateJob(editingJob.id, updatedJobData);
-        
-        setEditingJob(null);
-        setNewJob({
-          title: '',
-          description: '',
-          customerId: '',
-          scheduledDate: '',
-          quotation: ''
-        });
-      } catch (error) {
-        console.error('Error updating job:', error);
-      }
+      const updatedJobData = {
+        ...newJob,
+        quotation: parseFloat(newJob.quotation) || 0,
+      };
+      
+      updateJob(editingJob.id, updatedJobData);
+      
+      setEditingJob(null);
+      setNewJob({
+        title: '',
+        description: '',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        customerMobile: '',
+        customerAddress: '',
+        customerPostcode: '',
+        scheduledDate: '',
+        quotation: ''
+      });
     }
   };
 
@@ -357,6 +351,34 @@ export function JobManagement() {
             <form onSubmit={editingJob ? handleUpdateJob : handleCreateJob} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Job Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newJob.title}
+                  onChange={(e) => setNewJob({...newJob, title: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter job title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={newJob.description}
+                  onChange={(e) => setNewJob({...newJob, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Describe the job requirements"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Customer Name *
                 </label>
                 <input
@@ -424,52 +446,23 @@ export function JobManagement() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Postcode *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newJob.customerPostcode}
-                  onChange={(e) => setNewJob({...newJob, customerPostcode: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter postcode"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newJob.title}
-                  onChange={(e) => setNewJob({...newJob, title: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter job title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Job Description *
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={newJob.description}
-                  onChange={(e) => setNewJob({...newJob, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe the job requirements and details"
-                />
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Scheduled Date & Time *
+                    Postcode
+                  </label>
+                  <input
+                    type="text"
+                    value={newJob.customerPostcode}
+                    onChange={(e) => setNewJob({...newJob, customerPostcode: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="12345"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Scheduled Date *
                   </label>
                   <input
                     type="datetime-local"
@@ -479,21 +472,21 @@ export function JobManagement() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quotation ($)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={newJob.quotation}
-                    onChange={(e) => setNewJob({...newJob, quotation: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quotation ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={newJob.quotation}
+                  onChange={(e) => setNewJob({...newJob, quotation: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0.00"
+                />
               </div>
 
               <div className="flex justify-end space-x-3 pt-6">
