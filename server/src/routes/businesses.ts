@@ -1,4 +1,5 @@
 import express from 'express';
+import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest, requireRole } from '../middleware/auth';
@@ -7,7 +8,7 @@ import { logActivity } from '../utils/logger';
 const router = express.Router();
 
 // Get all businesses (admin only)
-router.get('/', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.get('/', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const result = await pool.query(`
       SELECT b.*, u.name as admin_name 

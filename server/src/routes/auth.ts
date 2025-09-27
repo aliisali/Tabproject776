@@ -1,4 +1,5 @@
 import express from 'express';
+import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
@@ -11,7 +12,7 @@ const router = express.Router();
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 1 })
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -41,8 +42,8 @@ router.post('/login', [
     // Generate JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      process.env.JWT_SECRET as string,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
     );
 
     // Save session
@@ -78,7 +79,7 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('name').isLength({ min: 2 }),
   body('role').isIn(['admin', 'business', 'employee'])
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

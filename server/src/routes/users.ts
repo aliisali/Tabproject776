@@ -1,4 +1,5 @@
 import express from 'express';
+import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
@@ -8,7 +9,7 @@ import { logActivity } from '../utils/logger';
 const router = express.Router();
 
 // Get all users (admin only)
-router.get('/', requireRole(['admin']), async (req: AuthRequest, res) => {
+router.get('/', requireRole(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const result = await pool.query(`
       SELECT u.*, b.name as business_name 

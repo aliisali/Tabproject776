@@ -1,4 +1,5 @@
 import express from 'express';
+import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { pool } from '../server';
 import { AuthRequest } from '../middleware/auth';
@@ -7,7 +8,7 @@ import { logActivity } from '../utils/logger';
 const router = express.Router();
 
 // Get jobs (filtered by user role)
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     let query = `
       SELECT j.*, c.name as customer_name, u.name as employee_name, b.name as business_name
