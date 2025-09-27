@@ -21,10 +21,22 @@ const migrateOldData = () => {
     'jobmanager_jobs_v4',
     'jobmanager_customers_v4',
     'jobmanager_notifications_v4',
-    'jobmanager_products_v4'
+    'jobmanager_products_v4',
+    'blindscloud_users_v5',
+    'blindscloud_businesses_v5',
+    'blindscloud_jobs_v5',
+    'blindscloud_customers_v5',
+    'blindscloud_notifications_v5',
+    'blindscloud_products_v5'
   ];
   
   const newKeys = [
+    STORAGE_KEYS.USERS,
+    STORAGE_KEYS.BUSINESSES,
+    STORAGE_KEYS.JOBS,
+    STORAGE_KEYS.CUSTOMERS,
+    STORAGE_KEYS.NOTIFICATIONS,
+    STORAGE_KEYS.PRODUCTS,
     STORAGE_KEYS.USERS,
     STORAGE_KEYS.BUSINESSES,
     STORAGE_KEYS.JOBS,
@@ -548,6 +560,26 @@ export class LocalStorageService {
     this.getCustomers();
     this.getProducts();
     this.getNotifications();
+    
+    // Show initialization message
+    const initDiv = document.createElement('div');
+    initDiv.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    initDiv.innerHTML = `
+      <div class="flex items-center space-x-2">
+        <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+          <span class="text-blue-500 text-sm">✓</span>
+        </div>
+        <span>BlindsCloud data initialized successfully!</span>
+      </div>
+    `;
+    document.body.appendChild(initDiv);
+    
+    setTimeout(() => {
+      if (document.body.contains(initDiv)) {
+        document.body.removeChild(initDiv);
+      }
+    }, 4000);
+    
     console.log('✅ All data initialized successfully');
   }
   

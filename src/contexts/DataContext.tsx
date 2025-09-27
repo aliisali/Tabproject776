@@ -78,39 +78,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
       let productsData = [];
       let notificationsData = [];
       
-      // Try API first
-      try {
-        console.log('🌐 Trying API...');
-        [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
-          ApiService.getUsers().catch(() => []),
-          ApiService.getBusinesses().catch(() => []),
-          ApiService.getJobs().catch(() => []),
-          ApiService.getCustomers().catch(() => []),
-          ApiService.getProducts().catch(() => [])
-        ]);
-        if (usersData.length > 0) {
-          console.log('✅ Data loaded from API');
-        }
-      } catch (apiError) {
-        console.log('🔄 API failed, trying Supabase...');
-        
-        // Try Supabase if API fails
-        if (DatabaseService.isAvailable()) {
-          try {
-            [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
-              DatabaseService.getUsers().catch(() => []),
-              DatabaseService.getBusinesses().catch(() => []),
-              DatabaseService.getJobs().catch(() => []),
-              DatabaseService.getCustomers().catch(() => []),
-              DatabaseService.getProducts().catch(() => []),
-              DatabaseService.getNotifications().catch(() => [])
-            ]);
-            if (usersData.length > 0) {
-              console.log('✅ Data loaded from Supabase');
-            }
-          } catch (supabaseError) {
-            console.log('⚠️ Supabase failed, using localStorage:', supabaseError);
+      // Try Supabase first
+      if (DatabaseService.isAvailable()) {
+        try {
+          console.log('🗄️ Trying Supabase...');
+          [usersData, businessesData, jobsData, customersData, productsData, notificationsData] = await Promise.all([
+            DatabaseService.getUsers().catch(() => []),
+            DatabaseService.getBusinesses().catch(() => []),
+            DatabaseService.getJobs().catch(() => []),
+            DatabaseService.getCustomers().catch(() => []),
+            DatabaseService.getProducts().catch(() => []),
+            DatabaseService.getNotifications().catch(() => [])
+          ]);
+          if (usersData.length > 0) {
+            console.log('✅ Data loaded from Supabase');
           }
+        } catch (supabaseError) {
+          console.log('🔄 Supabase failed, trying API...', supabaseError);
+        }
+      }
+      
+      // Try API if Supabase fails
+      if (usersData.length === 0) {
+        try {
+          console.log('🌐 Trying API...');
+          [usersData, businessesData, jobsData, customersData, productsData] = await Promise.all([
+            ApiService.getUsers().catch(() => []),
+            ApiService.getBusinesses().catch(() => []),
+            ApiService.getJobs().catch(() => []),
+            ApiService.getCustomers().catch(() => []),
+            ApiService.getProducts().catch(() => [])
+          ]);
+          if (usersData.length > 0) {
+            console.log('✅ Data loaded from API');
+          }
+        } catch (apiError) {
+          console.log('⚠️ API failed, using localStorage:', apiError);
         }
       }
       
@@ -160,7 +163,44 @@ export function DataProvider({ children }: { children: ReactNode }) {
   ) => {
     const operations = [];
     
-    // Try API first
+    // Try Supabase first
+    if (DatabaseService.isAvailable()) {
+      try {
+        switch (operation) {
+          case 'create':
+            if (type === 'user') await DatabaseService.createUser(data);
+            else if (type === 'business') await DatabaseService.createBusiness(data);
+            else if (type === 'job') await DatabaseService.createJob(data);
+            else if (type === 'customer') await DatabaseService.createCustomer(data);
+            else if (type === 'product') await DatabaseService.createProduct(data);
+            break;
+          case 'update':
+            if (id) {
+              if (type === 'user') await DatabaseService.updateUser(id, data);
+              else if (type === 'business') await DatabaseService.updateBusiness(id, data);
+              else if (type === 'job') await DatabaseService.updateJob(id, data);
+              else if (type === 'customer') await DatabaseService.updateCustomer(id, data);
+              else if (type === 'product') await DatabaseService.updateProduct(id, data);
+            }
+            break;
+          case 'delete':
+            if (id) {
+              if (type === 'user') await DatabaseService.deleteUser(id);
+              else if (type === 'business') await DatabaseService.deleteBusiness(id);
+              else if (type === 'job') await DatabaseService.deleteJob(id);
+              else if (type === 'customer') await DatabaseService.deleteCustomer(id);
+              else if (type === 'product') await DatabaseService.deleteProduct(id);
+            }
+            break;
+        }
+        console.log(`✅ ${operation} ${type} via Supabase successful`);
+        return;
+      } catch (supabaseError) {
+        console.log(`Supabase ${operation} failed, trying API:`, supabaseError);
+      }
+    }
+    
+    // Try API if Supabase fails
     try {
       switch (operation) {
         case 'create':
@@ -197,44 +237,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return;
       }
     } catch (apiError) {
-      console.log(`API ${operation} failed, trying Supabase:`, apiError);
-    }
-    
-    // Try Supabase if API fails
-    if (DatabaseService.isAvailable()) {
-      try {
-        switch (operation) {
-          case 'create':
-            if (type === 'user') await DatabaseService.createUser(data);
-            else if (type === 'business') await DatabaseService.createBusiness(data);
-            else if (type === 'job') await DatabaseService.createJob(data);
-            else if (type === 'customer') await DatabaseService.createCustomer(data);
-            else if (type === 'product') await DatabaseService.createProduct(data);
-            break;
-          case 'update':
-            if (id) {
-              if (type === 'user') await DatabaseService.updateUser(id, data);
-              else if (type === 'business') await DatabaseService.updateBusiness(id, data);
-              else if (type === 'job') await DatabaseService.updateJob(id, data);
-              else if (type === 'customer') await DatabaseService.updateCustomer(id, data);
-              else if (type === 'product') await DatabaseService.updateProduct(id, data);
-            }
-            break;
-          case 'delete':
-            if (id) {
-              if (type === 'user') await DatabaseService.deleteUser(id);
-              else if (type === 'business') await DatabaseService.deleteBusiness(id);
-              else if (type === 'job') await DatabaseService.deleteJob(id);
-              else if (type === 'customer') await DatabaseService.deleteCustomer(id);
-              else if (type === 'product') await DatabaseService.deleteProduct(id);
-            }
-            break;
-        }
-        console.log(`✅ ${operation} ${type} via Supabase successful`);
-        return;
-      } catch (supabaseError) {
-        console.log(`Supabase ${operation} failed, using localStorage:`, supabaseError);
-      }
+      console.log(`API ${operation} failed, using localStorage:`, apiError);
     }
     
     // Final fallback to localStorage
