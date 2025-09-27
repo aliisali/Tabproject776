@@ -1,6 +1,7 @@
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://blindscloud-backend.onrender.com/api'
-  : 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD 
+    ? 'https://blindscloud-backend.onrender.com/api'
+    : 'http://localhost:3001/api');</action>
 
 class ApiService {
   private static getAuthHeaders() {

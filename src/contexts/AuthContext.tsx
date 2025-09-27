@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import ApiService from '../services/api';
+import { LocalStorageService } from '../lib/storage';
 
 interface AuthContextType {
   user: User | null;
