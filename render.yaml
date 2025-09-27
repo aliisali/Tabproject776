@@ -6,9 +6,8 @@ services:
     env: docker
     plan: free
     region: oregon
-    databases:
-      - name: blindscloud-db-0s88
-        user: blindscloud_user
+    databaseName: blindscloud_db
+    databaseUser: blindscloud_user
 
   # Backend API Service
   - type: web
@@ -29,7 +28,7 @@ services:
         value: https://blindscloud.co.uk
       - key: DATABASE_URL
         fromDatabase:
-          name: blindscloud_db
+          name: blindscloud-database
           property: connectionString
       - key: UPLOAD_DIR
         value: uploads
