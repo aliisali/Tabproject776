@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, Business, Job, Customer, Notification, Product } from '../types';
 import ApiService from '../services/api';
 import { EmailService } from '../services/EmailService';
+import { LocalStorageService } from '../lib/storage';
 
 interface DataContextType {
   // Users
