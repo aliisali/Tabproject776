@@ -24,12 +24,15 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
-      - key: FRONTEND_URL
-        value: https://blindscloud.co.uk
       - key: DATABASE_URL
         fromDatabase:
           name: blindscloud-database
           property: connectionString
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: blindscloud-frontend
+          property: url
       - key: UPLOAD_DIR
         value: uploads
       - key: MAX_FILE_SIZE
@@ -44,12 +47,6 @@ services:
         sync: false
       - key: SMTP_FROM
         value: admin@blindscloud.co.uk
-      - key: DOMAIN_NAME
-        value: blindscloud.co.uk
-      - key: API_SUBDOMAIN
-        value: api.blindscloud.co.uk
-      - key: CORS_ORIGINS
-        value: https://blindscloud.co.uk,https://www.blindscloud.co.uk
 
   # Frontend Static Site
   - type: web
@@ -64,11 +61,7 @@ services:
         fromService:
           type: web
           name: blindscloud-backend
-          envVarKey: RENDER_EXTERNAL_URL
           property: url
-      - key: VITE_APP_DOMAIN
-        value: blindscloud.co.uk
     routes:
       - type: rewrite
         source: /*
-        destination: /index.html

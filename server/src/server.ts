@@ -44,11 +44,9 @@ app.use(helmet());
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
-    'https://blindscloud.co.uk',
-    'https://www.blindscloud.co.uk',
-    'https://api.blindscloud.co.uk',
     'https://*.onrender.com',
-    'https://job-management-platf-ucrc.bolt.host',
+    'https://blindscloud-frontend.onrender.com',
+    'https://blindscloud-backend.onrender.com',
     ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [])
   ],
   credentials: true
