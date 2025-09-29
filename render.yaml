@@ -43,7 +43,8 @@ services:
       - key: VITE_API_URL
         value: https://blindscloud-backend.onrender.com/api
       - key: VITE_APP_DOMAIN
-        value: blindscloud.co.uk    staticPublishPath: ./dist
+        value: blindscloud.co.uk
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
