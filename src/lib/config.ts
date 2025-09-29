@@ -3,7 +3,7 @@ export const CONFIG = {
   // Your custom domain configuration
   DOMAIN: {
     PRODUCTION: 'blindscloud-frontend.onrender.com',
-    STAGING: 'blindscloud-frontend-staging.onrender.com',
+    STAGING: 'blindscloud-frontend.onrender.com',
     DEVELOPMENT: 'localhost:5173'
   },
   
@@ -16,7 +16,7 @@ export const CONFIG = {
   
   // Email configuration
   EMAIL: {
-    FROM_NAME: 'BlindsCloud',
+    FROM_NAME: 'JobManager Pro',
     FROM_EMAIL: 'noreply@gmail.com',
     SUPPORT_EMAIL: 'support@gmail.com',
     SMTP_HOST: 'smtp.gmail.com'
@@ -24,8 +24,8 @@ export const CONFIG = {
   
   // App configuration
   APP: {
-    NAME: 'BlindsCloud',
-    DESCRIPTION: 'Professional Blinds Business Management Platform',
+    NAME: 'JobManager Pro',
+    DESCRIPTION: 'Professional Business Management Platform',
     VERSION: '1.3.0'
   }
 };
