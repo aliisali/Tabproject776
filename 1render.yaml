@@ -1,0 +1,42 @@
+services:
+  # PostgreSQL Database
+  - type: web
+    name: blindscloud-database
+    env: docker
+    dockerfilePath: ./Dockerfile.postgres
+    plan: free
+    envVars:
+      - key: POSTGRES_DB
+        value: blindscloud_db
+      - key: POSTGRES_USER
+        value: blindscloud_user
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+
+  # Backend API Service  
+  - type: web
+    name: blindscloud-backend
+    env: node
+    plan: free
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: postgresql://blindscloud_user:${POSTGRES_PASSWORD}@blindscloud-database:5432/blindscloud_db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://blindscloud-frontend.onrender.com
+
+  # Frontend Static Site
+  - type: web
+    name: blindscloud-frontend
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://blindscloud-backend.onrender.com/api
