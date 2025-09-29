@@ -1,5 +1,6 @@
-# Exported from Render on 2025-09-27T12:29:41Z
+# Render Blueprint for BlindsCloud Platform
 version: "1"
+
 services:
   # PostgreSQL Database
   - type: pserv
@@ -10,12 +11,13 @@ services:
     databaseName: blindscloud_db
     databaseUser: blindscloud_user
 
-  # Backend API Service (Your Configuration)
+  # Backend API Service
   - type: web
     name: blindscloud-backend
     runtime: node
     repo: https://github.com/aliisali/Tabproject776
     plan: free
+    region: oregon
     envVars:
       - key: NODE_ENV
         value: production
@@ -46,7 +48,8 @@ services:
         sync: false
       - key: SMTP_FROM
         value: admin@blindscloud.co.uk
-    region: oregon
+      - key: CORS_ORIGINS
+        value: https://blindscloud-frontend.onrender.com
     buildCommand: cd server && npm install && npm run build && npm run migrate
     startCommand: cd server && npm start
     autoDeployTrigger: commit
