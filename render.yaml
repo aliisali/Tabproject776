@@ -4,7 +4,7 @@ services:
     name: blindscloud-database
     plan: free
 
-  # Backend API Service  
+  # Backend API Service
   - type: web
     name: blindscloud-backend
     env: node
