@@ -12,6 +12,7 @@ services:
     rootDir: server
     buildCommand: npm install && npm run build
     startCommand: npm start
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,12 +22,20 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
       - key: FRONTEND_URL
         value: https://blindscloud-frontend.onrender.com
       - key: UPLOAD_DIR
         value: uploads
       - key: MAX_FILE_SIZE
         value: 10485760
+      - key: SMTP_HOST
+        value: mail.blindscloud.co.uk
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        value: admin@blindscloud.co.uk
 
   # Frontend Static Site
   - type: web
@@ -34,16 +43,6 @@ services:
     env: static
     repo: https://github.com/aliisali/Tabproject776
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        value: https://blindscloud-backend.onrender.com/api
-      - key: VITE_APP_DOMAIN
-        value: blindscloud.co.uk
     staticPublishPath: ./dist
     routes:
       - type: rewrite
