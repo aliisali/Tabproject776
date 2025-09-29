@@ -2,9 +2,9 @@ databases:
   - name: jobmanagerpro-database
     plan: free
     region: frankfurt
-    diskSizeGB: 1
 
 services:
+  # Backend API Service
   - type: web
     name: jobmanagerpro-backend
     runtime: node
@@ -37,15 +37,15 @@ services:
       - key: SMTP_USER
         value: yourapp@gmail.com
       - key: SMTP_PASS
-        sync: false
+        sync: false   # set securely in Render dashboard
 
+  # Frontend Static Site
   - type: web
     name: jobmanagerpro-frontend
     runtime: static
     rootDir: client
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
-    plan: free
     routes:
       - type: rewrite
         source: /*
@@ -53,3 +53,4 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://jobmanagerpro-backend.onrender.com/api
+        
