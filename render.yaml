@@ -2,8 +2,6 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: blindscloud-database
-    databaseName: blindscloud_db
-    databaseUser: blindscloud_user
     plan: free
 
   # Backend API Service  
