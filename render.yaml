@@ -1,17 +1,19 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database Service
   - type: pserv
     name: blindscloud-database
-    plan: free
     databaseName: blindscloud_db
     user: blindscloud_user
+    plan: free
 
   # Backend API Service  
   - type: web
     name: blindscloud-backend
     env: node
-    buildCommand: cd server && npm install && npm run build
-    startCommand: cd server && npm start
+    repo: https://github.com/aliisali/Tabproject776
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,6 +23,8 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
       - key: FRONTEND_URL
         value: https://blindscloud-frontend.onrender.com
       - key: SMTP_HOST
@@ -29,11 +33,16 @@ services:
         value: 587
       - key: SMTP_USER
         value: admin@blindscloud.co.uk
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_FILE_SIZE
+        value: 10485760
 
   # Frontend Static Site
   - type: web
     name: blindscloud-frontend
     env: static
+    repo: https://github.com/aliisali/Tabproject776
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
@@ -43,3 +52,5 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://blindscloud-backend.onrender.com/api
+      - key: VITE_APP_DOMAIN
+        value: blindscloud.co.uk
