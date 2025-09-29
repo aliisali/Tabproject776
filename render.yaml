@@ -25,17 +25,17 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: FRONTEND_URL
-        value: https://blindscloud-frontend-app.onrender.com
+        value: https://blindscloud-frontend.onrender.com
       - key: UPLOAD_DIR
         value: uploads
       - key: MAX_FILE_SIZE
         value: "10485760"
       - key: SMTP_HOST
-        value: "mail.blindscloud.co.uk"
+        value: smtp.gmail.com
       - key: SMTP_PORT
         value: "587"
       - key: SMTP_USER
-        value: "admin@blindscloud.co.uk"
+        value: your-email@gmail.com
 
   - type: web
     name: blindscloud-frontend-app

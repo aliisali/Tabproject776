@@ -2,24 +2,24 @@
 export const CONFIG = {
   // Your custom domain configuration
   DOMAIN: {
-    PRODUCTION: 'blindscloud.co.uk',
-    STAGING: 'staging.blindscloud.co.uk',
+    PRODUCTION: 'blindscloud-frontend.onrender.com',
+    STAGING: 'blindscloud-frontend-staging.onrender.com',
     DEVELOPMENT: 'localhost:5173'
   },
   
   // API endpoints for different environments
   API: {
-    PRODUCTION: 'https://api.blindscloud.co.uk',
-    STAGING: 'https://api-staging.blindscloud.co.uk',
+    PRODUCTION: 'https://blindscloud-backend.onrender.com',
+    STAGING: 'https://blindscloud-backend-staging.onrender.com',
     DEVELOPMENT: 'http://localhost:3001'
   },
   
   // Email configuration
   EMAIL: {
     FROM_NAME: 'BlindsCloud',
-    FROM_EMAIL: 'admin@blindscloud.co.uk',
-    SUPPORT_EMAIL: 'support@blindscloud.co.uk',
-    SMTP_HOST: 'mail.blindscloud.co.uk'
+    FROM_EMAIL: 'noreply@gmail.com',
+    SUPPORT_EMAIL: 'support@gmail.com',
+    SMTP_HOST: 'smtp.gmail.com'
   },
   
   // App configuration

@@ -26,17 +26,17 @@ interface SMTPConfig {
 }
 
 export class EmailService {
-  private static readonly FROM_EMAIL = 'admin@jobmanager.com';
+  private static readonly FROM_EMAIL = 'noreply@gmail.com';
   private static readonly FROM_NAME = 'JobManager Pro';
-  private static readonly REPLY_TO = 'support@jobmanager.com';
+  private static readonly REPLY_TO = 'support@gmail.com';
   
   // SMTP Configuration for custom domain
   private static readonly SMTP_CONFIG: SMTPConfig = {
-    host: 'mail.jobmanager.com', // Your domain's mail server
+    host: 'smtp.gmail.com', // Gmail SMTP server
     port: 587, // or 465 for SSL
     secure: false, // true for 465, false for other ports
     auth: {
-      user: 'admin@jobmanager.com',
+      user: 'your-email@gmail.com',
       pass: 'your-email-password' // This should be in environment variables
     }
   };
