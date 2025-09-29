@@ -1,11 +1,10 @@
-services:
-  # PostgreSQL Database
-  - type: postgres
-    name: blindscloud-database
+databases:
+  - name: blindscloud-database
     plan: free
-    region: frankfurt      # <-- region set
-    diskSizeGB: 1          # persistent storage
+    region: frankfurt
+    diskSizeGB: 1
 
+services:
   # Backend API Service
   - type: web
     name: blindscloud-backend
@@ -14,7 +13,7 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm start
     plan: free
-    region: frankfurt      # <-- keep backend in same region
+    region: frankfurt
     envVars:
       - key: NODE_ENV
         value: production
@@ -34,6 +33,29 @@ services:
         value: 10485760
       - key: SMTP_HOST
         value: mail.blindscloud.co.uk
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        value: "admin@blindscloud.co.uk"
+
+  # Frontend Static Site
+  - type: web
+    name: blindscloud-frontend-app
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    plan: free
+    region: frankfurt
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://blindscloud-backend.onrender.com/api
+      - key: VITE_APP_DOMAIN
+        value: blindscloud.co.uk
       - key: SMTP_PORT
         value: "587"
       - key: SMTP_USER
