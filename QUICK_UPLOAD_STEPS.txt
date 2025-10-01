@@ -1,0 +1,127 @@
+═══════════════════════════════════════════════════════════
+  QUICK CPANEL UPLOAD GUIDE - BlindsCloud Platform
+═══════════════════════════════════════════════════════════
+
+📦 WHAT TO UPLOAD: Everything inside the "dist" folder
+
+═══════════════════════════════════════════════════════════
+EASIEST METHOD - FILE MANAGER
+═══════════════════════════════════════════════════════════
+
+1. LOGIN TO CPANEL
+   → Go to: yourdomain.com/cpanel
+   → Enter your hosting username and password
+
+2. OPEN FILE MANAGER
+   → Click "File Manager" icon
+   → Navigate to "public_html" folder
+
+3. CLEAN DIRECTORY (if needed)
+   → Select old files → Delete
+   → Keep public_html empty
+
+4. UPLOAD FILES
+   → Click "Upload" button
+   → Select ALL files from your "dist" folder:
+     • index.html
+     • .htaccess
+     • assets folder (entire folder)
+   → Wait for green checkmark
+
+5. SET PERMISSIONS
+   → Select all files → Right-click → Change Permissions
+   → Files: 644
+   → Folders: 755
+   → Check "Recurse into subdirectories"
+   → Click "Change Permissions"
+
+6. DONE! Visit https://yourdomain.com
+
+═══════════════════════════════════════════════════════════
+FASTER METHOD - ZIP UPLOAD
+═══════════════════════════════════════════════════════════
+
+1. CREATE ZIP
+   → Go to "dist" folder
+   → Select ALL files inside
+   → Create ZIP file (name: website.zip)
+
+2. UPLOAD ZIP
+   → cPanel → File Manager → public_html
+   → Click Upload → Choose website.zip
+   → Wait for upload
+
+3. EXTRACT ZIP
+   → Right-click website.zip → Extract
+   → Delete website.zip after extraction
+
+4. SET PERMISSIONS (see step 5 above)
+
+5. DONE! Visit your website
+
+═══════════════════════════════════════════════════════════
+YOUR DIST FOLDER CONTAINS:
+═══════════════════════════════════════════════════════════
+
+✓ index.html          → Main HTML file
+✓ .htaccess          → Server configuration (IMPORTANT!)
+✓ assets/            → All CSS, JS, and images
+  ├── index-*.css    → Styles
+  ├── index-*.js     → Main app code
+  ├── lucide-*.js    → Icons
+  └── vendor-*.js    → React libraries
+
+═══════════════════════════════════════════════════════════
+VERIFICATION CHECKLIST
+═══════════════════════════════════════════════════════════
+
+After upload, check:
+☐ Website loads at https://yourdomain.com
+☐ No 404 errors (check browser console with F12)
+☐ Login page appears
+☐ HTTPS working (padlock icon in address bar)
+☐ .htaccess file is in public_html root
+
+═══════════════════════════════════════════════════════════
+COMMON ISSUES & FIXES
+═══════════════════════════════════════════════════════════
+
+❌ 404 Error / Page Not Found
+   → Check .htaccess is in public_html root
+   → Ask hosting support to enable mod_rewrite
+
+❌ White/Blank Screen
+   → Press F12, check console for errors
+   → Verify all files uploaded correctly
+   → Check file permissions (644/755)
+
+❌ CSS/JS Not Loading
+   → Set correct permissions (644 for files)
+   → Clear browser cache (Ctrl+Shift+R)
+   → Check assets folder uploaded completely
+
+═══════════════════════════════════════════════════════════
+DEFAULT LOGIN (for testing)
+═══════════════════════════════════════════════════════════
+
+Email: admin@example.com
+Password: admin123
+
+Note: These are stored in browser localStorage. Create new
+admin account after first login for security.
+
+═══════════════════════════════════════════════════════════
+IMPORTANT NOTES
+═══════════════════════════════════════════════════════════
+
+✓ Upload ONLY the contents of "dist" folder
+✓ Do NOT upload source files (src, node_modules, etc.)
+✓ .htaccess file MUST be in public_html root
+✓ Enable SSL/HTTPS for production (free with Let's Encrypt)
+✓ Always backup before updating
+
+═══════════════════════════════════════════════════════════
+
+Need detailed help? Read CPANEL_DEPLOYMENT.md
+
+Your project is ready to deploy! Good luck! 🚀
