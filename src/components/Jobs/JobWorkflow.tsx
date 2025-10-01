@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, CheckCircle, Camera, FileText, CreditCard, Ligature as Signature, Clock, ArrowRight } from 'lucide-react';
+import { Play, Pause, CheckCircle, Camera, FileText, CreditCard, Ligature as Signature, Clock, ArrowRight, X } from 'lucide-react';
 import { Job } from '../../types';
 import { ProductSelection } from './ProductSelection';
 import { MeasurementScreen } from './MeasurementScreen';

@@ -15,6 +15,19 @@ export function JobManagement() {
   const [showWorkflow, setShowWorkflow] = useState(false);
   const [showJobDetails, setShowJobDetails] = useState(false);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [editingJob, setEditingJob] = useState<any>(null);
+  const [newJob, setNewJob] = useState({
+    title: '',
+    description: '',
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    customerMobile: '',
+    customerAddress: '',
+    customerPostcode: '',
+    scheduledDate: '',
+    quotation: ''
+  });
 
   // Filter jobs based on user role and permissions
   const getVisibleJobs = () => {
@@ -88,9 +101,11 @@ export function JobManagement() {
     const jobData = {
       ...newJob,
       customerId: customerId,
+      jobType: 'installation' as const,
       status: 'pending' as const,
-      employeeId: 'employee-1', // Default assignment
-      businessId: 'business-1', // Default business
+      employeeId: 'employee-1',
+      businessId: 'business-1',
+      scheduledTime: '09:00',
       quotation: parseFloat(newJob.quotation) || 0,
       images: [],
       documents: [],
@@ -99,7 +114,8 @@ export function JobManagement() {
         { id: '2', text: 'Prepare materials', completed: false },
         { id: '3', text: 'Complete work', completed: false },
         { id: '4', text: 'Final inspection', completed: false },
-      ]
+      ],
+      jobHistory: []
     };
     
     addJob(jobData);
@@ -122,10 +138,10 @@ export function JobManagement() {
   const handleEditJob = (job: any) => {
     setEditingJob(job);
     setNewJob({
+      ...newJob,
       title: job.title,
       description: job.description,
-      customerId: job.customerId,
-      scheduledDate: job.scheduledDate.slice(0, 16), // Format for datetime-local input
+      scheduledDate: job.scheduledDate.slice(0, 16),
       quotation: job.quotation?.toString() || ''
     });
   };
@@ -145,7 +161,12 @@ export function JobManagement() {
       setNewJob({
         title: '',
         description: '',
-        customerId: '',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        customerMobile: '',
+        customerAddress: '',
+        customerPostcode: '',
         scheduledDate: '',
         quotation: ''
       });

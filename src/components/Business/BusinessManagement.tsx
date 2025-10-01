@@ -30,7 +30,7 @@ export function BusinessManagement() {
       address: newBusiness.address,
       phone: newBusiness.phone,
       email: newBusiness.email,
-      adminId: newBusiness.adminId || null,
+      adminId: newBusiness.adminId || '',
       features: ['job_management', 'calendar', 'reports'],
       subscription: 'basic' as const
     };

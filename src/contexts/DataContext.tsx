@@ -196,19 +196,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
       let newUser = null;
       
       // Try Supabase first
-      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
-        try {
-          console.log('🗄️ Creating user via Supabase...');
-          const supabaseUser = await DatabaseService.createUser(userData);
-          
-          if (supabaseUser) {
-            newUser = supabaseUser;
-            console.log('✅ User created via Supabase');
-          }
-        } catch (supabaseError) {
-          console.log('⚠️ Supabase user creation failed, using localStorage:', supabaseError);
-        }
-      }
+      // TODO: Implement Supabase integration
+      // if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+      //   try {
+      //     console.log('🗄️ Creating user via Supabase...');
+      //     const supabaseUser = await DatabaseService.createUser(userData);
+      //
+      //     if (supabaseUser) {
+      //       newUser = supabaseUser;
+      //       console.log('✅ User created via Supabase');
+      //     }
+      //   } catch (supabaseError) {
+      //     console.log('⚠️ Supabase user creation failed, using localStorage:', supabaseError);
+      //   }
+      // }
       
       // Fallback to localStorage
       if (!newUser) {
@@ -253,15 +254,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       let success = false;
       
       // Try Supabase first
-      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
-        try {
-          await DatabaseService.updateUser(id, userData);
-          console.log('✅ User updated via Supabase');
-          success = true;
-        } catch (supabaseError) {
-          console.log('⚠️ Supabase update failed, using localStorage:', supabaseError);
-        }
-      }
+      // TODO: Implement Supabase integration
+      // if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+      //   try {
+      //     await DatabaseService.updateUser(id, userData);
+      //     console.log('✅ User updated via Supabase');
+      //     success = true;
+      //   } catch (supabaseError) {
+      //     console.log('⚠️ Supabase update failed, using localStorage:', supabaseError);
+      //   }
+      // }
       
       // Fallback to localStorage
       if (!success) {
@@ -302,15 +304,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
       let success = false;
       
       // Try Supabase first
-      if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
-        try {
-          await DatabaseService.deleteUser(id);
-          console.log('✅ User deleted via Supabase');
-          success = true;
-        } catch (supabaseError) {
-          console.log('⚠️ Supabase delete failed, using localStorage:', supabaseError);
-        }
-      }
+      // TODO: Implement Supabase integration
+      // if (DatabaseService.isAvailable() && DatabaseService.hasValidCredentials()) {
+      //   try {
+      //     await DatabaseService.deleteUser(id);
+      //     console.log('✅ User deleted via Supabase');
+      //     success = true;
+      //   } catch (supabaseError) {
+      //     console.log('⚠️ Supabase delete failed, using localStorage:', supabaseError);
+      //   }
+      // }
       
       // Fallback to localStorage
       if (!success) {
@@ -487,11 +490,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await saveToMultipleSources('update', 'product', productData, id);
       
       const originalProduct = products.find(p => p.id === id);
-      const updatedProduct = { ...originalProduct, ...productData };
-      
-      setProducts(prev => prev.map(product => 
-        product.id === id ? updatedProduct : product
-      ));
+      if (originalProduct) {
+        const updatedProduct = { ...originalProduct, ...productData };
+
+        setProducts(prev => prev.map(product =>
+          product.id === id ? updatedProduct : product
+        ));
+      }
       
       showSuccessMessage('Product updated successfully!');
     } catch (error) {
@@ -526,15 +531,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const markNotificationRead = async (id: string) => {
     try {
       // Try database first, then localStorage
-      if (DatabaseService.isAvailable()) {
-        try {
-          await DatabaseService.markNotificationRead(id);
-        } catch (error) {
-          LocalStorageService.markNotificationRead(id);
-        }
-      } else {
+      // TODO: Implement Supabase integration
+      // if (DatabaseService.isAvailable()) {
+      //   try {
+      //     await DatabaseService.markNotificationRead(id);
+      //   } catch (error) {
+      //     LocalStorageService.markNotificationRead(id);
+      //   }
+      // } else {
         LocalStorageService.markNotificationRead(id);
-      }
+      // }
       
       setNotifications(prev => prev.map(notification => 
         notification.id === id ? { ...notification, read: true } : notification

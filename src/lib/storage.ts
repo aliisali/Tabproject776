@@ -1,4 +1,5 @@
 import { User, Business, Job, Customer, Product, Notification } from '../types';
+import type { Job as JobType } from '../types';
 
 // Storage keys with version to prevent conflicts
 const STORAGE_KEYS = {
@@ -218,11 +219,13 @@ const DEFAULT_JOBS: Job[] = [
     id: 'JOB-001',
     title: 'Premium Blackout Blinds Installation',
     description: 'Install premium blackout blinds in luxury home master bedroom',
+    jobType: 'installation',
     status: 'completed',
     customerId: '550e8400-e29b-41d4-a716-446655440006',
     employeeId: '550e8400-e29b-41d4-a716-446655440005',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     scheduledDate: '2024-01-15T09:00:00Z',
+    scheduledTime: '09:00',
     completedDate: '2024-01-15T16:30:00Z',
     quotation: 899,
     invoice: 899,
@@ -234,17 +237,20 @@ const DEFAULT_JOBS: Job[] = [
       { id: '3', text: 'Professional installation', completed: true },
       { id: '4', text: 'Quality check & demo', completed: true }
     ],
+    jobHistory: [],
     createdAt: '2024-01-15T09:00:00Z'
   },
   {
     id: 'JOB-002',
     title: 'Smart Motorized Blinds Setup',
     description: 'Install and configure smart motorized blinds with app integration',
+    jobType: 'installation',
     status: 'in-progress',
     customerId: '550e8400-e29b-41d4-a716-446655440007',
     employeeId: '550e8400-e29b-41d4-a716-446655440005',
     businessId: '550e8400-e29b-41d4-a716-446655440001',
     scheduledDate: '2024-01-18T10:00:00Z',
+    scheduledTime: '10:00',
     quotation: 1299,
     images: [],
     documents: [],
@@ -254,6 +260,7 @@ const DEFAULT_JOBS: Job[] = [
       { id: '3', text: 'Motor installation', completed: false },
       { id: '4', text: 'App setup and testing', completed: false }
     ],
+    jobHistory: [],
     createdAt: '2024-01-15T09:00:00Z'
   }
 ];

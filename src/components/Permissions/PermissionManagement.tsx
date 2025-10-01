@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, Users, Settings, Eye, CreditCard as Edit, Trash2, Plus, Search, Check, X } from 'lucide-react';
+import { useData } from '../../contexts/DataContext';
 
 interface Permission {
   id: string;
@@ -18,6 +19,7 @@ interface Role {
 }
 
 export function PermissionManagement() {
+  const { users } = useData();
   const [activeTab, setActiveTab] = useState<'roles' | 'permissions'>('roles');
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Building2, Users, FileText, CreditCard, Save, Upload, Eye, Trash2 } from 'lucide-react';
+import { Settings, Building2, Users, FileText, CreditCard, Save, Upload, Eye, Trash2, X } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { BusinessSettings, QuotationTemplate, InvoiceTemplate } from '../../types';
 

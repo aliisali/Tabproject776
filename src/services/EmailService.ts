@@ -1,3 +1,5 @@
+import { getFrontendUrl } from '../lib/config';
+
 interface EmailTemplate {
   subject: string;
   htmlBody: string;

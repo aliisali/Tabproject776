@@ -132,6 +132,23 @@ export class ApiService {
     return this.handleResponse(response);
   }
 
+  static async updateJob(id: string, jobData: any) {
+    const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(jobData)
+    });
+    return this.handleResponse(response);
+  }
+
+  static async deleteJob(id: string) {
+    const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+    return this.handleResponse(response);
+  }
+
   // Customers endpoints
   static async getCustomers() {
     const response = await fetch(`${API_BASE_URL}/customers`, {
@@ -149,6 +166,23 @@ export class ApiService {
     return this.handleResponse(response);
   }
 
+  static async updateCustomer(id: string, customerData: any) {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(customerData)
+    });
+    return this.handleResponse(response);
+  }
+
+  static async deleteCustomer(id: string) {
+    const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
+    });
+    return this.handleResponse(response);
+  }
+
   // Products endpoints
   static async getProducts() {
     const response = await fetch(`${API_BASE_URL}/products`, {
@@ -162,6 +196,23 @@ export class ApiService {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(productData)
+    });
+    return this.handleResponse(response);
+  }
+
+  static async updateProduct(id: string, productData: any) {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(productData)
+    });
+    return this.handleResponse(response);
+  }
+
+  static async deleteProduct(id: string) {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders()
     });
     return this.handleResponse(response);
   }

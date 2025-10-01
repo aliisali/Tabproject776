@@ -87,7 +87,7 @@ export function UserManagement() {
         permissions: newUser.role === 'employee' && currentUser?.businessId 
           ? ['create_jobs', 'manage_tasks', 'capture_signatures', 'view_dashboard', 'view_calendar']
           : getDefaultPermissions(newUser.role),
-        businessId: newUser.role === 'employee' ? (currentUser?.businessId || null) : (newUser.businessId || null),
+        businessId: newUser.role === 'employee' ? (currentUser?.businessId || undefined) : (newUser.businessId || undefined),
         isActive: true,
         emailVerified: false
       };
@@ -137,7 +137,7 @@ export function UserManagement() {
           name: editUser.name,
           email: editUser.email,
           role: editUser.role,
-          businessId: editUser.businessId || null,
+          businessId: editUser.businessId || undefined,
           permissions: editUser.permissions,
           ...(editUser.password && { password: editUser.password })
         };

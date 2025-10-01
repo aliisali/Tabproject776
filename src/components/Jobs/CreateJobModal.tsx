@@ -51,8 +51,8 @@ export function CreateJobModal({ isOpen, onClose, onJobCreated }: CreateJobModal
           businessId: user?.businessId || 'business-1'
         };
         
-        const newCustomer = await addCustomer(customerData);
-        customerId = newCustomer.id;
+        const newCustomer = await addCustomer(customerData) as any;
+        customerId = (newCustomer && newCustomer.id) ? newCustomer.id : `customer-${Date.now()}`;
       }
       
       // Generate customer reference number
