@@ -1,12 +1,16 @@
-// Removed - Using Render PostgreSQL backend instead
-export const supabase = null;
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export class DatabaseService {
   static isAvailable(): boolean {
-    return false; // Disabled - using Render backend
+    return !!(supabaseUrl && supabaseAnonKey);
   }
 
   static hasValidCredentials(): boolean {
-    return false; // Disabled - using Render backend
+    return !!(supabaseUrl && supabaseAnonKey);
   }
 }
