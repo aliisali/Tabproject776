@@ -236,12 +236,18 @@ export function Model3DViewer() {
 
               {/* 3D Viewer Area */}
               <div className="relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg h-96 mb-6 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Cube className="w-16 h-16 text-gray-500 mx-auto mb-4 animate-pulse" />
-                    <p className="text-gray-700 font-medium">3D Model Viewer</p>
-                    <p className="text-sm text-gray-500 mt-2">Interactive 3D model: {selectedModel.name}</p>
-                    <p className="text-xs text-gray-400 mt-1">
+                {/* Display the actual model image */}
+                <img
+                  src={selectedModel.originalImage}
+                  alt={selectedModel.name}
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Overlay with model info */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
+                  <div className="p-6 w-full">
+                    <p className="text-white font-semibold text-lg">{selectedModel.name}</p>
+                    <p className="text-white/80 text-sm mt-1">
                       Style: {selectedModel.settings.style} | Quality: {selectedModel.settings.quality}
                     </p>
                   </div>
